@@ -129,13 +129,17 @@ async function verarbeite(dateien) {
       datei.name.toLowerCase().endsWith(".pdf");
 
     try {
+      let ergebnis;
       if (istPdf) {
-        // Kommt in Etappe 4.
-        zeigeHinweis(zeile, "PDF-Unterstützung folgt in Kürze.");
-        continue;
+        // PDF-Engine (mupdf, ~10 MB) erst bei Bedarf laden.
+        zeile.status.textContent =
+          "verarbeite PDF … (beim ersten Mal lädt die PDF-Engine, ~10 MB)";
+        const { compressPdf } = await import("./pdf.js");
+        ergebnis = await compressPdf(datei, cfg);
+      } else {
+        ergebnis = await compressImage(datei, cfg);
       }
 
-      const ergebnis = await compressImage(datei, cfg);
       if (!ergebnis) {
         zeigeHinweis(zeile, "keine Einsparung möglich – Original behalten");
         continue;
