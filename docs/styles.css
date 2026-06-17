@@ -1,0 +1,144 @@
+/* styles.css – schlichtes, mobil-first Design.
+   Farben liegen in CSS-Variablen, damit sie leicht anpassbar sind. */
+
+:root {
+  --bg: #f1f5f9;
+  --karte: #ffffff;
+  --text: #0f172a;
+  --gedimmt: #64748b;
+  --akzent: #2563eb;
+  --akzent-hell: #dbeafe;
+  --rand: #e2e8f0;
+  --erfolg: #16a34a;
+  --radius: 14px;
+}
+
+/* Automatischer Dunkelmodus, wenn das Gerät dunkel eingestellt ist. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --karte: #1e293b;
+    --text: #f1f5f9;
+    --gedimmt: #94a3b8;
+    --akzent: #3b82f6;
+    --akzent-hell: #1e3a8a;
+    --rand: #334155;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* Kopf */
+.kopf { text-align: center; margin-bottom: 8px; }
+.kopf h1 { font-size: 1.6rem; margin: 0 0 4px; }
+.untertitel { color: var(--gedimmt); margin: 0 0 8px; font-size: 0.95rem; }
+
+/* Karten */
+.karte {
+  background: var(--karte);
+  border: 1px solid var(--rand);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 16px;
+}
+.karte h2 { font-size: 1.05rem; margin: 0 0 12px; }
+
+/* Stufen-Auswahl */
+.stufen { display: flex; gap: 8px; }
+.stufen label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 6px;
+  border: 2px solid var(--rand);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.stufen input { display: none; }
+.stufen label:has(input:checked) {
+  border-color: var(--akzent);
+  background: var(--akzent-hell);
+}
+.stufe-titel { font-weight: 600; font-size: 0.95rem; }
+.stufe-info { font-size: 0.75rem; color: var(--gedimmt); }
+
+/* Auswahl-/Ablagefläche */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 32px 16px;
+  border: 2px dashed var(--rand);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+}
+.dropzone.aktiv { border-color: var(--akzent); background: var(--akzent-hell); }
+.dropzone-icon { font-size: 1.8rem; }
+.dropzone-text { font-weight: 600; }
+.dropzone-klein { font-size: 0.8rem; color: var(--gedimmt); }
+
+/* Ergebnis-Liste */
+.ergebnisse { list-style: none; margin: 0; padding: 0; }
+.ergebnis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rand);
+}
+.ergebnis:last-child { border-bottom: none; }
+.ergebnis-name {
+  flex: 1 1 100%;
+  font-weight: 600;
+  word-break: break-all;
+}
+.ergebnis-status { color: var(--erfolg); font-size: 0.9rem; flex: 1; }
+.ergebnis.kein-ergebnis .ergebnis-status { color: var(--gedimmt); }
+
+.zusammenfassung {
+  margin: 12px 0 0;
+  font-size: 0.9rem;
+  color: var(--gedimmt);
+}
+
+/* Knöpfe */
+.knopf {
+  appearance: none;
+  border: none;
+  background: var(--akzent);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.knopf:hover { opacity: 0.92; }
+.knopf.klein { padding: 6px 12px; font-size: 0.85rem; }
+#alleLaden { width: 100%; margin-top: 14px; }
+
+/* Fuß */
+.fuss { text-align: center; margin-top: 24px; }
+.fuss p { color: var(--gedimmt); font-size: 0.8rem; margin: 0; }

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Datei-Komprimierer</title>
+  <meta name="description" content="Bilder und PDFs direkt auf dem Gerät verkleinern – ohne Upload." />
+
+  <!-- PWA: macht die Seite installierbar -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#2563eb" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="kopf">
+      <h1>📦 Datei-Komprimierer</h1>
+      <p class="untertitel">Bilder &amp; PDFs verkleinern – alles bleibt auf deinem Gerät.</p>
+    </header>
+
+    <!-- Schritt 1: Qualitätsstufe -->
+    <section class="karte">
+      <h2>1. Qualität wählen</h2>
+      <div class="stufen">
+        <label>
+          <input type="radio" name="stufe" value="1" />
+          <span class="stufe-titel">Stark</span>
+          <span class="stufe-info">kleinste Datei</span>
+        </label>
+        <label>
+          <input type="radio" name="stufe" value="2" checked />
+          <span class="stufe-titel">Mittel</span>
+          <span class="stufe-info">empfohlen</span>
+        </label>
+        <label>
+          <input type="radio" name="stufe" value="3" />
+          <span class="stufe-titel">Schonend</span>
+          <span class="stufe-info">beste Qualität</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- Schritt 2: Dateien -->
+    <section class="karte">
+      <h2>2. Dateien wählen</h2>
+      <label id="dropZone" class="dropzone" for="dateiEingabe">
+        <span class="dropzone-icon">⬆️</span>
+        <span class="dropzone-text">Tippen zum Auswählen</span>
+        <span class="dropzone-klein">oder Dateien hierher ziehen</span>
+        <input id="dateiEingabe" type="file" accept="image/*,application/pdf" multiple hidden />
+      </label>
+    </section>
+
+    <!-- Schritt 3: Ergebnis (erst sichtbar, sobald etwas verarbeitet wurde) -->
+    <section class="karte" id="ergebnisKarte" hidden>
+      <h2>3. Ergebnis</h2>
+      <ul id="ergebnisse" class="ergebnisse"></ul>
+      <p id="zusammenfassung" class="zusammenfassung"></p>
+      <button id="alleLaden" class="knopf" hidden>Alle herunterladen</button>
+    </section>
+
+    <footer class="fuss">
+      <p>Läuft komplett im Browser. Keine Datei wird hochgeladen.</p>
+    </footer>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
