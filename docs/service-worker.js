@@ -4,15 +4,18 @@
 // Cache gelegt; danach werden Anfragen bevorzugt aus dem Cache beantwortet.
 // So startet die App auch ohne Internet.
 
-const CACHE = "komprimierer-v1";
+const CACHE = "komprimierer-v2";
 
 // Die zur App gehörenden Dateien. Bei Änderungen die Versionsnummer oben
-// erhöhen (z. B. v2), damit Browser die neue Fassung laden.
+// erhöhen (z. B. v3), damit Browser die neue Fassung laden.
+// Die große PDF-Engine (lib/mupdf*) wird NICHT vorab geladen, sondern erst
+// beim ersten PDF zur Laufzeit gecacht (siehe fetch-Handler unten).
 const DATEIEN = [
   "index.html",
   "styles.css",
   "app.js",
   "image.js",
+  "pdf.js",
   "manifest.json",
   "icons/icon-192.png",
   "icons/icon-512.png",
@@ -37,16 +40,27 @@ self.addEventListener("activate", (e) => {
 });
 
 // Jede Anfrage: zuerst im Cache nachsehen, sonst aus dem Netz holen.
-// Wenn beides fehlschlägt (offline + nicht im Cache), bei Seitenaufrufen
+// Erfolgreiche Antworten aus dem eigenen Ursprung werden zur Laufzeit
+// mitgecacht – so landet z. B. die ~10 MB PDF-Engine nach dem ersten Laden
+// im Cache und ist danach offline verfügbar.
+// Wenn alles fehlschlägt (offline + nicht im Cache), bei Seitenaufrufen
 // ersatzweise index.html liefern.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   e.respondWith(
     caches.match(e.request).then((treffer) => {
       if (treffer) return treffer;
-      return fetch(e.request).catch(() => {
-        if (e.request.mode === "navigate") return caches.match("index.html");
-      });
+      return fetch(e.request)
+        .then((antwort) => {
+          if (antwort.ok && new URL(e.request.url).origin === self.location.origin) {
+            const kopie = antwort.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, kopie));
+          }
+          return antwort;
+        })
+        .catch(() => {
+          if (e.request.mode === "navigate") return caches.match("index.html");
+        });
     })
   );
 });
