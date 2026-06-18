@@ -4,12 +4,12 @@
 // Cache gelegt; danach werden Anfragen bevorzugt aus dem Cache beantwortet.
 // So startet die App auch ohne Internet.
 
-const CACHE = "komprimierer-v2";
+const CACHE = "filekit-v3";
 
 // Die zur App gehörenden Dateien. Bei Änderungen die Versionsnummer oben
-// erhöhen (z. B. v3), damit Browser die neue Fassung laden.
-// Die große PDF-Engine (lib/mupdf*) wird NICHT vorab geladen, sondern erst
-// beim ersten PDF zur Laufzeit gecacht (siehe fetch-Handler unten).
+// erhöhen (z. B. v4), damit Browser die neue Fassung laden.
+// Die pdf.js-Bibliothek (lib/pdfjs/*, ~1,4 MB) wird NICHT vorab geladen, sondern
+// erst beim ersten PDF zur Laufzeit gecacht (siehe fetch-Handler unten).
 const DATEIEN = [
   "index.html",
   "styles.css",
@@ -41,8 +41,8 @@ self.addEventListener("activate", (e) => {
 
 // Jede Anfrage: zuerst im Cache nachsehen, sonst aus dem Netz holen.
 // Erfolgreiche Antworten aus dem eigenen Ursprung werden zur Laufzeit
-// mitgecacht – so landet z. B. die ~10 MB PDF-Engine nach dem ersten Laden
-// im Cache und ist danach offline verfügbar.
+// mitgecacht – so landet z. B. die pdf.js-Bibliothek (~1,4 MB) nach dem ersten
+// Laden im Cache und ist danach offline verfügbar.
 // Wenn alles fehlschlägt (offline + nicht im Cache), bei Seitenaufrufen
 // ersatzweise index.html liefern.
 self.addEventListener("fetch", (e) => {
