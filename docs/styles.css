@@ -54,7 +54,7 @@ body {
 .app {
   max-width: 600px;
   margin: 0 auto;
-  padding: 24px 16px calc(96px + env(safe-area-inset-bottom));
+  padding: 24px 16px calc(150px + env(safe-area-inset-bottom));
 }
 
 /* ---------- Kopf / Marke ---------- */
@@ -268,23 +268,30 @@ body {
 .knopf svg { width: 16px; height: 16px; }
 
 /* ---------- Aktionsbalken unten ---------- */
-.aktionsleiste {
+.unterbau {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  z-index: 30;
+}
+.aktionsleiste {
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-top: 1px solid var(--border);
-  z-index: 20;
 }
-.leiste-text { flex: 1; font-size: 0.85rem; color: var(--muted); min-width: 0; }
-.aktionsleiste .knopf { flex-shrink: 0; }
+.aktion-inhalt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.leiste-text { flex: 1; font-size: 0.84rem; color: var(--muted); min-width: 0; }
+.aktion-inhalt .knopf { flex-shrink: 0; }
+.knopf.flex { flex: 1; justify-content: center; }
 
 /* ---------- Fuß ---------- */
 .fuss { text-align: center; margin-top: 26px; }
@@ -304,3 +311,137 @@ body {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------- Panels & untere Navigation ---------- */
+.panel[hidden] { display: none; }
+
+.tableiste {
+  display: flex;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px 9px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+.tab svg { width: 24px; height: 24px; }
+.tab span { white-space: nowrap; }
+.tab.aktiv { color: var(--accent); }
+
+/* ---------- Hinweis-Text ---------- */
+.panel-hinweis { font-size: 0.82rem; color: var(--muted); margin: 14px 2px 8px; }
+.panel-hinweis[hidden] { display: none; }
+
+/* ---------- Datei-Liste (Zusammenführen) ---------- */
+.datei-liste { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.datei-zeile {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+.datei-zeile .thumb { width: 44px; height: 44px; }
+.datei-info { min-width: 0; }
+.datei-name { font-weight: 600; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.datei-meta { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+.seiten-feld {
+  margin-top: 7px;
+  width: 100%;
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+}
+.datei-knoepfe { display: flex; flex-direction: column; gap: 4px; }
+.icon-knopf {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  width: 30px;
+  height: 26px;
+  border-radius: 7px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  line-height: 1;
+}
+.icon-knopf:hover { border-color: var(--accent); color: var(--accent); }
+.icon-knopf:disabled { opacity: 0.35; cursor: default; }
+.icon-knopf.entfernen:hover { border-color: var(--danger); color: var(--danger); }
+
+/* ---------- Seiten-Raster (Trennen) ---------- */
+.split-kopf { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 16px 2px 10px; }
+.split-kopf[hidden] { display: none; }
+.split-info { font-size: 0.85rem; color: var(--muted); }
+.split-werkzeuge { display: flex; gap: 6px; }
+.seiten-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+.seiten-kachel {
+  position: relative;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-2);
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.seiten-kachel img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.seiten-kachel .nummer {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  font-size: 0.72rem;
+  text-align: center;
+  padding: 2px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  color: var(--text);
+}
+.seiten-kachel .haken {
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+.seiten-kachel.gewaehlt { border-color: var(--accent); }
+.seiten-kachel.gewaehlt .haken { background: var(--accent); border-color: var(--accent); }
+
+/* ---------- kleine Knopf-Varianten ---------- */
+.knopf.winzig { padding: 5px 11px; font-size: 0.8rem; border-radius: 9px; }
+.knopf.voll { width: 100%; justify-content: center; }
+.knopf.sekundaer { background: var(--surface-2); color: var(--text); }
+.knopf.sekundaer:hover { background: var(--border); }

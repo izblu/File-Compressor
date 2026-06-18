@@ -1,9 +1,10 @@
-// app.js – Steuerung der Oberfläche.
-// Verbindet Auswahl/Stufe aus index.html mit der Kompressionslogik und zeigt
-// die Ergebnisse als Karten an. Bilder laufen über image.js (Canvas), PDFs
-// über pdf.js (wird erst bei Bedarf nachgeladen).
+// app.js – Steuerung der Oberfläche: Modus-Umschaltung (untere Navigation) und
+// der Modus "Verkleinern". Bilder über image.js (Canvas), PDFs über pdf.js.
+// "Zusammenführen" und "Trennen" liegen in merge.js / split.js und werden erst
+// beim ersten Öffnen des jeweiligen Tabs geladen.
 
 import { compressImage } from "./image.js";
+import { humanSize, el, ladeHerunter, LADE_ICON, setzeAktion } from "./shared.js";
 
 // Dieselben drei Qualitätsstufen wie in compress.py (LEVELS).
 const LEVELS = {
@@ -12,68 +13,26 @@ const LEVELS = {
   3: { name: "Schonend", maxSide: 2200, quality: 85 },
 };
 
-// --- Elemente aus dem HTML ---
+// --- Elemente für "Verkleinern" ---
 const dateiEingabe  = document.getElementById("dateiEingabe");
 const dropZone      = document.getElementById("dropZone");
 const ergebnisKarte = document.getElementById("ergebnisKarte");
 const ergebnisListe = document.getElementById("ergebnisse");
-const aktionsleiste = document.getElementById("aktionsleiste");
-const leisteText    = document.getElementById("leisteText");
-const alleLadenBtn  = document.getElementById("alleLaden");
 
-// --- Zustand ---
+// --- Zustand "Verkleinern" ---
 const fertige = [];        // { blob, name, alt, neu }
 let aktuelleDateien = [];  // zuletzt gewählte Dateien (für Stufenwechsel)
 let vorschauUrls = [];     // Object-URLs der Thumbnails (zum Freigeben)
 let laeuft = false;        // verhindert parallele Durchläufe
 
-const LADE_ICON =
-  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
-  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-  '<path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>';
-
-// --- kleine Helfer ---
-
-// Bytes in lesbare Größe umwandeln (wie human_size in compress.py).
-function humanSize(bytes) {
-  let size = bytes;
-  for (const einheit of ["B", "KB", "MB", "GB"]) {
-    if (size < 1024) return `${size.toFixed(1)} ${einheit}`;
-    size /= 1024;
-  }
-  return `${size.toFixed(1)} TB`;
-}
-
-// Aktuell gewählte Qualitätsstufe (1/2/3) auslesen.
+// Aktuell gewählte Qualitätsstufe (1/2/3).
 function gewaehlteStufe() {
   const treffer = document.querySelector('input[name="stufe"]:checked');
   return Number(treffer ? treffer.value : 2);
 }
 
-// Kurzschreibweise zum Erzeugen eines HTML-Elements.
-function el(tag, klasse, text) {
-  const e = document.createElement(tag);
-  if (klasse) e.className = klasse;
-  if (text != null) e.textContent = text;
-  return e;
-}
-
-// Eine Datei (Blob) als Download anbieten. Auf dem Handy landet sie im
-// Downloads-Ordner; am PC öffnet sich der "Speichern unter"-Dialog.
-function ladeHerunter(blob, name) {
-  const url = URL.createObjectURL(blob);
-  const a = el("a");
-  a.href = url;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10000);
-}
-
 // --- Ergebnis-Karten ---
 
-// Legt eine neue Karte im Status "wird verarbeitet" an und gibt Griffe darauf zurück.
 function neueKarte(datei, istPdf) {
   ergebnisKarte.hidden = false;
 
@@ -97,13 +56,11 @@ function neueKarte(datei, istPdf) {
   return { root, thumb, status, meta, fuell, aktion };
 }
 
-// Fortschritt bei PDFs: "Seite x / y" + Balken füllen.
 function fortschrittPdf(h, seite, anzahl) {
   h.status.textContent = `Seite ${seite} / ${anzahl}`;
   h.fuell.style.width = `${Math.round((seite / anzahl) * 100)}%`;
 }
 
-// Erfolgreiches Ergebnis: Größen, Ersparnis-Badge, Vorschau und Download-Knopf.
 function zeigeErfolg(h, datei, ergebnis, istPdf) {
   const neu = ergebnis.blob.size;
   const alt = datei.size;
@@ -113,7 +70,6 @@ function zeigeErfolg(h, datei, ergebnis, istPdf) {
   h.meta.append(el("span", "badge badge--success", `−${prozent} %`));
   h.fuell.style.width = `${Math.max(3, Math.round((neu / alt) * 100))}%`;
 
-  // Vorschaubild (nur bei Bildern – zeigt das komprimierte Ergebnis).
   if (!istPdf) {
     const url = URL.createObjectURL(ergebnis.blob);
     vorschauUrls.push(url);
@@ -129,7 +85,6 @@ function zeigeErfolg(h, datei, ergebnis, istPdf) {
   h.aktion.replaceChildren(knopf);
 }
 
-// Hinweis statt Ergebnis: "kein Gewinn" (neutral) oder "Fehler" (rot).
 function zeigeHinweis(h, text, art) {
   h.status.textContent = text;
   const istFehler = art === "fehler";
@@ -140,38 +95,42 @@ function zeigeHinweis(h, text, art) {
   h.root.classList.add("kein-ergebnis");
 }
 
-// Aktionsbalken unten aktualisieren (Gesamt-Ersparnis + "Alle herunterladen").
-function aktualisiereLeiste() {
+// Aktionsleiste für "Verkleinern" (Gesamt-Ersparnis + "Alle herunterladen").
+function aktualisiereCompressAktion() {
   if (fertige.length === 0) {
-    aktionsleiste.hidden = true;
+    setzeAktion(null, "verkleinern");
     return;
   }
-  aktionsleiste.hidden = false;
-
   const alt = fertige.reduce((s, f) => s + f.alt, 0);
   const neu = fertige.reduce((s, f) => s + f.neu, 0);
   const prozent = Math.max(0, Math.round((1 - neu / alt) * 100));
   const wort = fertige.length === 1 ? "Datei" : "Dateien";
-  leisteText.textContent =
-    `${fertige.length} ${wort} · ${humanSize(alt)} → ${humanSize(neu)} (−${prozent} %)`;
+  const text = el("span", "leiste-text",
+    `${fertige.length} ${wort} · ${humanSize(alt)} → ${humanSize(neu)} (−${prozent} %)`);
 
-  alleLadenBtn.hidden = fertige.length < 2;
-  alleLadenBtn.textContent = `Alle herunterladen (${fertige.length})`;
+  if (fertige.length >= 2) {
+    const btn = el("button", "knopf");
+    btn.textContent = `Alle herunterladen (${fertige.length})`;
+    btn.addEventListener("click", () =>
+      fertige.forEach((f, i) => setTimeout(() => ladeHerunter(f.blob, f.name), i * 350)));
+    setzeAktion([text, btn], "verkleinern");
+  } else {
+    setzeAktion(text, "verkleinern");
+  }
 }
 
-// --- Hauptablauf ---
+// --- Hauptablauf "Verkleinern" ---
 
 async function verarbeite(dateien) {
   if (laeuft) return;
   laeuft = true;
   aktuelleDateien = dateien;
 
-  // Zurücksetzen.
   ergebnisListe.replaceChildren();
   fertige.length = 0;
   vorschauUrls.forEach((u) => URL.revokeObjectURL(u));
   vorschauUrls = [];
-  aktionsleiste.hidden = true;
+  setzeAktion(null, "verkleinern");
 
   const cfg = LEVELS[gewaehlteStufe()];
 
@@ -179,14 +138,11 @@ async function verarbeite(dateien) {
     const istPdf =
       datei.type === "application/pdf" || datei.name.toLowerCase().endsWith(".pdf");
     const h = neueKarte(datei, istPdf);
-
-    // Dem Browser kurz Zeit zum Zeichnen geben (Spinner/Status wird sichtbar).
     await new Promise((r) => setTimeout(r));
 
     try {
       let ergebnis;
       if (istPdf) {
-        // pdf.js (~1,4 MB) erst beim ersten PDF laden.
         const { compressPdf } = await import("./pdf.js");
         ergebnis = await compressPdf(datei, cfg, (s, n) => fortschrittPdf(h, s, n));
       } else {
@@ -208,30 +164,23 @@ async function verarbeite(dateien) {
       zeigeHinweis(h, `Fehler: ${e && e.message ? e.message : e}`, "fehler");
     }
 
-    aktualisiereLeiste();
+    aktualisiereCompressAktion();
   }
 
   laeuft = false;
 }
 
-// --- Ereignisse verknüpfen ---
+// --- Ereignisse "Verkleinern" ---
 
 dateiEingabe.addEventListener("change", () => {
   if (dateiEingabe.files.length) verarbeite([...dateiEingabe.files]);
 });
 
-// Drag & Drop (vor allem am PC). Verhindert, dass der Browser die Datei öffnet.
 ["dragover", "dragenter"].forEach((ev) =>
-  dropZone.addEventListener(ev, (e) => {
-    e.preventDefault();
-    dropZone.classList.add("aktiv");
-  })
+  dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.add("aktiv"); })
 );
 ["dragleave", "dragend"].forEach((ev) =>
-  dropZone.addEventListener(ev, (e) => {
-    e.preventDefault();
-    dropZone.classList.remove("aktiv");
-  })
+  dropZone.addEventListener(ev, (e) => { e.preventDefault(); dropZone.classList.remove("aktiv"); })
 );
 dropZone.addEventListener("drop", (e) => {
   e.preventDefault();
@@ -240,7 +189,6 @@ dropZone.addEventListener("drop", (e) => {
   if (dateien.length) verarbeite(dateien);
 });
 
-// Stufenwechsel merken und bereits gewählte Dateien sofort neu verarbeiten.
 document.querySelectorAll('input[name="stufe"]').forEach((radio) =>
   radio.addEventListener("change", () => {
     try { localStorage.setItem("stufe", String(gewaehlteStufe())); } catch {}
@@ -248,7 +196,6 @@ document.querySelectorAll('input[name="stufe"]').forEach((radio) =>
   })
 );
 
-// Zuletzt gewählte Stufe wiederherstellen.
 try {
   const gespeichert = localStorage.getItem("stufe");
   if (gespeichert && LEVELS[gespeichert]) {
@@ -257,13 +204,38 @@ try {
   }
 } catch {}
 
-// "Alle herunterladen": leicht zeitversetzt, sonst lässt der Browser nur den
-// ersten Download zu.
-alleLadenBtn.addEventListener("click", () => {
-  fertige.forEach((f, i) => setTimeout(() => ladeHerunter(f.blob, f.name), i * 350));
-});
+// --- Modus-Umschaltung (untere Navigation) ---
 
-// --- Service-Worker registrieren (macht die App offline-fähig/installierbar) ---
+const tabs = document.querySelectorAll(".tab");
+const panels = document.querySelectorAll(".panel");
+const initialisiert = {}; // merkt sich, ob merge/split schon geladen wurden
+
+async function setzeModus(neu) {
+  tabs.forEach((t) => {
+    const aktiv = t.dataset.modus === neu;
+    t.classList.toggle("aktiv", aktiv);
+    if (aktiv) t.setAttribute("aria-current", "page");
+    else t.removeAttribute("aria-current");
+  });
+  panels.forEach((p) => { p.hidden = p.dataset.modus !== neu; });
+
+  setzeAktion(null); // Leiste zunächst leeren – der Modus füllt sie gleich neu
+
+  if (neu === "zusammenfuehren" && !initialisiert.merge) {
+    initialisiert.merge = (await import("./merge.js")).initMerge();
+  }
+  if (neu === "trennen" && !initialisiert.split) {
+    initialisiert.split = (await import("./split.js")).initSplit();
+  }
+
+  if (neu === "verkleinern") aktualisiereCompressAktion();
+  else if (neu === "zusammenfuehren") initialisiert.merge.aktualisiere();
+  else if (neu === "trennen") initialisiert.split.aktualisiere();
+}
+
+tabs.forEach((t) => t.addEventListener("click", () => setzeModus(t.dataset.modus)));
+
+// --- Service-Worker registrieren ---
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker

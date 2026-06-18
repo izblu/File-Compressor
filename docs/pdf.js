@@ -12,7 +12,7 @@
 
 // pdf.js nur einmal laden und den (großen) Worker lokal verdrahten.
 let pdfjsPromise = null;
-function ladePdfjs() {
+export function ladePdfjs() {
   if (!pdfjsPromise) {
     pdfjsPromise = import("./lib/pdfjs/pdf.min.mjs").then((lib) => {
       lib.GlobalWorkerOptions.workerSrc = new URL(
@@ -23,6 +23,24 @@ function ladePdfjs() {
     });
   }
   return pdfjsPromise;
+}
+
+// pdf-lib (~0,5 MB) für Zusammenführen/Trennen: einmal als UMD-Skript laden und
+// das globale PDFLib zurückgeben. Wird nur bei Bedarf geladen.
+let pdfLibPromise = null;
+export function ladePdfLib() {
+  if (!pdfLibPromise) {
+    pdfLibPromise = new Promise((resolve, reject) => {
+      if (window.PDFLib) return resolve(window.PDFLib);
+      const s = document.createElement("script");
+      s.src = "./lib/pdf-lib.min.js";
+      s.onload = () =>
+        window.PDFLib ? resolve(window.PDFLib) : reject(new Error("pdf-lib nicht verfügbar"));
+      s.onerror = () => reject(new Error("pdf-lib konnte nicht geladen werden"));
+      document.head.appendChild(s);
+    });
+  }
+  return pdfLibPromise;
 }
 
 // "Dokument.pdf" -> "Dokument_compressed.pdf"
