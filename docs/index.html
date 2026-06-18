@@ -3,38 +3,67 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Datei-Komprimierer</title>
+  <title>FileKit – Bilder &amp; PDFs verkleinern</title>
   <meta name="description" content="Bilder und PDFs direkt auf dem Gerät verkleinern – ohne Upload." />
 
   <!-- PWA: macht die Seite installierbar -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#2563eb" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
 
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="app">
     <header class="kopf">
-      <h1>📦 Datei-Komprimierer</h1>
-      <p class="untertitel">Bilder &amp; PDFs verkleinern – alles bleibt auf deinem Gerät.</p>
+      <span class="marke">
+        <svg class="marke-icon" viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
+          <rect x="0" y="0" width="64" height="64" rx="16" fill="#2563eb" />
+          <rect x="7" y="14" width="33" height="26" rx="4" fill="#ffffff" />
+          <circle cx="16" cy="22" r="3" fill="#2563eb" />
+          <polygon points="10,38 18,27 25,38" fill="#2563eb" />
+          <polygon points="22,38 30,29 38,38" fill="#2563eb" />
+          <rect x="30" y="26" width="27" height="30" rx="4" fill="#ffffff" stroke="#2563eb" stroke-width="1.5" />
+          <polygon points="49,26 57,26 57,34" fill="#2563eb" />
+          <rect x="35" y="36" width="16" height="2.5" rx="1.2" fill="#2563eb" />
+          <rect x="35" y="42" width="16" height="2.5" rx="1.2" fill="#2563eb" />
+          <rect x="35" y="48" width="10" height="2.5" rx="1.2" fill="#2563eb" />
+        </svg>
+        <span class="marke-text">FileKit</span>
+      </span>
+      <p class="untertitel">Bilder &amp; PDFs verkleinern</p>
+      <p class="vertrauen">privat · offline · keine Uploads</p>
     </header>
 
-    <!-- Schritt 1: Qualitätsstufe -->
-    <section class="karte">
-      <h2>1. Qualität wählen</h2>
-      <div class="stufen">
-        <label>
+    <!-- Hauptaktion: Dateien wählen / ablegen -->
+    <label id="dropZone" class="dropzone" for="dateiEingabe">
+      <svg class="dropzone-icon" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
+        <path d="M24 30 V10 M15 19 L24 10 L33 19" fill="none" stroke="currentColor"
+              stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M10 30 V36 H38 V30" fill="none" stroke="currentColor"
+              stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span class="dropzone-text">Dateien wählen</span>
+      <span class="dropzone-klein">oder hierher ziehen</span>
+      <input id="dateiEingabe" type="file" accept="image/*,application/pdf" multiple hidden />
+    </label>
+
+    <!-- Qualitätsstufe (gilt für die nächste Auswahl und verarbeitet eine
+         bestehende Auswahl sofort neu) -->
+    <section class="stufen-karte" aria-label="Qualität wählen">
+      <div class="stufen" role="radiogroup">
+        <label class="stufe">
           <input type="radio" name="stufe" value="1" />
           <span class="stufe-titel">Stark</span>
           <span class="stufe-info">kleinste Datei</span>
         </label>
-        <label>
+        <label class="stufe">
           <input type="radio" name="stufe" value="2" checked />
+          <span class="stufe-badge">empfohlen</span>
           <span class="stufe-titel">Mittel</span>
-          <span class="stufe-info">empfohlen</span>
+          <span class="stufe-info">gute Balance</span>
         </label>
-        <label>
+        <label class="stufe">
           <input type="radio" name="stufe" value="3" />
           <span class="stufe-titel">Schonend</span>
           <span class="stufe-info">beste Qualität</span>
@@ -42,29 +71,21 @@
       </div>
     </section>
 
-    <!-- Schritt 2: Dateien -->
-    <section class="karte">
-      <h2>2. Dateien wählen</h2>
-      <label id="dropZone" class="dropzone" for="dateiEingabe">
-        <span class="dropzone-icon">⬆️</span>
-        <span class="dropzone-text">Tippen zum Auswählen</span>
-        <span class="dropzone-klein">oder Dateien hierher ziehen</span>
-        <input id="dateiEingabe" type="file" accept="image/*,application/pdf" multiple hidden />
-      </label>
-    </section>
-
-    <!-- Schritt 3: Ergebnis (erst sichtbar, sobald etwas verarbeitet wurde) -->
-    <section class="karte" id="ergebnisKarte" hidden>
-      <h2>3. Ergebnis</h2>
-      <ul id="ergebnisse" class="ergebnisse"></ul>
-      <p id="zusammenfassung" class="zusammenfassung"></p>
-      <button id="alleLaden" class="knopf" hidden>Alle herunterladen</button>
+    <!-- Ergebnisse (erst sichtbar, sobald etwas verarbeitet wurde) -->
+    <section id="ergebnisKarte" class="ergebnis-karte" hidden aria-live="polite">
+      <div id="ergebnisse" class="ergebnisse"></div>
     </section>
 
     <footer class="fuss">
       <p>Läuft komplett im Browser. Keine Datei wird hochgeladen.</p>
     </footer>
   </main>
+
+  <!-- Fest sichtbarer Aktionsbalken unten (ab dem ersten Ergebnis) -->
+  <div id="aktionsleiste" class="aktionsleiste" hidden>
+    <span id="leisteText" class="leiste-text"></span>
+    <button id="alleLaden" class="knopf" hidden>Alle herunterladen</button>
+  </div>
 
   <script type="module" src="app.js"></script>
 </body>
