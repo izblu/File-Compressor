@@ -4,18 +4,22 @@
 // Cache gelegt; danach werden Anfragen bevorzugt aus dem Cache beantwortet.
 // So startet die App auch ohne Internet.
 
-const CACHE = "filekit-v3";
+const CACHE = "filekit-v4";
 
 // Die zur App gehörenden Dateien. Bei Änderungen die Versionsnummer oben
-// erhöhen (z. B. v4), damit Browser die neue Fassung laden.
-// Die pdf.js-Bibliothek (lib/pdfjs/*, ~1,4 MB) wird NICHT vorab geladen, sondern
-// erst beim ersten PDF zur Laufzeit gecacht (siehe fetch-Handler unten).
+// erhöhen (z. B. v5), damit Browser die neue Fassung laden.
+// Die großen Bibliotheken (lib/pdfjs/* ~1,4 MB, lib/pdf-lib.min.js ~0,5 MB)
+// werden NICHT vorab geladen, sondern erst bei Bedarf zur Laufzeit gecacht
+// (siehe fetch-Handler unten).
 const DATEIEN = [
   "index.html",
   "styles.css",
   "app.js",
+  "shared.js",
   "image.js",
   "pdf.js",
+  "merge.js",
+  "split.js",
   "manifest.json",
   "icons/icon-192.png",
   "icons/icon-512.png",

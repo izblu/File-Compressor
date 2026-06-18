@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>FileKit – Bilder &amp; PDFs verkleinern</title>
-  <meta name="description" content="Bilder und PDFs direkt auf dem Gerät verkleinern – ohne Upload." />
+  <title>FileKit – Bilder &amp; PDFs verkleinern, zusammenführen, trennen</title>
+  <meta name="description" content="Bilder und PDFs direkt auf dem Gerät verkleinern, zusammenführen und trennen – ohne Upload." />
 
-  <!-- PWA: macht die Seite installierbar -->
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#2563eb" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
@@ -17,7 +16,7 @@
   <main class="app">
     <header class="kopf">
       <span class="marke">
-        <svg class="marke-icon" viewBox="0 0 64 64" width="36" height="36" aria-hidden="true">
+        <svg class="marke-icon" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">
           <rect x="0" y="0" width="64" height="64" rx="16" fill="#2563eb" />
           <rect x="7" y="14" width="33" height="26" rx="4" fill="#ffffff" />
           <circle cx="16" cy="22" r="3" fill="#2563eb" />
@@ -31,49 +30,95 @@
         </svg>
         <span class="marke-text">FileKit</span>
       </span>
-      <p class="untertitel">Bilder &amp; PDFs verkleinern</p>
       <p class="vertrauen">privat · offline · keine Uploads</p>
     </header>
 
-    <!-- Hauptaktion: Dateien wählen / ablegen -->
-    <label id="dropZone" class="dropzone" for="dateiEingabe">
-      <svg class="dropzone-icon" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
-        <path d="M24 30 V10 M15 19 L24 10 L33 19" fill="none" stroke="currentColor"
-              stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
-        <path d="M10 30 V36 H38 V30" fill="none" stroke="currentColor"
-              stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-      <span class="dropzone-text">Dateien wählen</span>
-      <span class="dropzone-klein">oder hierher ziehen</span>
-      <input id="dateiEingabe" type="file" accept="image/*,application/pdf" multiple hidden />
-    </label>
+    <!-- ===== Panel: Verkleinern ===== -->
+    <section class="panel" data-modus="verkleinern">
+      <label id="dropZone" class="dropzone" for="dateiEingabe">
+        <svg class="dropzone-icon" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
+          <path d="M24 30 V10 M15 19 L24 10 L33 19" fill="none" stroke="currentColor"
+                stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M10 30 V36 H38 V30" fill="none" stroke="currentColor"
+                stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="dropzone-text">Dateien wählen</span>
+        <span class="dropzone-klein">Bilder oder PDFs · oder hierher ziehen</span>
+        <input id="dateiEingabe" type="file" accept="image/*,application/pdf" multiple hidden />
+      </label>
 
-    <!-- Qualitätsstufe (gilt für die nächste Auswahl und verarbeitet eine
-         bestehende Auswahl sofort neu) -->
-    <section class="stufen-karte" aria-label="Qualität wählen">
-      <div class="stufen" role="radiogroup">
-        <label class="stufe">
-          <input type="radio" name="stufe" value="1" />
-          <span class="stufe-titel">Stark</span>
-          <span class="stufe-info">kleinste Datei</span>
-        </label>
-        <label class="stufe">
-          <input type="radio" name="stufe" value="2" checked />
-          <span class="stufe-badge">empfohlen</span>
-          <span class="stufe-titel">Mittel</span>
-          <span class="stufe-info">gute Balance</span>
-        </label>
-        <label class="stufe">
-          <input type="radio" name="stufe" value="3" />
-          <span class="stufe-titel">Schonend</span>
-          <span class="stufe-info">beste Qualität</span>
-        </label>
-      </div>
+      <section class="stufen-karte" aria-label="Qualität wählen">
+        <div class="stufen" role="radiogroup">
+          <label class="stufe">
+            <input type="radio" name="stufe" value="1" />
+            <span class="stufe-titel">Stark</span>
+            <span class="stufe-info">kleinste Datei</span>
+          </label>
+          <label class="stufe">
+            <input type="radio" name="stufe" value="2" checked />
+            <span class="stufe-badge">empfohlen</span>
+            <span class="stufe-titel">Mittel</span>
+            <span class="stufe-info">gute Balance</span>
+          </label>
+          <label class="stufe">
+            <input type="radio" name="stufe" value="3" />
+            <span class="stufe-titel">Schonend</span>
+            <span class="stufe-info">beste Qualität</span>
+          </label>
+        </div>
+      </section>
+
+      <section id="ergebnisKarte" class="ergebnis-karte" hidden aria-live="polite">
+        <div id="ergebnisse" class="ergebnisse"></div>
+      </section>
     </section>
 
-    <!-- Ergebnisse (erst sichtbar, sobald etwas verarbeitet wurde) -->
-    <section id="ergebnisKarte" class="ergebnis-karte" hidden aria-live="polite">
-      <div id="ergebnisse" class="ergebnisse"></div>
+    <!-- ===== Panel: Zusammenführen ===== -->
+    <section class="panel" data-modus="zusammenfuehren" hidden>
+      <label id="mergeDrop" class="dropzone" for="mergeEingabe">
+        <svg class="dropzone-icon" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
+          <path d="M10 8 L24 22 M38 8 L24 22 M24 22 V40" fill="none" stroke="currentColor"
+                stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M18 34 L24 40 L30 34" fill="none" stroke="currentColor"
+                stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="dropzone-text">Dateien zum Verbinden wählen</span>
+        <span class="dropzone-klein">PDFs &amp; Bilder · oder hierher ziehen</span>
+        <input id="mergeEingabe" type="file" accept="image/*,application/pdf" multiple hidden />
+      </label>
+      <p id="mergeHinweis" class="panel-hinweis" hidden>
+        Reihenfolge mit den Pfeilen ändern. Bei PDFs kannst du Seiten wählen (z. B. „1-3, 5"), leer = alle.
+      </p>
+      <div id="mergeListe" class="datei-liste"></div>
+      <section id="mergeErgebnis" class="ergebnis-karte" hidden aria-live="polite">
+        <div id="mergeAusgabe" class="ergebnisse"></div>
+      </section>
+    </section>
+
+    <!-- ===== Panel: Trennen ===== -->
+    <section class="panel" data-modus="trennen" hidden>
+      <label id="splitDrop" class="dropzone" for="splitEingabe">
+        <svg class="dropzone-icon" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
+          <path d="M24 8 V20 M24 20 L14 30 M24 20 L34 30" fill="none" stroke="currentColor"
+                stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M10 34 L14 30 L18 34 M30 34 L34 30 L38 34" fill="none" stroke="currentColor"
+                stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <span class="dropzone-text">PDF zum Trennen wählen</span>
+        <span class="dropzone-klein">ein PDF · oder hierher ziehen</span>
+        <input id="splitEingabe" type="file" accept="application/pdf" hidden />
+      </label>
+      <div id="splitKopf" class="split-kopf" hidden>
+        <span id="splitInfo" class="split-info"></span>
+        <span class="split-werkzeuge">
+          <button id="splitAlle" class="knopf winzig" type="button">Alle</button>
+          <button id="splitKeine" class="knopf winzig sekundaer" type="button">Keine</button>
+        </span>
+      </div>
+      <div id="splitGrid" class="seiten-grid"></div>
+      <section id="splitErgebnis" class="ergebnis-karte" hidden aria-live="polite">
+        <div id="splitAusgabe" class="ergebnisse"></div>
+      </section>
     </section>
 
     <footer class="fuss">
@@ -81,10 +126,36 @@
     </footer>
   </main>
 
-  <!-- Fest sichtbarer Aktionsbalken unten (ab dem ersten Ergebnis) -->
-  <div id="aktionsleiste" class="aktionsleiste" hidden>
-    <span id="leisteText" class="leiste-text"></span>
-    <button id="alleLaden" class="knopf" hidden>Alle herunterladen</button>
+  <!-- Unterbau: kontextuelle Aktionsleiste + untere Navigation (Daumen-Zone) -->
+  <div class="unterbau">
+  <div id="aktionsleiste" class="aktionsleiste" hidden></div>
+
+  <nav class="tableiste" aria-label="Funktion wählen">
+    <button class="tab aktiv" data-modus="verkleinern" type="button" aria-current="page">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 12 H20" /><path d="M12 3 V8" /><path d="M9 5 L12 8 L15 5" />
+        <path d="M12 21 V16" /><path d="M9 19 L12 16 L15 19" />
+      </svg>
+      <span>Verkleinern</span>
+    </button>
+    <button class="tab" data-modus="zusammenfuehren" type="button">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 12 H10" /><path d="M7 8.5 L10.5 12 L7 15.5" />
+        <path d="M21 12 H14" /><path d="M17 8.5 L13.5 12 L17 15.5" />
+      </svg>
+      <span>Zusammenführen</span>
+    </button>
+    <button class="tab" data-modus="trennen" type="button">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M11 12 H4" /><path d="M7 8.5 L3.5 12 L7 15.5" />
+        <path d="M13 12 H20" /><path d="M17 8.5 L20.5 12 L17 15.5" />
+      </svg>
+      <span>Trennen</span>
+    </button>
+  </nav>
   </div>
 
   <script type="module" src="app.js"></script>
