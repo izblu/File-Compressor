@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Designsystem – Komponenten</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.sec{display:flex;flex-direction:column;gap:18px}
+.sec > h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fk-muted)}
+.cap{font-size:12px;font-weight:700;color:var(--fk-muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--fk-muted);letter-spacing:-.02em}
+.mx{display:grid;grid-template-columns:120px repeat(4,minmax(0,1fr));gap:14px 20px;align-items:center}
+.cell{display:flex;flex-direction:column;gap:8px}
+.panel{padding:24px;border-radius:24px;background:rgba(255,255,255,.02);box-shadow:inset 0 0 0 1px var(--fk-line)}
+</style>
+</helmet>
+<div class="fk-page" style="width: 1280px; min-height: 2140px; box-sizing: border-box; padding: 64px 72px; display: flex; flex-direction: column; gap: 48px">
+<header class="fk-row" style="gap: 24px; align-items: flex-end">
+<div class="fk-stack" style="gap: 8px; flex: 1">
+<p class="t-micro t-accent">FileKit · Designsystem „Nacht“</p>
+<h1 style="font-size: 44px; line-height: 1.05; font-weight: 750; letter-spacing: -0.035em">Komponenten</h1>
+</div>
+<p class="t-body t-muted" style="max-width: 460px; text-align: right">Klassen aus <b class="t-2">filekit.css</b>. Alles hier ist bedienbar – drücken, tippen, auswählen.</p>
+</header>
+
+<section class="sec panel">
+<h2>Buttons</h2>
+<div class="mx">
+<span></span><span class="cap">Normal</span><span class="cap">Gedrückt</span><span class="cap">Deaktiviert</span><span class="cap">Arbeitet</span>
+<span class="mono">.btn-primary</span>
+<button type="button" class="btn btn-primary">Speichern</button>
+<button type="button" class="btn btn-primary is-pressed">Speichern</button>
+<button type="button" class="btn btn-primary" disabled>Speichern</button>
+<button type="button" class="btn btn-primary is-working" aria-busy="true"><span class="spinner" aria-hidden="true"></span>Wird gespeichert …</button>
+<span class="mono">.btn-secondary</span>
+<button type="button" class="btn btn-secondary">Abbrechen</button>
+<button type="button" class="btn btn-secondary is-pressed">Abbrechen</button>
+<button type="button" class="btn btn-secondary" disabled>Abbrechen</button>
+<button type="button" class="btn btn-secondary is-working" aria-busy="true"><span class="spinner" aria-hidden="true" style="border-color: rgba(255,255,255,.2); border-top-color: #eef2fb"></span>Wird geöffnet …</button>
+<span class="mono">.btn-ghost</span>
+<button type="button" class="btn btn-ghost">Andere Zielgröße wählen</button>
+<button type="button" class="btn btn-ghost is-pressed">Andere Zielgröße wählen</button>
+<button type="button" class="btn btn-ghost" disabled>Andere Zielgröße wählen</button>
+<button type="button" class="btn btn-ghost is-working" aria-busy="true"><span class="spinner" aria-hidden="true" style="border-color: rgba(121,162,255,.25); border-top-color: #79a2ff"></span>Wird vorbereitet …</button>
+<span class="mono">.btn-danger</span>
+<button type="button" class="btn btn-danger">Verwerfen</button>
+<button type="button" class="btn btn-danger is-pressed">Verwerfen</button>
+<button type="button" class="btn btn-danger" disabled>Verwerfen</button>
+<span></span>
+</div>
+<div class="fk-row" style="gap: 32px; flex-wrap: wrap; margin-top: 8px; align-items: flex-start">
+<div class="cell"><span class="cap">Klein · .btn-sm</span><button type="button" class="btn btn-secondary btn-sm">Ändern</button></div>
+<div class="cell"><span class="cap">Text-Link · .btn-link</span><button type="button" class="btn-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Weitere Dateien hinzufügen</button></div>
+<div class="cell"><span class="cap">Icon-Button · normal / glass / an</span><div class="fk-row" style="gap: 10px">
+<button type="button" class="icon-btn" aria-label="Zurück"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+<button type="button" class="icon-btn glass" aria-label="Schließen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+<button type="button" class="icon-btn is-on" aria-label="Optionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></button>
+</div></div>
+</div>
+</section>
+
+<section class="sec panel">
+<h2>Geteilter Button · Hauptaktion | ▾ (mind. 48 px, hier 58 px)</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+<div class="cell"><span class="cap">Normal</span>
+<div class="split"><button type="button" class="split-main"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke-dasharray="2.2 2.4" opacity=".6"></path><path d="M7 12.5h3.5l2 2V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4.5a2 2 0 0 1 2-2zM18.5 5.5 13.5 10.5M13.5 6.5v4h4"></path></svg>Verkleinern</button><span class="split-div" aria-hidden="true"></span><button type="button" class="split-more" aria-label="Weitere Aktionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div>
+<div class="cell"><span class="cap">Hauptteil gedrückt</span>
+<div class="split"><button type="button" class="split-main is-pressed"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 17H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v2M16 6h-6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10l-4-4zM16 6v4h4M11 14.5h6M11 18h4"></path></svg>Zusammenführen</button><span class="split-div" aria-hidden="true"></span><button type="button" class="split-more" aria-label="Weitere Aktionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></button></div></div>
+<div class="cell"><span class="cap">▾ gedrückt (öffnet Aktionen-Menü)</span>
+<div class="split"><button type="button" class="split-main"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke-dasharray="2.2 2.4" opacity=".6"></path><path d="M7 12.5h3.5l2 2V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4.5a2 2 0 0 1 2-2zM18.5 5.5 13.5 10.5M13.5 6.5v4h4"></path></svg>Verkleinern</button><span class="split-div" aria-hidden="true"></span><button type="button" class="split-more is-pressed" aria-label="Weitere Aktionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform: rotate(180deg)"><path d="m6 9 6 6 6-6"></path></svg></button></div></div>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px">
+<section class="sec panel">
+<h2>Auswahl</h2>
+<div class="cell"><span class="cap">Options-Karte · normal / markiert / deaktiviert</span>
+<div role="radiogroup" aria-label="Beispiel" class="fk-stack" style="gap: 10px">
+<sc-for list="{{opts}}" as="o" hint-placeholder-count="2">
+<button type="button" role="radio" aria-checked="{{o.checked}}" class="opt {{o.cls}}" onClick="{{o.pick}}"><span class="opt-main"><span class="opt-title">{{o.title}}</span><span class="opt-sub">{{o.sub}}</span></span><span class="radio" aria-hidden="true"></span></button>
+</sc-for>
+<div class="opt is-disabled" aria-disabled="true"><span class="opt-main"><span class="opt-title">PDF</span><span class="mrow-why">Ist bereits ein PDF</span></span></div>
+</div></div>
+<div class="cell"><span class="cap">Umschalter · .seg</span>
+<div class="seg" role="tablist" aria-label="Beispiel"><button type="button" role="tab" aria-selected="{{segA}}" class="{{segAc}}" onClick="{{segToA}}">Qualität</button><button type="button" role="tab" aria-selected="{{segB}}" class="{{segBc}}" onClick="{{segToB}}">Zielgröße</button></div></div>
+<div class="cell"><span class="cap">Chips · .chip / .is-on</span>
+<div class="fk-row" style="gap: 10px; flex-wrap: wrap"><sc-for list="{{chips}}" as="c" hint-placeholder-count="4"><button type="button" class="chip {{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.label}}</button></sc-for></div></div>
+<div class="cell"><span class="cap">Badges &amp; Tag</span>
+<div class="fk-row" style="gap: 10px; flex-wrap: wrap"><span class="badge badge-accent">empfohlen</span><span class="badge badge-accent">Vorschlag</span><span class="badge badge-success t-num">−77 %</span><span class="badge badge-warning">Ziel verfehlt</span><span class="tag">PDF</span></div></div>
+</section>
+
+<section class="sec panel">
+<h2>Dateiname-Feld</h2>
+<div class="field">
+<label for="ds-name">Dateiname</label>
+<div class="field-box"><input id="ds-name" value="{{name}}" onChange="{{setName}}" autocomplete="off" spellcheck="false"><span class="field-ext">.pdf</span></div>
+<p class="field-hint">Vorschlag wird vorbelegt · Endung fest dahinter · Original bleibt unverändert.</p>
+</div>
+<div class="cell"><span class="cap">Mit Live-Vorschau (z. B. Trennen)</span>
+<div class="namelist"><span>{{n3}}</span><span>{{n4}}</span><span>{{n7}}</span></div></div>
+<div class="cell"><span class="cap">Fokussiert</span>
+<div class="field-box is-focus"><input aria-label="Beispiel fokussiert" value="Vertrag_klein"><span class="field-ext">.pdf</span></div></div>
+<div class="cell"><span class="cap">Hinweise · .note / -warning / -danger</span>
+<p class="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>Text ist danach nicht mehr markierbar.</p>
+<p class="note note-warning"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 21h20L12 3zM12 10v5M12 18h.01"></path></svg>Zielgröße nicht erreicht.</p>
+<p class="note note-danger"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15 9l-6 6M9 9l6 6"></path></svg>Diese Datei ist geschützt.</p>
+</div>
+</section>
+</div>
+
+<section class="sec panel">
+<h2>Seiten-Kachel · normal · markiert · wird gezogen · gedreht</h2>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px; align-items: start; padding: 8px 0 12px">
+<div class="cell"><span class="cap">Normal</span>
+<div class="tile"><span class="tile-band bg-m1" aria-hidden="true"></span><div class="tile-page"><div class="doc scan"><div class="ln h" style="width: 54%"></div><div class="ln"></div><div class="ln" style="width: 92%"></div><div class="ln" style="width: 66%"></div><div class="gap"></div><div class="ln"></div><div class="ln" style="width: 40%"></div></div></div><div class="tile-foot"><span class="marker bg-m1">1</span><span class="tile-num">Seite 1</span><button type="button" class="icon-btn" aria-label="Optionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></button></div></div></div>
+<div class="cell"><span class="cap">Markiert</span>
+<div class="tile is-selected"><span class="tile-band bg-m2" aria-hidden="true"></span><div class="tile-page"><div class="doc scan"><div class="ln"></div><div class="ln" style="width: 92%"></div><div class="ln" style="width: 66%"></div><div class="gap"></div><div class="ln"></div><div class="ln" style="width: 70%"></div></div></div><span class="tile-check" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><div class="tile-foot"><span class="marker bg-m2">2</span><span class="tile-num">Seite 2</span></div></div></div>
+<div class="cell"><span class="cap">Auswählbar (leer)</span>
+<div class="tile"><div class="tile-page"><div class="doc"><div class="ln h" style="width: 54%"></div><div class="ln"></div><div class="ln" style="width: 80%"></div></div></div><span class="tile-check" aria-hidden="true"></span><div class="tile-foot"><span class="tile-num">Seite 3</span></div></div></div>
+<div class="cell" style="position: relative"><span class="cap">Wird gezogen + Platzhalter</span>
+<div style="position: relative"><div class="tile-slot" style="aspect-ratio: 1 / 1.62"></div>
+<div class="tile is-dragging" style="position: absolute; left: 14px; top: -6px; right: -14px"><span class="tile-band bg-m3" aria-hidden="true"></span><div class="tile-page"><div class="doc"><span class="ttl" style="font-size: 9px">RECHNUNG</span><div class="ln d" style="width: 40%; margin-top: 6px"></div><div class="ln"></div></div></div><div class="tile-foot"><span class="marker bg-m3">3</span><span class="tile-num">Seite 3</span></div></div></div></div>
+<div class="cell"><span class="cap">Gedreht (90°)</span>
+<div class="tile is-rotated"><span class="tile-band bg-m4" aria-hidden="true"></span><div class="tile-page"><div class="doc"><div class="ln d" style="width: 50%"></div><div class="ln"></div><div class="ln" style="width: 90%"></div><div class="ln" style="width: 70%"></div></div></div><span class="tile-rot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8M21 3v5h-5"></path></svg>90°</span><div class="tile-foot"><span class="marker bg-m4">4</span><span class="tile-num">Seite 5</span></div></div></div>
+</div>
+</section>
+
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px">
+<section class="sec panel">
+<h2>Menüzeilen (Bottom Sheet)</h2>
+<div class="fk-stack" style="gap: 4px; padding: 8px; border-radius: 22px; background: var(--fk-surface-2)">
+<div class="mrow is-suggested"><span class="mrow-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke-dasharray="2.2 2.4" opacity=".6"></path><path d="M7 12.5h3.5l2 2V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4.5a2 2 0 0 1 2-2zM18.5 5.5 13.5 10.5M13.5 6.5v4h4"></path></svg></span><span class="mrow-tx"><span class="mrow-t">Verkleinern <span class="badge badge-accent">Vorschlag</span></span><span class="mrow-d">Dateigröße reduzieren.</span></span></div>
+<div class="mrow"><span class="mrow-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 17H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v2M16 6h-6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10l-4-4zM16 6v4h4M11 14.5h6M11 18h4"></path></svg></span><span class="mrow-tx"><span class="mrow-t">Zusammenführen</span><span class="mrow-d">Mehrere Dateien zu einem PDF.</span></span></div>
+<div class="mrow is-disabled" aria-disabled="true"><span class="mrow-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"></path></svg></span><span class="mrow-tx"><span class="mrow-t">Trennen</span><span class="mrow-why"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>Nur für ein einzelnes PDF</span></span></div>
+<div class="sep" aria-hidden="true"></div>
+<div class="mrow compact danger"><span class="mrow-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg></span><span class="mrow-t">Löschen</span></div>
+</div>
+</section>
+<section class="sec panel">
+<h2>Kopfzeile · Toast · Hinweis · Auswahl-Leiste</h2>
+<div style="position: relative; border-radius: 22px; background: var(--fk-bg); overflow: hidden; box-shadow: inset 0 0 0 1px var(--fk-line)">
+<div class="fk-top" style="padding-top: 8px; padding-bottom: 14px"><div class="fk-top-row"><button type="button" class="icon-btn" aria-label="Zurück"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button><div class="fk-top-title"><b>Wie stark verkleinern?</b><span>Schritt 2 von 3</span></div><button type="button" class="icon-btn" aria-label="Abbrechen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div><div class="fk-progress" aria-hidden="true"><i style="width: 66.6%"></i></div></div>
+</div>
+<div style="position: relative; height: 56px"><div class="toast" role="status" style="position: absolute; left: 0; right: 0; animation: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #475569"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg><span>Seite gelöscht</span><button type="button" class="btn-link">Rückgängig</button></div></div>
+<div class="fk-row" style="gap: 20px; align-items: flex-start">
+<div style="position: relative; height: 118px; width: 240px"><div class="coach" style="position: absolute; left: 0; top: 0; animation: none"><p style="font-size: 16px; font-weight: 800">Weitere Aktionen</p><p style="margin-top: 4px; font-size: 14px; line-height: 1.4; font-weight: 500; color: #3a465c">Hier findest du alle Aktionen.</p><span class="coach-arrow" aria-hidden="true" style="right: 31px; bottom: -6px"></span></div></div>
+<div class="selbar" style="flex: 1"><button type="button"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"></path></svg>Verschieben</button><button type="button"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8M21 3v5h-5"></path></svg>Drehen</button><button type="button" class="danger"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg>Löschen</button></div>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":2140}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { opt: 'mittel', seg: 'a', chip: '2', name: 'Vertrag' };
+  }
+  renderVals() {
+    const s = this.state;
+    const opts = [
+      { id: 'stark', title: 'Stark', sub: 'kleinste Datei' },
+      { id: 'mittel', title: 'Mittel', sub: 'gute Balance' }
+    ].map((o) => ({ ...o, cls: s.opt === o.id ? 'is-selected' : '', checked: s.opt === o.id ? 'true' : 'false', pick: () => this.setState({ opt: o.id }) }));
+    const chips = ['500 KB', '1 MB', '2 MB', '5 MB'].map((label, i) => {
+      const id = String(i);
+      const on = s.chip === id;
+      return { label, cls: on ? 'is-on' : '', on: on ? 'true' : 'false', pick: () => this.setState({ chip: id }) };
+    });
+    const n = (s.name || '').trim() || 'Vertrag';
+    return {
+      opts, chips,
+      segA: s.seg === 'a' ? 'true' : 'false', segB: s.seg === 'b' ? 'true' : 'false',
+      segAc: s.seg === 'a' ? 'is-on' : '', segBc: s.seg === 'b' ? 'is-on' : '',
+      segToA: () => this.setState({ seg: 'a' }), segToB: () => this.setState({ seg: 'b' }),
+      name: s.name, setName: (e) => this.setState({ name: e.target.value }),
+      n3: n + '_Seite3.pdf', n4: n + '_Seite4.pdf', n7: n + '_Seite7.pdf'
+    };
+  }
+}
+</script>
+</body>
+</html>

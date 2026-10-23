@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Zusammenführen – Speichern</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.mini{position:relative;width:34px;height:46px;border-radius:4px;background:#fff;box-shadow:0 6px 14px -6px rgba(0,0,0,.8);overflow:hidden;flex:none}
+.mini i{position:absolute;left:0;right:0;top:0;height:4px}
+</style>
+</helmet>
+<div class="fk-app">
+<header class="fk-top">
+<div class="fk-top-row">
+<a href="10-Seiten-anordnen.dc.html" class="icon-btn" aria-label="Zurück"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<div class="fk-top-title"><b>Speichern</b><span>Schritt 3 von 3</span></div>
+<a href="20c-Abbrechen.dc.html" class="icon-btn" aria-label="Abbrechen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</div>
+<div class="fk-progress" role="progressbar" aria-label="Schritt 3 von 3" aria-valuemin="1" aria-valuemax="3" aria-valuenow="3"><i style="width: 100%"></i></div>
+</header>
+<main class="fk-body in-step fk-stack" style="gap: 20px; padding-top: 20px">
+<section class="card fk-stack" aria-label="Ergebnis" style="padding: 20px 16px; gap: 18px; align-items: center">
+<div class="fk-row" aria-hidden="true" style="gap: 14px">
+<div class="fk-row" style="gap: 6px">
+<span class="mini"><i class="bg-m1"></i></span><span class="mini"><i class="bg-m2"></i></span><span class="mini"><i class="bg-m3"></i></span>
+</div>
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--fk-muted)"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<div style="position: relative; width: 52px; height: 70px">
+<span class="mini" style="position: absolute; left: 8px; top: 0; width: 44px; height: 60px; opacity: .55"></span>
+<span class="mini" style="position: absolute; left: 4px; top: 4px; width: 44px; height: 60px; opacity: .8"></span>
+<span class="mini" style="position: absolute; left: 0; top: 8px; width: 44px; height: 60px; display: flex; align-items: center; justify-content: center"><span class="tag" style="background: #dbe5fb; color: #1d4fd7">PDF</span></span>
+</div>
+</div>
+<div class="fk-stack" style="gap: 4px; align-items: center; text-align: center">
+<p class="t-h">1 PDF mit 5 Seiten</p>
+<p class="t-body t-muted">aus 3 Dateien</p>
+</div>
+</section>
+<section class="fk-stack" style="gap: 8px">
+<h2 class="t-s t-2">Ausgabe</h2>
+<div class="card fk-row" style="padding: 0 16px; gap: 12px; min-height: 56px">
+<span class="t-body" style="flex: 1">Format</span><b class="t-body">PDF</b>
+</div>
+</section>
+<div class="field">
+<label for="name">Dateiname</label>
+<div class="field-box"><input id="name" value="Zusammengeführt" autocomplete="off" spellcheck="false"><span class="field-ext">.pdf</span></div>
+<p class="field-hint">Wird als neue Datei gespeichert – die Originale bleiben unverändert.</p>
+</div>
+</main>
+<footer class="fk-dock">
+<a href="18-Gespeichert.dc.html" class="btn btn-primary btn-block">Speichern</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

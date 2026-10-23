@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Seiten ordnen – Speichern</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+</style>
+</helmet>
+<div class="fk-app">
+<header class="fk-top">
+<div class="fk-top-row">
+<a href="10c-Seiten-ordnen.dc.html" class="icon-btn" aria-label="Zurück"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<div class="fk-top-title"><b>Speichern</b><span>Schritt 3 von 3</span></div>
+<a href="20c-Abbrechen.dc.html" class="icon-btn" aria-label="Abbrechen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</div>
+<div class="fk-progress" role="progressbar" aria-label="Schritt 3 von 3" aria-valuemin="1" aria-valuemax="3" aria-valuenow="3"><i style="width: 100%"></i></div>
+</header>
+<main class="fk-body in-step fk-stack" style="gap: 20px; padding-top: 20px">
+<section class="card fk-stack" aria-label="Ergebnis" style="padding: 16px; gap: 14px">
+<div class="fk-row" style="gap: 14px">
+<div style="position: relative; width: 52px; height: 72px; flex: none; border-radius: 5px; box-shadow: 0 8px 18px -8px rgba(0,0,0,.8)"><div class="doc" style="padding: 8px 6px; gap: 3px; border-radius: 5px"><div class="ln d" style="width: 60%; height: 3px"></div><div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px; width: 70%"></div><div class="ln" style="height: 2px"></div></div></div>
+<div class="fk-stack" style="gap: 4px"><p class="t-h">Vertrag.pdf</p><p class="t-body t-muted">12 Seiten · PDF</p></div>
+</div>
+<div class="fk-row" style="gap: 8px; flex-wrap: wrap">
+<span class="badge badge-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l-3 3 3 3M19 9l3 3-3 3M2 12h20"></path></svg>Reihenfolge geändert</span>
+<span class="badge badge-accent"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8M21 3v5h-5"></path></svg>1 Seite gedreht</span>
+</div>
+</section>
+<section class="fk-stack" style="gap: 8px">
+<h2 class="t-s t-2">Ausgabe</h2>
+<div class="card fk-row" style="padding: 0 16px; gap: 12px; min-height: 56px"><span class="t-body" style="flex: 1">Format</span><b class="t-body">PDF</b></div>
+</section>
+<div class="field">
+<label for="name">Dateiname</label>
+<div class="field-box"><input id="name" value="Vertrag_geordnet" autocomplete="off" spellcheck="false"><span class="field-ext">.pdf</span></div>
+<p class="field-hint">Wird als neue Datei gespeichert – das Original bleibt unverändert.</p>
+</div>
+</main>
+<footer class="fk-dock">
+<a href="18-Gespeichert.dc.html" class="btn btn-primary btn-block">Speichern</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

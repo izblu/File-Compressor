@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Seiten anordnen – Mehrfach-Auswahl</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.tile{width:100%;text-align:left;cursor:pointer;color:inherit}
+.tile .doc{display:flex}
+.selbar button:disabled{opacity:.4;cursor:not-allowed}
+</style>
+</helmet>
+<div class="fk-app">
+<header class="fk-top">
+<div class="fk-top-row">
+<a href="10-Seiten-anordnen.dc.html" class="icon-btn" aria-label="Auswahl beenden"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+<div class="fk-top-title" aria-live="polite"><b class="t-num">{{count}} ausgewählt</b><span>Schritt 2 von 3</span></div>
+<button type="button" class="btn-link" style="justify-self: end; padding: 0 8px; margin: 0" onClick="{{toggleAll}}">{{allLabel}}</button>
+</div>
+<div class="fk-progress" aria-hidden="true"><i style="width: 66.6%"></i></div>
+</header>
+<main class="fk-body in-fade" style="padding-top: 16px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<sc-for list="{{pages}}" as="p" hint-placeholder-count="5">
+<button type="button" class="tile {{p.cls}}" aria-pressed="{{p.pressed}}" aria-label="Seite {{p.n}} auswählen" onClick="{{p.toggle}}">
+<span class="tile-band {{p.m}}" aria-hidden="true"></span>
+<span class="tile-page" style="display: block">
+<span class="doc {{p.paper}}" style="transform: {{p.tf}}">
+<sc-if value="{{p.isInv}}" hint-placeholder-val="{{ false }}"><span class="ttl" style="font-size: 9px">RECHNUNG</span><span class="blk" style="height: 8px; margin-top: 6px; background: #dbe5fb"></span></sc-if>
+<span class="ln h" style="width: 54%"></span>
+<span class="ln" style="width: 100%"></span><span class="ln" style="width: 92%"></span><span class="ln" style="width: 97%"></span><span class="ln" style="width: 66%"></span>
+<span class="gap"></span>
+<span class="ln" style="width: 100%"></span><span class="ln" style="width: 88%"></span><span class="ln" style="width: 40%"></span>
+</span>
+</span>
+<span class="tile-check" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span>
+<sc-if value="{{p.rotated}}" hint-placeholder-val="{{ false }}"><span class="tile-rot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8M21 3v5h-5"></path></svg>{{p.deg}}°</span></sc-if>
+<span class="tile-foot"><span class="marker {{p.m}}">{{p.file}}</span><span class="tile-num">Seite {{p.n}}</span></span>
+</button>
+</sc-for>
+</div>
+</main>
+<footer class="fk-dock">
+<div class="selbar" role="toolbar" aria-label="Ausgewählte Seiten">
+<a href="10-Seiten-anordnen.dc.html"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"></path></svg>Verschieben</a>
+<button type="button" disabled="{{none}}" onClick="{{rotate}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36L21 8M21 3v5h-5"></path></svg>Drehen</button>
+<a href="14-Toast.dc.html" class="danger"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg>Löschen</a>
+</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      sel: { 3: true, 4: true, 5: true },
+      rot: { 4: 90 }
+    };
+  }
+  renderVals() {
+    const base = [
+      { n: 1, file: 1, m: 'bg-m1', paper: 'scan', isInv: false },
+      { n: 2, file: 2, m: 'bg-m2', paper: 'scan', isInv: false },
+      { n: 3, file: 3, m: 'bg-m3', paper: '', isInv: true },
+      { n: 4, file: 3, m: 'bg-m3', paper: '', isInv: false },
+      { n: 5, file: 3, m: 'bg-m3', paper: '', isInv: false }
+    ];
+    const sel = this.state.sel;
+    const rot = this.state.rot;
+    const count = Object.keys(sel).filter((k) => sel[k]).length;
+    const pages = base.map((p) => {
+      const s = !!sel[p.n];
+      const deg = rot[p.n] || 0;
+      return {
+        ...p,
+        cls: s ? 'is-selected' : '',
+        tf: deg ? 'rotate(' + deg + 'deg) scale(' + (deg % 180 ? 0.707 : 1) + ')' : 'none',
+        pressed: s ? 'true' : 'false',
+        rotated: deg > 0,
+        deg,
+        toggle: () => this.setState({ sel: { ...sel, [p.n]: !s } })
+      };
+    });
+    const all = count === base.length;
+    return {
+      pages, count,
+      none: count === 0,
+      allLabel: all ? 'Keine' : 'Alle',
+      toggleAll: () => {
+        const next = {};
+        if (!all) base.forEach((p) => { next[p.n] = true; });
+        this.setState({ sel: next });
+      },
+      rotate: () => {
+        const next = { ...rot };
+        Object.keys(sel).forEach((k) => { if (sel[k]) next[k] = ((next[k] || 0) + 90) % 360; });
+        this.setState({ rot: next });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

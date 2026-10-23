@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Designsystem – Animationen</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.sec{display:flex;flex-direction:column;gap:16px}
+.sec > h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fk-muted)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--fk-muted);letter-spacing:-.02em}
+.demo{position:relative;height:300px;border-radius:24px;background:var(--fk-bg);box-shadow:inset 0 0 0 1px var(--fk-line);overflow:hidden}
+.curve{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:18px;background:var(--fk-surface-1);box-shadow:inset 0 0 0 1px var(--fk-line)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fk-muted);text-align:left;padding:0 12px 10px 0;border-bottom:1px solid var(--fk-line-strong)}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--fk-line);vertical-align:top;color:var(--fk-text-2);line-height:1.4;font-weight:500}
+td:first-child{color:var(--fk-text);font-weight:700;white-space:nowrap}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fk-text)}
+td.k{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--fk-accent-text);white-space:nowrap}
+.ok-check{stroke-dasharray:40;--len:40;animation:fk-draw 380ms cubic-bezier(.2,.8,.2,1) 280ms both}
+.ok{animation:fk-pop-in 460ms cubic-bezier(.34,1.45,.64,1) both}
+.burst{animation:fk-burst 760ms cubic-bezier(.2,.8,.2,1) 200ms both}
+</style>
+</helmet>
+<div class="fk-page" style="width: 1280px; min-height: 1500px; box-sizing: border-box; padding: 64px 72px; display: flex; flex-direction: column; gap: 40px">
+<header class="fk-row" style="gap: 24px; align-items: flex-end">
+<div class="fk-stack" style="gap: 8px; flex: 1">
+<p class="t-micro t-accent">FileKit · Designsystem „Nacht“</p>
+<h1 style="font-size: 44px; line-height: 1.05; font-weight: 750; letter-spacing: -0.035em">Animationen</h1>
+</div>
+<p class="t-body t-muted" style="max-width: 500px; text-align: right">Ruhig, kurz, physikalisch: Bewegung erklärt, woher etwas kommt. Nur transform &amp; opacity. Bei „Bewegung reduzieren“ bleiben nur Überblendungen (200 ms).</p>
+</header>
+
+<div style="display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 32px">
+<section class="sec">
+<h2>Live ansehen</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<div class="fk-stack" style="gap: 10px">
+<div class="demo">
+<sc-if value="{{showA}}" hint-placeholder-val="{{ true }}">
+<div class="preview in-card" style="position: absolute; left: 16px; right: 16px; top: 16px; height: 180px">
+<span class="preview-halo in-halo" aria-hidden="true" style="width: 200px; height: 200px; margin: -100px 0 0 -100px"></span>
+<div class="preview-page in-page" style="width: 92px; height: 124px"><div class="doc" style="padding: 10px 8px; gap: 3px"><span class="ttl" style="font-size: 6px">VERTRAG</span><div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px; width: 80%"></div><div class="ln" style="height: 2px"></div></div></div>
+</div>
+<p class="t-s in-up d3" style="position: absolute; left: 18px; top: 208px">Vertrag.pdf</p>
+<div class="split in-dock" style="position: absolute; left: 16px; right: 16px; bottom: 16px; height: 46px; border-radius: 14px"><span class="split-main" style="font-size: 14px">Verkleinern</span><span class="split-div"></span><span class="split-more" style="width: 46px"></span></div>
+</sc-if>
+</div>
+<div class="fk-row" style="justify-content: space-between"><span class="t-s">Dropzone → Vorschau</span><button type="button" class="btn-link" style="height: 36px" onClick="{{playA}}">Abspielen</button></div>
+</div>
+<div class="fk-stack" style="gap: 10px">
+<div class="demo">
+<sc-if value="{{showB}}" hint-placeholder-val="{{ true }}">
+<span class="scrim" style="position: absolute"></span>
+<div class="sheet" style="position: absolute; padding: 8px 10px 14px">
+<div class="sheet-handle"></div>
+<div class="mrow is-suggested" style="min-height: 52px"><span class="mrow-ic" style="width: 34px; height: 34px"></span><span class="mrow-t" style="font-size: 14px">Verkleinern</span></div>
+<div class="mrow" style="min-height: 52px"><span class="mrow-ic" style="width: 34px; height: 34px"></span><span class="mrow-t" style="font-size: 14px">Zusammenführen</span></div>
+<div class="mrow" style="min-height: 52px"><span class="mrow-ic" style="width: 34px; height: 34px"></span><span class="mrow-t" style="font-size: 14px">Trennen</span></div>
+</div>
+</sc-if>
+</div>
+<div class="fk-row" style="justify-content: space-between"><span class="t-s">Bottom Sheet</span><button type="button" class="btn-link" style="height: 36px" onClick="{{playB}}">Abspielen</button></div>
+</div>
+<div class="fk-stack" style="gap: 10px">
+<div class="demo" style="display: flex; align-items: center; justify-content: center">
+<sc-if value="{{showC}}" hint-placeholder-val="{{ true }}">
+<div style="position: relative; width: 96px; height: 96px">
+<span class="burst" aria-hidden="true" style="position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px #79a2ff"></span>
+<svg class="ok" width="96" height="96" viewBox="0 0 112 112" aria-hidden="true" style="position: relative; filter: drop-shadow(0 12px 24px rgba(47,107,240,.55))"><circle cx="56" cy="56" r="56" fill="#2f6bf0"></circle><path class="ok-check" d="M37 57.5l12.5 12.5L76 43.5" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+</sc-if>
+</div>
+<div class="fk-row" style="justify-content: space-between"><span class="t-s">Gespeichert ✓</span><button type="button" class="btn-link" style="height: 36px" onClick="{{playC}}">Abspielen</button></div>
+</div>
+</div>
+</section>
+<section class="sec">
+<h2>Kurven</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+<div class="curve"><svg viewBox="-10 -30 120 140" width="100%" height="96" aria-hidden="true"><path d="M0 100H100M0 0V100" stroke="rgba(255,255,255,.12)"></path><path d="M0 100C20 20 20 0 100 0" fill="none" stroke="#79a2ff" stroke-width="3" stroke-linecap="round"></path></svg><b class="t-s">Standard · ease-out</b><span class="mono">.2, .8, .2, 1</span></div>
+<div class="curve"><svg viewBox="-10 -30 120 140" width="100%" height="96" aria-hidden="true"><path d="M0 100H100M0 0V100" stroke="rgba(255,255,255,.12)"></path><path d="M0 100C32 28 0 0 100 0" fill="none" stroke="#79a2ff" stroke-width="3" stroke-linecap="round"></path></svg><b class="t-s">Sheet · Dock · Toast</b><span class="mono">.32, .72, 0, 1</span></div>
+<div class="curve"><svg viewBox="-10 -30 120 140" width="100%" height="96" aria-hidden="true"><path d="M0 100H100M0 0V100" stroke="rgba(255,255,255,.12)"></path><path d="M0 100C65 100 35 0 100 0" fill="none" stroke="#79a2ff" stroke-width="3" stroke-linecap="round"></path></svg><b class="t-s">Positionswechsel · io</b><span class="mono">.65, 0, .35, 1</span></div>
+<div class="curve"><svg viewBox="-10 -30 120 140" width="100%" height="96" aria-hidden="true"><path d="M0 100H100M0 0V100" stroke="rgba(255,255,255,.12)"></path><path d="M0 100C34 -45 64 0 100 0" fill="none" stroke="#79a2ff" stroke-width="3" stroke-linecap="round"></path></svg><b class="t-s">Feder · spring</b><span class="mono">.34, 1.45, .64, 1</span></div>
+</div>
+</section>
+</div>
+
+<section class="sec">
+<h2>Übersicht · Dauer &amp; Kurve</h2>
+<table>
+<thead><tr><th>Moment</th><th>Dauer</th><th>Kurve</th><th>Was passiert</th><th>Bewegung reduzieren</th></tr></thead>
+<tbody>
+<tr><td>Dropzone · Ruhe</td><td class="n">5000 / 7000 Schleife</td><td class="k">ease-in-out / linear</td><td>Illustration schwebt ±5 px, Halo atmet (Deckkraft 0,55 ↔ 0,9), Lichtkante umrundet den Rand in 7 s.</td><td>Alles steht still.</td></tr>
+<tr><td>Dropzone · Drag-over</td><td class="n">200 · 600</td><td class="k">ease-out · spring</td><td>Rand wird voll Akzent, Fläche hellt auf, Scale 1,02; Illustration hebt sich 12 px, „+“ wird Pfeil.</td><td>Nur Farbwechsel.</td></tr>
+<tr><td>Dropzone → Vorschau</td><td class="n">520 (+80 / +120 / +180)</td><td class="k">ease-out</td><td>Karte 0,95 → 1, Radius 26,5 → 28; Seite fliegt aus 10 px / 0,92 ein; Halo wächst (900 ms); Metadaten folgen.</td><td>Überblendung 200 ms.</td></tr>
+<tr><td>Geteilter Button gleitet ein</td><td class="n">560 (+260)</td><td class="k">sheet</td><td>Von unten (120 %) in die Daumen-Zone, gleichzeitig eingeblendet.</td><td>Überblendung.</td></tr>
+<tr><td>Hinweis „Weitere Aktionen“</td><td class="n">460 (+900) · 1800 Puls</td><td class="k">spring</td><td>Sprechblase ploppt aus dem ▾ auf, ▾ pulsiert sanft, bis der Hinweis geschlossen wird.</td><td>Erscheint ohne Puls.</td></tr>
+<tr><td>Schritt vor / zurück</td><td class="n">320</td><td class="k">ease-out</td><td>Inhalt gleitet 28 px von rechts (vor) bzw. links (zurück); Kopfzeile steht, Fortschrittsbalken wächst.</td><td>Überblendung.</td></tr>
+<tr><td>Bottom Sheet</td><td class="n">480 auf · 280 zu</td><td class="k">sheet · io</td><td>Von unten, Abdunklung blendet in 320 ms ein; Wischen nach unten schließt.</td><td>Überblendung.</td></tr>
+<tr><td>Button-Druck</td><td class="n">120 · 200 los</td><td class="k">ease-out</td><td>Scale 0,98, Fläche dunkler, Schein kleiner.</td><td>Nur Farbe.</td></tr>
+<tr><td>Seite anheben / ziehen</td><td class="n">200</td><td class="k">spring</td><td>Scale 1,06, −2,5°, starker Schatten + Akzent-Ring; Platzhalter gestrichelt.</td><td>Nur Ring.</td></tr>
+<tr><td>Nachrutschen</td><td class="n">340 (je +40 versetzt)</td><td class="k">io</td><td>Übrige Kacheln gleiten an die neue Position (FLIP-Technik).</td><td>Springt sofort.</td></tr>
+<tr><td>Seite drehen</td><td class="n">320</td><td class="k">io</td><td>90° plus Scale 0,707, damit Querformat in die Kachel passt.</td><td>Springt sofort.</td></tr>
+<tr><td>Verarbeiten</td><td class="n">420 je Seite · 900 Schleife</td><td class="k">ease-out · io</td><td>Ring füllt sich, Scan-Strahl läuft über die Seite, Seiten-Segmente füllen sich.</td><td>Ring + Zahl, kein Strahl.</td></tr>
+<tr><td>Gespeichert ✓</td><td class="n">460 · 380 (+280) · 760</td><td class="k">spring · ease-out</td><td>Kreis ploppt auf, Haken zeichnet sich, Ring-Puls und 8 Funken; Button folgt nach 520 ms.</td><td>Überblendung, Haken sofort.</td></tr>
+<tr><td>Toast</td><td class="n">420 ein · 200 aus (nach 5 s)</td><td class="k">sheet</td><td>Gleitet 24 px hoch über das Dock; „Rückgängig“ setzt die Seite animiert zurück.</td><td>Überblendung.</td></tr>
+<tr><td>Fehler</td><td class="n">420 + 420</td><td class="k">ease-out</td><td>Karte erscheint, dann kurzes Schütteln (±5 px).</td><td>Kein Schütteln.</td></tr>
+</tbody>
+</table>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1500}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { a: true, b: true, c: true };
+  }
+  replay(k) {
+    this.setState({ [k]: false });
+    setTimeout(() => this.setState({ [k]: true }), 40);
+  }
+  renderVals() {
+    return {
+      showA: this.state.a, showB: this.state.b, showC: this.state.c,
+      playA: () => this.replay('a'), playB: () => this.replay('b'), playC: () => this.replay('c')
+    };
+  }
+}
+</script>
+</body>
+</html>

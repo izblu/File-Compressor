@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Seite gelöscht – Rückgängig</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.slide-a{animation:slideA 340ms cubic-bezier(.65,0,.35,1) 80ms both}
+.slide-b{animation:slideB 340ms cubic-bezier(.65,0,.35,1) 120ms both}
+.slide-c{animation:slideB 340ms cubic-bezier(.65,0,.35,1) 160ms both}
+@keyframes slideA{from{transform:translateX(174px)}}
+@keyframes slideB{from{transform:translate(-174px,274px)}}
+@media (prefers-reduced-motion: reduce){.slide-a,.slide-b,.slide-c{animation:fk-fade 200ms ease both}}
+</style>
+</helmet>
+<div class="fk-app">
+<header class="fk-top">
+<div class="fk-top-row">
+<a href="04-Mehrere-Dateien.dc.html" class="icon-btn" aria-label="Zurück"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<div class="fk-top-title"><b>Seiten anordnen</b><span>Schritt 2 von 3</span></div>
+<a href="20c-Abbrechen.dc.html" class="icon-btn" aria-label="Abbrechen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</div>
+<div class="fk-progress" role="progressbar" aria-label="Schritt 2 von 3" aria-valuemin="1" aria-valuemax="3" aria-valuenow="2"><i style="width: 66.6%"></i></div>
+</header>
+<main class="fk-body fk-stack" style="gap: 12px; padding-top: 14px">
+<div class="legend" aria-label="Ursprungsdateien">
+<span><i class="marker bg-m1">1</i>Scan_1.jpg</span>
+<span><i class="marker bg-m2">2</i>Scan_2.jpg</span>
+<span><i class="marker bg-m3">3</i>Rechnung.pdf</span>
+</div>
+<div class="toolbar">
+<span class="t-s t-muted" style="flex: 1">4 Seiten</span>
+<a href="11-Mehrfachauswahl.dc.html" class="btn-link" style="padding: 0 10px">Auswählen</a>
+<div class="viewtoggle" role="group" aria-label="Ansicht">
+<a href="10-Seiten-anordnen.dc.html" class="is-on" aria-label="2 Spalten" aria-current="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg></a>
+<a href="10b-Eine-Spalte.dc.html" aria-label="1 Spalte"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="3.5" width="15" height="7" rx="1.5"></rect><rect x="4.5" y="13.5" width="15" height="7" rx="1.5"></rect></svg></a>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<div class="tile">
+<span class="tile-band bg-m1" aria-hidden="true"></span>
+<div class="tile-page"><div class="doc scan"><div class="ln h" style="width: 54%"></div><div class="ln" style="width: 100%"></div><div class="ln" style="width: 92%"></div><div class="ln" style="width: 97%"></div><div class="ln" style="width: 66%"></div><div class="gap"></div><div class="ln" style="width: 100%"></div><div class="ln" style="width: 88%"></div><div class="ln" style="width: 40%"></div><div class="sig"><i></i></div></div></div>
+<div class="tile-foot"><span class="marker bg-m1">1</span><span class="tile-num">Seite 1</span><a href="12-Seitenmenue.dc.html" class="icon-btn" aria-label="Seite 1 – Optionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></a></div>
+</div>
+<div class="tile">
+<span class="tile-band bg-m2" aria-hidden="true"></span>
+<div class="tile-page"><div class="doc scan"><div class="ln" style="width: 100%"></div><div class="ln" style="width: 95%"></div><div class="ln" style="width: 90%"></div><div class="ln" style="width: 98%"></div><div class="ln" style="width: 74%"></div><div class="gap"></div><div class="ln" style="width: 100%"></div><div class="ln" style="width: 86%"></div><div class="ln" style="width: 58%"></div></div></div>
+<div class="tile-foot"><span class="marker bg-m2">2</span><span class="tile-num">Seite 2</span><a href="12-Seitenmenue.dc.html" class="icon-btn" aria-label="Seite 2 – Optionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></a></div>
+</div>
+<div class="tile slide-a">
+<span class="tile-band bg-m3" aria-hidden="true"></span>
+<div class="tile-page"><div class="doc"><div class="ln d" style="width: 50%"></div><div class="fk-row" style="gap: 6px"><div class="ln" style="flex: 1"></div><div class="ln d" style="width: 18%"></div></div><div class="fk-row" style="gap: 6px"><div class="ln" style="flex: 1"></div><div class="ln d" style="width: 18%"></div></div><div class="fk-row" style="gap: 6px"><div class="ln" style="flex: 1"></div><div class="ln d" style="width: 18%"></div></div><div class="gap"></div><div class="ln" style="width: 80%"></div></div></div>
+<div class="tile-foot"><span class="marker bg-m3">3</span><span class="tile-num">Seite 3</span><a href="12-Seitenmenue.dc.html" class="icon-btn" aria-label="Seite 3 – Optionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></a></div>
+</div>
+<div class="tile slide-b">
+<span class="tile-band bg-m3" aria-hidden="true"></span>
+<div class="tile-page"><div class="doc"><div class="ln" style="width: 100%"></div><div class="ln" style="width: 92%"></div><div class="ln" style="width: 70%"></div><div class="gap"></div><div class="ln" style="width: 96%"></div><div class="ln" style="width: 50%"></div><div class="sig"><i></i><i></i></div></div></div>
+<div class="tile-foot"><span class="marker bg-m3">3</span><span class="tile-num">Seite 4</span><a href="12-Seitenmenue.dc.html" class="icon-btn" aria-label="Seite 4 – Optionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></a></div>
+</div>
+</div>
+</main>
+<div class="toast" role="status" style="bottom: 112px">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #475569"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg>
+<span>Seite gelöscht</span>
+<a href="10-Seiten-anordnen.dc.html" class="btn-link">Rückgängig</a>
+</div>
+<footer class="fk-dock">
+<a href="10s-Speichern-Zusammen.dc.html" class="btn btn-primary btn-block">Weiter</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

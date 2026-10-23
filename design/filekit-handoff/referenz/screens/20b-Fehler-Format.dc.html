@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Fehler – Format nicht unterstützt</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.err{animation:fk-card 420ms cubic-bezier(.2,.8,.2,1) both,shake 420ms cubic-bezier(.36,.07,.19,.97) 420ms both}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@media (prefers-reduced-motion: reduce){.err{animation:fk-fade 200ms ease both}}
+</style>
+</helmet>
+<div class="fk-app" style="padding: 60px 24px 30px; gap: 24px">
+<header class="fk-row" style="gap: 10px">
+<svg width="32" height="32" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#2f6bf0"></rect><rect x="11" y="15" width="29" height="22" rx="4" fill="#fff"></rect><circle cx="18" cy="21.5" r="2.7" fill="#2a63ec"></circle><path d="M13 35 L20 25.5 L25 32 L28.5 28 L33 35 Z" fill="#2a63ec"></path><path d="M31 26h12l7 7v17a3 3 0 0 1-3 3H31a3 3 0 0 1-3-3V29a3 3 0 0 1 3-3z" fill="#fff" stroke="#2a63ec" stroke-width="2.5"></path><path d="M33.5 38h12M33.5 42.5h12M33.5 47h8" stroke="#2a63ec" stroke-width="2" stroke-linecap="round"></path></svg>
+<span style="font-size: 17px; font-weight: 750; letter-spacing: -0.01em">FileKit</span>
+</header>
+<h1 class="t-display" style="margin-top: 4px">Deine PDFs &amp; Bilder – bearbeitet auf <span class="t-accent">deinem Gerät.</span></h1>
+<section class="err card fk-stack" role="alert" style="align-items: center; text-align: center; gap: 12px; padding: 32px 20px 20px; border-color: rgba(251,191,36,.28); box-shadow: 0 30px 70px -34px rgba(245,158,11,.3)">
+<span style="width: 64px; height: 64px; border-radius: 32px; display: flex; align-items: center; justify-content: center; background: var(--fk-warning-tint); color: var(--fk-warning-text)">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"></path><path d="M14 3v5h5M10 12.5a2 2 0 1 1 2.7 1.9c-.4.2-.7.5-.7 1v.3M12 18.5h.01"></path></svg>
+</span>
+<h2 class="t-h">Dieses Format geht leider nicht</h2>
+<p class="t-body t-2" style="text-wrap: pretty">FileKit kann PDFs und Bilder (z. B. JPG, PNG) öffnen.</p>
+<span class="fk-row t-s t-muted" style="gap: 6px; margin-top: 2px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"></path><path d="M14 3v5h5"></path></svg>Präsentation.pptx</span>
+<a href="06-Hinweis.dc.html" class="btn btn-primary btn-block" style="margin-top: 12px">Andere Datei wählen</a>
+</section>
+<footer class="trust" style="margin-top: auto">
+<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>privat</span>
+<span aria-hidden="true">·</span>
+<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 2l20 20M8.5 16.4a5 5 0 0 1 7 0M5 12.6a10 10 0 0 1 5.2-2.6M19 12.6a10 10 0 0 0-2.4-1.7M2 8.8a15 15 0 0 1 4.3-2.7M10.7 5.1A15 15 0 0 1 22 8.8M12 20h.01"></path></svg>offline</span>
+<span aria-hidden="true">·</span>
+<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2.5"></rect><path d="M10.5 18h3"></path></svg>Nichts verlässt dein Gerät</span>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

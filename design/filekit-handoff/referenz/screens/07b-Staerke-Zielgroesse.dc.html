@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Verkleinern – Stärke wählen (Zielgröße)</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+</style>
+</helmet>
+<div class="fk-app">
+<header class="fk-top">
+<div class="fk-top-row">
+<a href="03-Eine-Datei.dc.html" class="icon-btn" aria-label="Zurück"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<div class="fk-top-title"><b>Wie stark verkleinern?</b><span>Schritt 2 von 3</span></div>
+<a href="01-Start-leer.dc.html" class="icon-btn" aria-label="Abbrechen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</div>
+<div class="fk-progress" role="progressbar" aria-label="Schritt 2 von 3" aria-valuemin="1" aria-valuemax="3" aria-valuenow="2"><i style="width: 66.6%"></i></div>
+</header>
+<main class="fk-body in-fade fk-stack" style="gap: 16px; padding-top: 20px">
+<div class="fk-row card" style="gap: 12px; padding: 10px 14px 10px 10px">
+<div style="position: relative; width: 32px; height: 44px; flex: none"><div class="doc" style="padding: 5px 4px; gap: 2px; border-radius: 3px"><div class="ln d" style="width: 70%; height: 2px"></div><div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px; width: 60%"></div></div></div>
+<div class="fk-stack" style="flex: 1; min-width: 0; gap: 1px"><span class="t-s" style="color: var(--fk-text)">Vertrag.pdf</span><span class="t-xs t-muted">12 Seiten</span></div>
+<span class="t-l t-num">8,4 MB</span>
+</div>
+<nav class="seg" aria-label="Art der Verkleinerung">
+<a href="07-Staerke-Qualitaet.dc.html">Qualität</a>
+<a href="07b-Staerke-Zielgroesse.dc.html" class="is-on" aria-current="page">Zielgröße</a>
+</nav>
+<section class="fk-stack" style="gap: 12px; margin-top: 4px">
+<h2 class="t-s t-2">Maximale Dateigröße</h2>
+<div class="fk-row" role="radiogroup" aria-label="Zielgröße" style="flex-wrap: wrap; gap: 10px">
+<button type="button" role="radio" aria-checked="{{a500}}" class="chip {{c500}}" onClick="{{p500}}">500 KB</button>
+<button type="button" role="radio" aria-checked="{{a1}}" class="chip {{c1}}" onClick="{{p1}}">1 MB</button>
+<button type="button" role="radio" aria-checked="{{a2}}" class="chip {{c2}}" onClick="{{p2}}">2 MB</button>
+<button type="button" role="radio" aria-checked="{{a5}}" class="chip {{c5}}" onClick="{{p5}}">5 MB</button>
+<button type="button" role="radio" aria-checked="{{aEigen}}" class="chip {{cEigen}}" onClick="{{pEigen}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"></path></svg>Eigener Wert</button>
+</div>
+<sc-if value="{{isEigen}}" hint-placeholder-val="{{ false }}">
+<div class="field in-up">
+<label for="ziel">Eigene Zielgröße</label>
+<div class="field-box"><input id="ziel" inputmode="decimal" value="1,5"><span class="field-ext">MB</span></div>
+</div>
+</sc-if>
+<p class="t-body t-muted">FileKit versucht, die Datei unter <b style="color: var(--fk-text)">{{label}}</b> zu bringen.</p>
+</section>
+<p class="note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>Text ist danach nicht mehr markierbar.</p>
+</main>
+<footer class="fk-dock">
+<a href="08-Verarbeiten.dc.html" class="btn btn-primary btn-block">Weiter</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { t: '2' };
+  }
+  renderVals() {
+    const t = this.state.t;
+    const c = (k) => (t === k ? 'is-on' : '');
+    const a = (k) => (t === k ? 'true' : 'false');
+    const p = (k) => () => this.setState({ t: k });
+    const labels = { '500': '500 KB', '1': '1 MB', '2': '2 MB', '5': '5 MB', 'eigen': '1,5 MB' };
+    return {
+      c500: c('500'), c1: c('1'), c2: c('2'), c5: c('5'), cEigen: c('eigen'),
+      a500: a('500'), a1: a('1'), a2: a('2'), a5: a('5'), aEigen: a('eigen'),
+      p500: p('500'), p1: p('1'), p2: p('2'), p5: p('5'), pEigen: p('eigen'),
+      isEigen: t === 'eigen',
+      label: labels[t]
+    };
+  }
+}
+</script>
+</body>
+</html>

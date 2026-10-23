@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Designsystem – Farben</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.sec{display:flex;flex-direction:column;gap:14px}
+.sec h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fk-muted)}
+.row7{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:16px}
+.sw{display:flex;flex-direction:column;gap:3px;font-size:13px;font-weight:600;color:var(--fk-text-2)}
+.sw-c{height:72px;border-radius:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);margin-bottom:8px;display:flex;align-items:flex-end;justify-content:flex-end;padding:8px;font-size:12px;font-weight:800}
+.sw b{font-size:13px;font-weight:800;color:var(--fk-text);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-.02em}
+.sw .hx{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--fk-text-2)}
+.sw .use{color:var(--fk-muted);font-weight:500;line-height:1.35}
+</style>
+</helmet>
+<div class="fk-page" style="width: 1280px; min-height: 1180px; box-sizing: border-box; padding: 64px 72px; display: flex; flex-direction: column; gap: 40px">
+<header class="fk-row" style="gap: 24px; align-items: flex-end">
+<div class="fk-stack" style="gap: 8px; flex: 1">
+<p class="t-micro t-accent">FileKit · Designsystem „Nacht“</p>
+<h1 style="font-size: 44px; line-height: 1.05; font-weight: 750; letter-spacing: -0.035em">Farben</h1>
+</div>
+<p class="t-body t-muted" style="max-width: 460px; text-align: right">Nur Dunkel. Alle Werte liegen als CSS-Variablen in <b class="t-2">filekit.css</b>. Kontraste gegen <b class="t-2">--fk-bg</b>.</p>
+</header>
+
+<section class="sec">
+<h2>Flächen &amp; Linien</h2>
+<div class="row7">
+<div class="sw"><span class="sw-c" style="background: #060a13"></span><b>--fk-bg</b><span class="hx">#060a13</span><span class="use">Hintergrund, mit Glow von oben</span></div>
+<div class="sw"><span class="sw-c" style="background: #0d1424"></span><b>--fk-surface-1</b><span class="hx">#0d1424</span><span class="use">Karten, Felder, Dropzone</span></div>
+<div class="sw"><span class="sw-c" style="background: #121b2e"></span><b>--fk-surface-2</b><span class="hx">#121b2e</span><span class="use">Sheets, Dialoge, Sekundär-Button</span></div>
+<div class="sw"><span class="sw-c" style="background: #1a2540"></span><b>--fk-surface-3</b><span class="hx">#1a2540</span><span class="use">Gedrückt, Icon-Kacheln</span></div>
+<div class="sw"><span class="sw-c" style="background: rgba(255,255,255,.07)"></span><b>--fk-glass</b><span class="hx">#fff · 7 %</span><span class="use">Schwebende Icon-Buttons</span></div>
+<div class="sw"><span class="sw-c" style="background: #060a13; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08)"></span><b>--fk-line</b><span class="hx">#fff · 8 %</span><span class="use">Kartenränder, Trenner</span></div>
+<div class="sw"><span class="sw-c" style="background: #060a13; box-shadow: inset 0 0 0 1px rgba(255,255,255,.16)"></span><b>--fk-line-strong</b><span class="hx">#fff · 16 %</span><span class="use">Felder, Chips, gestrichelt</span></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Text</h2>
+<div class="row7">
+<div class="sw"><span class="sw-c" style="background: #060a13; color: #eef2fb">17,7 : 1</span><b>--fk-text</b><span class="hx">#eef2fb</span><span class="use">Titel, Fließtext</span></div>
+<div class="sw"><span class="sw-c" style="background: #060a13; color: #c3cbdb">12,1 : 1</span><b>--fk-text-2</b><span class="hx">#c3cbdb</span><span class="use">Sekundärer Text, Labels</span></div>
+<div class="sw"><span class="sw-c" style="background: #060a13; color: #8e9ab2">7,0 : 1</span><b>--fk-muted</b><span class="hx">#8e9ab2</span><span class="use">Hinweise, Metadaten</span></div>
+<div class="sw"><span class="sw-c" style="background: #060a13; color: #5f6a82">3,6 : 1</span><b>--fk-faint</b><span class="hx">#5f6a82</span><span class="use">Nur deaktivierte Elemente</span></div>
+<div class="sw"><span class="sw-c" style="background: #060a13; color: #79a2ff">7,9 : 1</span><b>--fk-accent-text</b><span class="hx">#79a2ff</span><span class="use">Links, Akzent-Text, Icons</span></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Akzent</h2>
+<div class="row7">
+<div class="sw"><span class="sw-c" style="background: #2f6bf0; color: #fff">Weiß 4,7 : 1</span><b>--fk-accent</b><span class="hx">#2f6bf0</span><span class="use">Haupt-Button, Auswahl</span></div>
+<div class="sw"><span class="sw-c" style="background: #2559d4; color: #fff">Weiß 6,1 : 1</span><b>--fk-accent-press</b><span class="hx">#2559d4</span><span class="use">Gedrückt</span></div>
+<div class="sw"><span class="sw-c" style="background: #14213f"></span><b>--fk-accent-tint</b><span class="hx">#14213f</span><span class="use">Markierte Karten, Badges</span></div>
+<div class="sw"><span class="sw-c" style="background: radial-gradient(closest-side, rgba(59,116,255,.45), #060a13)"></span><b>--fk-accent-glow</b><span class="hx">#3b74ff · 45 %</span><span class="use">Schein hinter Vorschau &amp; Button</span></div>
+<div class="sw"><span class="sw-c" style="background: #060a13; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 0 0 4px rgba(121,162,255,.35)"></span><b>--fk-focus</b><span class="hx">#79a2ff · 35 %</span><span class="use">Fokus-Ring (Tastatur)</span></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Status</h2>
+<div class="row7">
+<div class="sw"><span class="sw-c" style="background: rgba(34,197,94,.14); color: #4ade80">−77 %</span><b>--fk-success-text</b><span class="hx">#4ade80 · 11,4 : 1</span><span class="use">Ersparnis, Erfolg</span></div>
+<div class="sw"><span class="sw-c" style="background: #16a34a"></span><b>--fk-success</b><span class="hx">#16a34a</span><span class="use">Erfolgs-Flächen</span></div>
+<div class="sw"><span class="sw-c" style="background: rgba(245,158,11,.13); color: #fbbf24">Hinweis</span><b>--fk-warning-text</b><span class="hx">#fbbf24 · 11,9 : 1</span><span class="use">Zielgröße verfehlt, Format</span></div>
+<div class="sw"><span class="sw-c" style="background: rgba(239,68,68,.14); color: #f87171">Löschen</span><b>--fk-danger-text</b><span class="hx">#f87171 · 7,2 : 1</span><span class="use">Löschen, Fehler</span></div>
+<div class="sw"><span class="sw-c" style="background: #dc2626; color: #fff">Weiß 4,8 : 1</span><b>--fk-danger</b><span class="hx">#dc2626</span><span class="use">Gefahr-Button</span></div>
+</div>
+</section>
+
+<section class="sec">
+<h2>Markierungen je Ursprungsdatei (Seiten-Editor)</h2>
+<div class="row7">
+<div class="sw"><span class="sw-c" style="background: #f5a524; color: #0a1122">1</span><b>--fk-m1</b><span class="hx">#f5a524</span><span class="use">Bernstein</span></div>
+<div class="sw"><span class="sw-c" style="background: #2dd4bf; color: #0a1122">2</span><b>--fk-m2</b><span class="hx">#2dd4bf</span><span class="use">Türkis</span></div>
+<div class="sw"><span class="sw-c" style="background: #f472b6; color: #0a1122">3</span><b>--fk-m3</b><span class="hx">#f472b6</span><span class="use">Pink</span></div>
+<div class="sw"><span class="sw-c" style="background: #c4b5fd; color: #0a1122">4</span><b>--fk-m4</b><span class="hx">#c4b5fd</span><span class="use">Flieder (heller als Pink)</span></div>
+<div class="sw"><span class="sw-c" style="background: #a3e635; color: #0a1122">5</span><b>--fk-m5</b><span class="hx">#a3e635</span><span class="use">Limette</span></div>
+<div class="sw" style="grid-column: span 2"><span class="sw-c" style="background: transparent; box-shadow: none; padding: 0; align-items: center; justify-content: flex-start; gap: 8px; height: 72px"><span class="marker bg-m1">1</span><span class="marker bg-m2">2</span><span class="marker bg-m3">3</span><span class="marker bg-m4">4</span><span class="marker bg-m5">5</span></span><b>Nie nur Farbe</b><span class="use">Jede Markierung trägt zusätzlich die Dateinummer – auch bei Farbsehschwäche eindeutig. Text darauf: #0a1122 (≥ 6,9 : 1).</span></div>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

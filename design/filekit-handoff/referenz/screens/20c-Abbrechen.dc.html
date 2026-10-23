@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Abbrechen – Rückfrage</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+</style>
+</helmet>
+<div class="fk-app">
+<header class="fk-top" aria-hidden="true">
+<div class="fk-top-row"><span></span><div class="fk-top-title"><b>Seiten anordnen</b><span>Schritt 2 von 3</span></div><span></span></div>
+<div class="fk-progress"><i style="width: 66.6%"></i></div>
+</header>
+<div class="fk-body" aria-hidden="true" style="padding-top: 70px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px">
+<div class="tile"><span class="tile-band bg-m1"></span><div class="tile-page"><div class="doc scan"><div class="ln h" style="width: 54%"></div><div class="ln"></div><div class="ln" style="width: 80%"></div></div></div><div class="tile-foot"><span class="marker bg-m1">1</span><span class="tile-num">Seite 1</span></div></div>
+<div class="tile"><span class="tile-band bg-m2"></span><div class="tile-page"><div class="doc scan"><div class="ln"></div><div class="ln" style="width: 90%"></div></div></div><div class="tile-foot"><span class="marker bg-m2">2</span><span class="tile-num">Seite 2</span></div></div>
+<div class="tile"><span class="tile-band bg-m3"></span><div class="tile-page"><div class="doc"><span class="ttl" style="font-size: 9px">RECHNUNG</span></div></div><div class="tile-foot"><span class="marker bg-m3">3</span><span class="tile-num">Seite 3</span></div></div>
+<div class="tile"><span class="tile-band bg-m3"></span><div class="tile-page"><div class="doc"><div class="ln"></div></div></div><div class="tile-foot"><span class="marker bg-m3">3</span><span class="tile-num">Seite 4</span></div></div>
+</div>
+</div>
+<div class="fk-dock" aria-hidden="true"><span class="btn btn-primary btn-block">Weiter</span></div>
+
+<a href="10-Seiten-anordnen.dc.html" class="scrim" aria-label="Rückfrage schließen"></a>
+<div class="dialog" role="alertdialog" aria-labelledby="dlg-t" aria-describedby="dlg-d">
+<h2 id="dlg-t" class="t-h">Bearbeitung abbrechen?</h2>
+<p id="dlg-d" class="t-body t-2">Deine Änderungen an den Seiten gehen verloren. Die Originaldateien bleiben unverändert.</p>
+<div class="fk-stack" style="gap: 8px; margin-top: 12px">
+<a href="10-Seiten-anordnen.dc.html" class="btn btn-primary btn-block">Weiter bearbeiten</a>
+<a href="01-Start-leer.dc.html" class="btn btn-secondary btn-block" style="color: var(--fk-danger-text)">Änderungen verwerfen</a>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

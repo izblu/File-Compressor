@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>PC – Seiten anordnen</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.wrap{width:100%;max-width:1280px;margin:0 auto;padding-left:32px;padding-right:32px;box-sizing:border-box}
+.tile:hover{border-color:var(--fk-line-strong)}
+.drop-ind{position:absolute;left:-13px;top:6px;bottom:6px;width:4px;border-radius:2px;background:#79a2ff;box-shadow:0 0 14px rgba(121,162,255,.8)}
+</style>
+</helmet>
+<div class="fk-page" style="display: flex; flex-direction: column; min-height: 900px">
+<header style="border-bottom: 1px solid var(--fk-line)">
+<div class="wrap fk-row" style="gap: 12px; min-height: 76px; flex-wrap: wrap">
+<a href="21a-PC-Start.dc.html" class="icon-btn" aria-label="Zurück"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<div class="fk-stack" style="gap: 2px; flex: 1; min-width: 200px">
+<h1 class="t-h">Seiten anordnen</h1>
+<div class="fk-row" style="gap: 10px"><span class="t-xs t-muted">Schritt 2 von 3</span><span class="fk-progress" style="margin: 0; width: 120px" aria-hidden="true"><i style="width: 66.6%"></i></span></div>
+</div>
+<a href="20c-Abbrechen.dc.html" class="btn btn-ghost btn-sm" style="color: var(--fk-text-2)">Abbrechen</a>
+</div>
+</header>
+<main class="wrap fk-stack" style="flex: 1; gap: 18px; padding-top: 24px; padding-bottom: 32px">
+<div class="toolbar" style="flex-wrap: wrap; gap: 12px 20px">
+<div class="legend" aria-label="Ursprungsdateien" style="flex: 1; min-width: 280px; gap: 8px 18px">
+<span><i class="marker bg-m1">1</i>Scan_1.jpg</span>
+<span><i class="marker bg-m2">2</i>Scan_2.jpg</span>
+<span><i class="marker bg-m3">3</i>Rechnung.pdf</span>
+<span><i class="marker bg-m4">4</i>Lieferschein.pdf</span>
+<span><i class="marker bg-m5">5</i>Foto.jpg</span>
+</div>
+<button type="button" class="btn-link" style="padding: 0 10px; margin: 0">Auswählen</button>
+<div class="viewtoggle" role="group" aria-label="Vorschaugröße">
+<button type="button" class="is-on" aria-label="Kleine Vorschau" aria-pressed="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg></button>
+<button type="button" aria-label="Große Vorschau" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="4.5" y="3.5" width="15" height="7" rx="1.5"></rect><rect x="4.5" y="13.5" width="15" height="7" rx="1.5"></rect></svg></button>
+</div>
+</div>
+<div style="position: relative">
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr)); gap: 22px">
+<sc-for list="{{pages}}" as="p" hint-placeholder-count="8">
+<div class="tile">
+<span class="tile-band {{p.m}}" aria-hidden="true"></span>
+<sc-if value="{{p.drop}}" hint-placeholder-val="{{ false }}"><span class="drop-ind" aria-hidden="true"></span></sc-if>
+<div class="tile-page">
+<div class="doc {{p.paper}}">
+<sc-if value="{{p.inv}}" hint-placeholder-val="{{ false }}"><span class="ttl" style="font-size: 9px">{{p.ttl}}</span><span class="blk" style="height: 8px; margin-top: 6px; background: #dbe5fb"></span></sc-if>
+<sc-if value="{{p.photo}}" hint-placeholder-val="{{ false }}"><span class="blk" style="flex: 1; margin: -11% -9%; border-radius: 0; background: linear-gradient(160deg, #3b5aa0, #14213f 70%)"></span></sc-if>
+<span class="ln h" style="width: 54%"></span>
+<span class="ln" style="width: 100%"></span><span class="ln" style="width: 92%"></span><span class="ln" style="width: 97%"></span><span class="ln" style="width: 66%"></span>
+<span class="gap"></span>
+<span class="ln" style="width: 100%"></span><span class="ln" style="width: 88%"></span><span class="ln" style="width: 40%"></span>
+</div>
+</div>
+<div class="tile-foot"><span class="marker {{p.m}}">{{p.file}}</span><span class="tile-num">Seite {{p.n}}</span><button type="button" class="icon-btn" aria-label="Seite {{p.n}} – Optionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></button></div>
+</div>
+</sc-for>
+<button type="button" class="tile-add" style="min-height: 240px"><span class="plus"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span>Weitere Dateien hinzufügen<span class="t-xs t-muted" style="font-weight: 600">oder hierher ziehen</span></button>
+</div>
+<div class="tile is-dragging" aria-hidden="true" style="position: absolute; left: 31%; top: 46px; width: 180px; opacity: .96">
+<span class="tile-band bg-m5"></span>
+<div class="tile-page"><div class="doc"><span class="blk" style="flex: 1; margin: -11% -9%; border-radius: 0; background: linear-gradient(160deg, #3b5aa0, #14213f 70%)"></span></div></div>
+<div class="tile-foot"><span class="marker bg-m5">5</span><span class="tile-num">Seite 8</span></div>
+<svg width="22" height="22" viewBox="0 0 24 24" style="position: absolute; left: 96px; top: 120px; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6))"><path d="M5 3l14 8-6 1.5L10 19z" fill="#fff" stroke="#0a1122" stroke-width="1.5" stroke-linejoin="round"></path></svg>
+</div>
+</div>
+</main>
+<footer style="position: sticky; bottom: 0; border-top: 1px solid var(--fk-line); background: rgba(6,10,19,.86); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px)">
+<div class="wrap fk-row" style="gap: 16px; min-height: 84px; flex-wrap: wrap">
+<p class="t-body t-muted" style="flex: 1">8 Seiten aus 5 Dateien</p>
+<a href="10s-Speichern-Zusammen.dc.html" class="btn btn-primary" style="min-width: 220px">Weiter</a>
+</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = (n, file, m, o) => ({ n, file, m: 'bg-m' + m, paper: '', inv: false, photo: false, drop: false, ttl: '', ...o });
+    const pages = [
+      P(1, 1, 1, { paper: 'scan' }),
+      P(2, 2, 2, { paper: 'scan' }),
+      P(3, 3, 3, { inv: true, ttl: 'RECHNUNG', drop: true }),
+      P(4, 3, 3, {}),
+      P(5, 3, 3, {}),
+      P(6, 4, 4, { inv: true, ttl: 'LIEFERSCHEIN' }),
+      P(7, 4, 4, {})
+    ];
+    return { pages };
+  }
+}
+</script>
+</body>
+</html>

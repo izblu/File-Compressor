@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Mehrere Dateien gewählt</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.strip{scrollbar-width:none}.strip::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<div class="fk-app" style="padding: 60px 24px 30px">
+<header class="fk-row" style="gap: 10px">
+<svg width="32" height="32" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="ai1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b78ff"></stop><stop offset="1" stop-color="#2257e0"></stop></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#ai1)"></rect><rect x="11" y="15" width="29" height="22" rx="4" fill="#fff"></rect><circle cx="18" cy="21.5" r="2.7" fill="#2a63ec"></circle><path d="M13 35 L20 25.5 L25 32 L28.5 28 L33 35 Z" fill="#2a63ec"></path><path d="M31 26h12l7 7v17a3 3 0 0 1-3 3H31a3 3 0 0 1-3-3V29a3 3 0 0 1 3-3z" fill="#fff" stroke="#2a63ec" stroke-width="2.5"></path><path d="M33.5 38h12M33.5 42.5h12M33.5 47h8" stroke="#2a63ec" stroke-width="2" stroke-linecap="round"></path></svg>
+<span style="font-size: 17px; font-weight: 750; letter-spacing: -0.01em">FileKit</span>
+</header>
+<section class="preview in-card" aria-label="Gewählte Dateien" style="margin: 24px -24px 0; height: 392px; border-radius: 0; border-left: 0; border-right: 0; align-items: stretch; justify-content: flex-start; box-sizing: border-box; padding-top: 76px"><div style="position: absolute; top: 16px; left: 24px; right: 24px; z-index: 2; display: flex; flex-direction: column; gap: 2px"><p class="t-h" style="margin: 0">3 Dateien · 4,7 MB</p><p class="t-body t-muted" style="margin: 0">2 Bilder, 1 PDF</p></div>
+<span class="preview-halo in-halo" aria-hidden="true"></span>
+<ul class="strip" style="position: relative; list-style: none; margin: 0; padding: 16px 24px; width: 100%; display: flex; align-items: center; gap: 16px; overflow-x: auto">
+<li class="fk-stack in-page d1" style="flex: none; width: 156px; gap: 10px">
+<div class="fk-stack" style="gap: 2px"><span class="t-s" style="color: var(--fk-text)">Scan_1.jpg</span><span class="t-xs t-muted">1,6 MB</span></div><div class="preview-page" style="position: relative; width: 156px; height: 220px">
+<div class="doc scan">
+<div class="ln h" style="width: 54%"></div>
+<div class="ln" style="width: 100%"></div><div class="ln" style="width: 92%"></div><div class="ln" style="width: 97%"></div><div class="ln" style="width: 66%"></div>
+<div class="gap"></div>
+<div class="ln" style="width: 100%"></div><div class="ln" style="width: 88%"></div><div class="ln" style="width: 94%"></div><div class="ln" style="width: 40%"></div>
+<div class="sig"><i></i></div>
+</div>
+<button type="button" class="icon-btn glass" aria-label="Scan_1.jpg entfernen" style="position: absolute; top: -10px; right: -10px; background: rgba(13,20,36,.92)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+<span class="pill" style="left: 8px; bottom: 8px; height: 24px; background: rgba(6,10,19,.78); color: #fff">1 Seite</span></div>
+
+</li>
+<li class="fk-stack in-page d2" style="flex: none; width: 156px; gap: 10px">
+<div class="fk-stack" style="gap: 2px"><span class="t-s" style="color: var(--fk-text)">Scan_2.jpg</span><span class="t-xs t-muted">1,4 MB</span></div><div class="preview-page" style="position: relative; width: 156px; height: 220px">
+<div class="doc scan">
+<div class="ln" style="width: 100%"></div><div class="ln" style="width: 95%"></div><div class="ln" style="width: 90%"></div><div class="ln" style="width: 98%"></div><div class="ln" style="width: 74%"></div>
+<div class="gap"></div>
+<div class="ln" style="width: 100%"></div><div class="ln" style="width: 86%"></div><div class="ln" style="width: 93%"></div><div class="ln" style="width: 58%"></div>
+<div class="gap"></div>
+<div class="ln" style="width: 97%"></div><div class="ln" style="width: 62%"></div>
+</div>
+<button type="button" class="icon-btn glass" aria-label="Scan_2.jpg entfernen" style="position: absolute; top: -10px; right: -10px; background: rgba(13,20,36,.92)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+<span class="pill" style="left: 8px; bottom: 8px; height: 24px; background: rgba(6,10,19,.78); color: #fff">1 Seite</span></div>
+
+</li>
+<li class="fk-stack in-page d3" style="flex: none; width: 156px; gap: 10px">
+<div class="fk-stack" style="gap: 2px"><span class="t-s" style="color: var(--fk-text)">Rechnung.pdf</span><span class="t-xs t-muted">1,7 MB</span></div><div class="preview-page" style="position: relative; width: 156px; height: 220px">
+<div class="doc">
+<span class="ttl" style="font-size: 9px">RECHNUNG</span>
+<div class="ln d" style="width: 40%; margin-top: 6px"></div><div class="ln" style="width: 30%"></div>
+<div class="gap"></div>
+<div class="blk" style="height: 8px; background: #dbe5fb"></div>
+<div class="fk-row" style="gap: 6px"><div class="ln" style="flex: 1"></div><div class="ln d" style="width: 18%"></div></div>
+<div class="fk-row" style="gap: 6px"><div class="ln" style="flex: 1"></div><div class="ln d" style="width: 18%"></div></div>
+<div class="fk-row" style="gap: 6px"><div class="ln" style="flex: 1"></div><div class="ln d" style="width: 18%"></div></div>
+<div class="fk-row" style="justify-content: flex-end; margin-top: 4px"><div class="ln h" style="width: 34%; margin: 0"></div></div>
+</div>
+<span class="pill" style="left: 8px; bottom: 8px; height: 24px; background: rgba(6,10,19,.78); color: #fff">3 Seiten</span>
+<button type="button" class="icon-btn glass" aria-label="Rechnung.pdf entfernen" style="position: absolute; top: -10px; right: -10px; background: rgba(13,20,36,.92)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+
+</li>
+</ul>
+</section>
+<div class="fk-stack in-up d3" style="margin-top: 20px; gap: 4px">
+
+
+<button type="button" class="btn-link" style="align-self: flex-start; margin-top: 8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Weitere Dateien hinzufügen</button>
+</div>
+<div class="split in-dock" role="group" aria-label="Aktion" style="margin-top: auto">
+<a href="10-Seiten-anordnen.dc.html" class="split-main"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 17H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v2M16 6h-6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10l-4-4zM16 6v4h4M11 14.5h6M11 18h4"></path></svg>Zusammenführen</a>
+<span class="split-div" aria-hidden="true"></span>
+<a href="05b-Aktionen-mehrere.dc.html" class="split-more" aria-label="Weitere Aktionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
