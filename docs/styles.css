@@ -1,5 +1,5 @@
 /* styles.css – App-spezifische Ergänzungen zum Designsystem „Nacht“ (filekit.css):
-   Schrift, Grundlayout, Startscreen (Handy + PC), Bottom Sheet und Toast.
+   Schrift, Grundlayout, Startscreen (Handy + PC), Wizard, Bottom Sheet, Dialog und Toast.
    Farben, Abstände und Kurven ausschließlich über die --fk-Variablen. */
 
 /* ===== Schrift: Manrope (SIL OFL 1.1, Lizenz in fonts/OFL.txt), lokal ===== */
@@ -236,6 +236,30 @@ p, h1, h2, h3 { margin: 0; }
 .sheet-titel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .sheet-liste { display: flex; flex-direction: column; gap: 4px; }
 .mrow.is-disabled:active { background: transparent; }
+
+/* Zurück aus dem Wizard: Startscreen gleitet zurück, die Einstiegs-Animationen
+   der Dateiansicht laufen nicht noch einmal */
+.start.ist-zurueck :is(.in-card, .in-page, .in-halo, .in-up, .in-dock, .in-fade, .coach) { animation: none; }
+
+/* ===== Wizard (ab Schritt 2) – am PC eine zentrierte Spalte ===== */
+.fk-top-title b:focus { outline: none; } /* Titel bekommt nur programmatisch den Fokus */
+.wizard-stapel { gap: var(--fk-s-5); }
+.wizard-platzhalter {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 28px 20px; text-align: center; border-style: dashed; border-color: var(--fk-line-strong);
+}
+.wizard-platzhalter-ic {
+  width: 48px; height: 48px; margin-bottom: 4px; border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--fk-surface-3); color: var(--fk-accent-text);
+}
+.fk-top .icon-btn:active { background: var(--fk-surface-3); }
+
+/* ===== Dialog (Rückfrage) – über dem ganzen Fenster ===== */
+.dialog { position: fixed; max-width: 432px; margin-inline: auto; }
+.dialog:focus-visible { outline: none; }
+.dialog-knoepfe { gap: 8px; margin-top: 12px; }
+.btn.is-danger { color: var(--fk-danger-text); }
 
 /* ===== Toast (über dem Dock) ===== */
 .toast-ebene {

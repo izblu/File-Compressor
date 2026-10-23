@@ -1,16 +1,18 @@
-// app.js – Einstieg der App: startet den Startscreen (start.js, Schritt 1
-// "Datei wählen") und registriert den Service Worker.
-// Die Wizard-Schritte der einzelnen Aktionen werden als Nächstes angebunden.
+// app.js – Einstieg der App: verbindet den Startscreen (start.js, Schritt 1
+// "Datei wählen") mit dem Wizard (wizard.js, Schritte ab 2) und registriert
+// den Service Worker.
 
-import { initStart } from "./start.js";
-import { AKTIONEN } from "./intake.js";
-import { zeigeToast } from "./ui.js";
+import { initStart, zurueckZumStart } from "./start.js";
+import { initWizard, starteWizard } from "./wizard.js";
+import { schritteFuer } from "./flows.js";
+
+initWizard({
+  beiEnde: zurueckZumStart,
+});
 
 initStart({
-  beiAktion(aktionId) {
-    // Platzhalter, bis der Wizard (Schritt 2 ff.) gebaut ist.
-    const aktion = AKTIONEN.find((a) => a.id === aktionId);
-    zeigeToast(`„${aktion.titel}“ wird im nächsten Bauabschnitt angebunden.`);
+  beiAktion(aktion, dateien) {
+    starteWizard({ aktion, dateien, schritte: schritteFuer(aktion) });
   },
 });
 

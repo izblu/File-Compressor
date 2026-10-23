@@ -156,7 +156,7 @@ function zeigeLeer(neu = false) {
   }
   zustand.dateien.forEach(freigeben);
   zustand.dateien = [];
-  app.classList.remove("has-files", "has-error");
+  app.classList.remove("has-files", "has-error", "ist-zurueck");
   dropzone.hidden = false;
   if (neu) {
     dropzone.classList.remove("is-neu");
@@ -198,7 +198,7 @@ function zeigeDateien(ersteWahl) {
   }
   dropzone.hidden = true;
   dropzone.classList.remove("is-over");
-  app.classList.remove("has-error");
+  app.classList.remove("has-error", "ist-zurueck");
   app.classList.add("has-files");
 
   const vorschau = zustand.dateien.length === 1
@@ -461,6 +461,20 @@ function initZiehen() {
     if (app.hidden || sheetIstOffen()) return;
     waehle([...e.dataTransfer.files], zustand.dateien.length > 0);
   });
+}
+
+// --- Rückkehr aus dem Wizard ---
+
+// leeren = true (Abbrechen): alles zurücksetzen. Sonst (Zurück aus Schritt 2)
+// bleiben die Dateien gewählt und der Fokus liegt wieder auf dem Haupt-Button.
+export function zurueckZumStart({ leeren }) {
+  if (leeren || !ansicht) {
+    zeigeLeer(true);
+    dropzone.focus({ preventScroll: true });
+  } else {
+    app.classList.add("ist-zurueck"); // Einstiegs-Animationen nicht erneut abspielen
+    ansicht.splitMain.focus({ preventScroll: true });
+  }
 }
 
 // --- Start ---

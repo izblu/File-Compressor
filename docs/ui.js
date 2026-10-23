@@ -1,6 +1,7 @@
-// ui.js – wiederverwendbare Oberflächen-Bausteine: Bottom Sheet, Toast und
-// Ansagen für Screenreader. Sheets liegen in #ebene (außerhalb von #app);
-// solange eins offen ist, wird #app "inert" geschaltet (Fokus bleibt im Sheet).
+// ui.js – wiederverwendbare Oberflächen-Bausteine: Bottom Sheet, Dialog
+// (Rückfrage), Toast und Ansagen für Screenreader. Sheets und Dialoge liegen in
+// #ebene (außerhalb der Ansichten); solange eins offen ist, werden Startscreen
+// und Wizard "inert" geschaltet (Fokus bleibt im Sheet bzw. Dialog).
 
 import { el } from "./shared.js";
 import { icon } from "./icons.js";
@@ -15,12 +16,23 @@ export function ansage(text) {
   setTimeout(() => { box.textContent = text; }, 50);
 }
 
+// Startscreen und Wizard sperren (inert), solange ein Sheet/Dialog offen ist.
+function sperre(an) {
+  document.querySelectorAll(".fk-app").forEach((ansicht) => { ansicht.inert = an; });
+  document.documentElement.classList.toggle("ist-gesperrt", an);
+}
+
 // --- Bottom Sheet ---
 
-let offen = null; // { scrim, sheet, ausloeser, schliessen }
+let offen = null; // offenes Sheet oder offener Dialog: { scrim, sheet, ausloeser, schliessen }
 
 export function sheetIstOffen() {
   return offen !== null;
+}
+
+// Schließt ein offenes Sheet/Dialog sofort (z. B. bei Browser-Zurück).
+export function schliesseOverlay() {
+  if (offen) offen.schliessen(true);
 }
 
 // Öffnet ein Bottom Sheet mit Kopf (Titel, Unterzeile, Schließen) und Inhalt.
@@ -29,7 +41,6 @@ export function sheetIstOffen() {
 export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser }) {
   if (offen) offen.schliessen(true);
 
-  const app = document.getElementById("app");
   const scrim = el("div", "scrim");
   scrim.setAttribute("aria-hidden", "true");
 
@@ -57,8 +68,7 @@ export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser }) {
 
   sheet.append(griff, kopf, inhalt);
   document.getElementById("ebene").append(scrim, sheet);
-  app.inert = true;
-  document.documentElement.classList.add("ist-gesperrt");
+  sperre(true);
 
   // Nach dem Einfahren die Animation lösen, damit Wischen per transform geht.
   sheet.addEventListener("animationend", () => { sheet.style.animation = "none"; }, { once: true });
@@ -67,8 +77,7 @@ export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser }) {
     if (!offen || offen.sheet !== sheet) return;
     offen = null;
     document.removeEventListener("keydown", beiTaste);
-    app.inert = false;
-    document.documentElement.classList.remove("ist-gesperrt");
+    sperre(false);
 
     const weg = () => { scrim.remove(); sheet.remove(); };
     if (sofort) {
@@ -130,6 +139,72 @@ export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser }) {
 
   offen = { scrim, sheet, ausloeser, schliessen };
   sheet.focus();
+  return { schliessen };
+}
+
+// --- Dialog (Rückfrage, z. B. "Bearbeitung abbrechen?") ---
+
+// knoepfe: [{ text, art: "primary" | "secondary" | "danger", beiKlick }] – der
+// erste bekommt den Fokus. Esc und Tipp auf die Abdunklung schließen ohne Aktion.
+export function oeffneDialog({ titel, text, knoepfe, ausloeser }) {
+  if (offen) offen.schliessen(true);
+
+  const scrim = el("div", "scrim");
+  scrim.setAttribute("aria-hidden", "true");
+
+  const dialog = el("div", "dialog");
+  dialog.setAttribute("role", "alertdialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-labelledby", "dialogTitel");
+  dialog.setAttribute("aria-describedby", "dialogText");
+  const h = el("h2", "t-h", titel);
+  h.id = "dialogTitel";
+  const p = el("p", "t-body t-2", text);
+  p.id = "dialogText";
+
+  const reihe = el("div", "fk-stack dialog-knoepfe");
+  const buttons = knoepfe.map((k) => {
+    const art = k.art === "primary" ? "btn-primary" : "btn-secondary";
+    const knopf = el("button", `btn btn-block ${art}${k.art === "danger" ? " is-danger" : ""}`, k.text);
+    knopf.type = "button";
+    knopf.addEventListener("click", () => {
+      schliessen(true, !k.beiKlick);
+      if (k.beiKlick) k.beiKlick();
+    });
+    return knopf;
+  });
+  reihe.append(...buttons);
+  dialog.append(h, p, reihe);
+  document.getElementById("ebene").append(scrim, dialog);
+  sperre(true);
+
+  function schliessen(sofort = false, fokusZurueck = true) {
+    if (!offen || offen.sheet !== dialog) return;
+    offen = null;
+    document.removeEventListener("keydown", beiTaste);
+    sperre(false);
+    const weg = () => { scrim.remove(); dialog.remove(); };
+    if (sofort) {
+      weg();
+    } else {
+      for (const teil of [scrim, dialog]) {
+        teil.style.animation = "none";
+        teil.style.transition = "opacity 200ms ease";
+        teil.style.opacity = "0";
+      }
+      setTimeout(weg, 220);
+    }
+    if (fokusZurueck && ausloeser && ausloeser.isConnected) ausloeser.focus();
+  }
+
+  function beiTaste(e) {
+    if (e.key === "Escape") { e.preventDefault(); schliessen(); }
+  }
+  document.addEventListener("keydown", beiTaste);
+  scrim.addEventListener("click", () => schliessen());
+
+  offen = { scrim, sheet: dialog, ausloeser, schliessen };
+  buttons[0].focus();
   return { schliessen };
 }
 
