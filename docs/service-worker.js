@@ -4,25 +4,33 @@
 // Cache gelegt; danach werden Anfragen bevorzugt aus dem Cache beantwortet.
 // So startet die App auch ohne Internet.
 
-const CACHE = "filekit-v4";
+const CACHE = "filekit-v5";
 
 // Die zur App gehörenden Dateien. Bei Änderungen die Versionsnummer oben
-// erhöhen (z. B. v5), damit Browser die neue Fassung laden.
+// erhöhen (z. B. v6), damit Browser die neue Fassung laden.
 // Die großen Bibliotheken (lib/pdfjs/* ~1,4 MB, lib/pdf-lib.min.js ~0,5 MB)
 // werden NICHT vorab geladen, sondern erst bei Bedarf zur Laufzeit gecacht
 // (siehe fetch-Handler unten).
 const DATEIEN = [
   "index.html",
+  "filekit.css",
   "styles.css",
+  "fonts/manrope-latin-wght-normal.woff2",
   "app.js",
+  "start.js",
+  "intake.js",
+  "ui.js",
+  "icons.js",
   "shared.js",
+  "compress.js",
   "image.js",
   "pdf.js",
-  "merge.js",
-  "split.js",
   "manifest.json",
+  "icons/app-icon-klein.svg",
+  "icons/apple-touch-icon.png",
   "icons/icon-192.png",
   "icons/icon-512.png",
+  "icons/icon-maskable-512.png",
 ];
 
 // Installieren: alle App-Dateien in den Cache laden.

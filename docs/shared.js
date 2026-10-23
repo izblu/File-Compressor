@@ -1,13 +1,14 @@
 // shared.js – gemeinsame Helfer für alle Modi (Verkleinern/Zusammenführen/Trennen).
 
-// Bytes in lesbare Größe (wie human_size in compress.py).
+// Bytes in lesbare Größe, deutsch formatiert: "512 B", "740 KB", "8,4 MB".
 export function humanSize(bytes) {
-  let size = bytes;
-  for (const einheit of ["B", "KB", "MB", "GB"]) {
-    if (size < 1024) return `${size.toFixed(1)} ${einheit}`;
-    size /= 1024;
-  }
-  return `${size.toFixed(1)} TB`;
+  if (bytes < 1024) return `${bytes} B`;
+  const kb = bytes / 1024;
+  if (kb < 1000) return `${Math.round(kb)} KB`;
+  const zahl = (n) => n.toLocaleString("de-DE", { maximumFractionDigits: 1 });
+  const mb = kb / 1024;
+  if (mb < 1000) return `${zahl(mb)} MB`;
+  return `${zahl(mb / 1024)} GB`;
 }
 
 // Kurzschreibweise zum Erzeugen eines HTML-Elements.
