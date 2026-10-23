@@ -1,7 +1,8 @@
 // ui.js – wiederverwendbare Oberflächen-Bausteine: Bottom Sheet, Dialog
-// (Rückfrage), Toast und Ansagen für Screenreader. Sheets und Dialoge liegen in
-// #ebene (außerhalb der Ansichten); solange eins offen ist, werden Startscreen
-// und Wizard "inert" geschaltet (Fokus bleibt im Sheet bzw. Dialog).
+// (Rückfrage), vollflächige Ebene (Vollbild), Toast und Ansagen für
+// Screenreader. Sheets, Dialoge und Ebenen liegen in #ebene (außerhalb der
+// Ansichten); solange eins offen ist, werden Startscreen und Wizard "inert"
+// geschaltet (Fokus bleibt im Sheet bzw. Dialog).
 
 import { el } from "./shared.js";
 import { icon } from "./icons.js";
@@ -30,15 +31,17 @@ export function sheetIstOffen() {
   return offen !== null;
 }
 
-// Schließt ein offenes Sheet/Dialog sofort (z. B. bei Browser-Zurück).
-export function schliesseOverlay() {
-  if (offen) offen.schliessen(true);
+// Schließt ein offenes Sheet/Dialog (z. B. bei Browser-Zurück), ohne Animation
+// nur mit sofort = true.
+export function schliesseOverlay(sofort = true) {
+  if (offen) offen.schliessen(sofort);
 }
 
 // Öffnet ein Bottom Sheet mit Kopf (Titel, Unterzeile, Schließen) und Inhalt.
 // Schließt über ×, Abdunklung, Esc oder nach unten wischen; danach geht der
-// Fokus zurück zum Auslöser.
-export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser }) {
+// Fokus zurück zum Auslöser. kopfBild = Element links im Kopf (z. B. Seiten-
+// Miniatur), unterzeile = Text oder Element(e), beiSchliessen() beim Schließen.
+export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser, kopfBild, kleinerTitel = false, beiSchliessen }) {
   if (offen) offen.schliessen(true);
 
   const scrim = el("div", "scrim");
@@ -55,11 +58,16 @@ export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser }) {
   griff.append(el("div", "sheet-handle"));
 
   const kopf = el("div", "sheet-head");
+  if (kopfBild) kopf.append(kopfBild);
   const titelBox = el("div", "sheet-titel");
-  const h = el("h2", "t-h", titel);
+  const h = el("h2", kleinerTitel ? "t-l" : "t-h", titel);
   h.id = "sheetTitel";
   titelBox.append(h);
-  if (unterzeile) titelBox.append(el("p", "t-s t-muted", unterzeile));
+  if (unterzeile) {
+    const u = el("p", "t-s t-muted sheet-unterzeile");
+    u.append(...[].concat(unterzeile));
+    titelBox.append(u);
+  }
   const zu = el("button", "icon-btn glass");
   zu.type = "button";
   zu.setAttribute("aria-label", "Schließen");
@@ -98,6 +106,7 @@ export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser }) {
       }
       setTimeout(weg, 300);
     }
+    if (beiSchliessen) beiSchliessen();
     if (ausloeser && ausloeser.isConnected) ausloeser.focus();
   }
 
@@ -208,16 +217,51 @@ export function oeffneDialog({ titel, text, knoepfe, ausloeser }) {
   return { schliessen };
 }
 
-// --- Toast (5 s sichtbar, optional mit Aktion wie "Rückgängig") ---
+// --- Vollflächige Ebene (z. B. Vollbild-Ansicht einer Seite) ---
 
-let toastTimer = null;
+// Legt element über alles: sperrt die Ansichten, Esc und Browser-Zurück
+// schließen, danach geht der Fokus zurück zum Auslöser.
+export function oeffneVollflaeche({ element, ausloeser, beiSchliessen }) {
+  if (offen) offen.schliessen(true);
+  document.getElementById("ebene").append(element);
+  sperre(true);
 
-export function zeigeToast(text, { aktion, beiAktion } = {}) {
+  function schliessen(sofort = false) {
+    if (!offen || offen.sheet !== element) return;
+    offen = null;
+    document.removeEventListener("keydown", beiTaste);
+    sperre(false);
+    if (sofort) {
+      element.remove();
+    } else {
+      element.style.transition = "opacity 200ms ease";
+      element.style.opacity = "0";
+      setTimeout(() => element.remove(), 220);
+    }
+    if (beiSchliessen) beiSchliessen();
+    if (ausloeser && ausloeser.isConnected) ausloeser.focus();
+  }
+
+  function beiTaste(e) {
+    if (e.key === "Escape") { e.preventDefault(); schliessen(); }
+  }
+  document.addEventListener("keydown", beiTaste);
+
+  offen = { sheet: element, ausloeser, schliessen };
+  return { schliessen };
+}
+
+// --- Toast (5 s sichtbar, optional mit Icon und Aktion wie "Rückgängig") ---
+
+let toastWeg = null; // schließt den gerade sichtbaren Toast
+
+// Rückgabe: { schliessen } – z. B. wenn "Rückgängig" nicht mehr passt.
+export function zeigeToast(text, { aktion, beiAktion, iconName } = {}) {
   const box = document.getElementById("toasts");
-  clearTimeout(toastTimer);
-  box.replaceChildren();
+  if (toastWeg) toastWeg(true);
 
   const toast = el("div", "toast");
+  if (iconName) toast.append(icon(iconName, 18, 2));
   toast.append(el("span", "toast-text", text));
   if (aktion) {
     const knopf = el("button", "btn-link", aktion);
@@ -227,10 +271,18 @@ export function zeigeToast(text, { aktion, beiAktion } = {}) {
   }
   box.append(toast);
 
-  function weg() {
-    clearTimeout(toastTimer);
+  const timer = setTimeout(() => weg(), 5000);
+  function weg(sofort = false) {
+    if (toastWeg !== weg) return; // schon geschlossen oder ersetzt
+    toastWeg = null;
+    clearTimeout(timer);
+    if (sofort) {
+      toast.remove();
+      return;
+    }
     toast.classList.add("is-closing");
     setTimeout(() => toast.remove(), 200);
   }
-  toastTimer = setTimeout(weg, 5000);
+  toastWeg = weg;
+  return { schliessen: () => weg() };
 }

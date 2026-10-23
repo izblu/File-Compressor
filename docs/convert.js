@@ -61,6 +61,14 @@ export async function bildUmwandeln(eintrag, format, { signal } = {}) {
 // richtig herum stehen.
 export async function bildZuPdf(file) {
   const PDFLib = await ladePdfLib();
+  const doc = await PDFLib.PDFDocument.create();
+  await bildAlsSeite(doc, file);
+  return new Blob([await doc.save()], { type: MIME.pdf });
+}
+
+// Hängt ein Bild als neue Seite an ein pdf-lib-Dokument an (auch fürs
+// Zusammenführen). Rückgabe: die neue Seite.
+export async function bildAlsSeite(doc, file) {
   const png = istPng(file);
   const bild = await dekodiere(file);
   let bytes;
@@ -72,11 +80,11 @@ export async function bildZuPdf(file) {
     bild.schliessen();
   }
 
-  const doc = await PDFLib.PDFDocument.create();
   const eingebettet = png ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
   const faktor = SEITE_PT / Math.max(eingebettet.width, eingebettet.height);
   const breite = eingebettet.width * faktor;
   const hoehe = eingebettet.height * faktor;
-  doc.addPage([breite, hoehe]).drawImage(eingebettet, { x: 0, y: 0, width: breite, height: hoehe });
-  return new Blob([await doc.save()], { type: MIME.pdf });
+  const seite = doc.addPage([breite, hoehe]);
+  seite.drawImage(eingebettet, { x: 0, y: 0, width: breite, height: hoehe });
+  return seite;
 }

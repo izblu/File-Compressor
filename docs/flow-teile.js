@@ -164,8 +164,9 @@ export function hinweis(text, { art = "", iconName, titel } = {}) {
 
 let feldNummer = 0;
 
-// Dateiname-Feld mit fester Endung. beiEingabe(text) bei jeder Änderung.
-export function namensFeld({ wert, endung, beiEingabe, label = "Dateiname", mitHinweis = true }) {
+// Dateiname-Feld mit fester Endung. beiEingabe(text) bei jeder Änderung,
+// hinweis = eigener Text unter dem Feld.
+export function namensFeld({ wert, endung, beiEingabe, label = "Dateiname", mitHinweis = true, hinweis }) {
   const feld = el("div", "field");
   const id = `dateiname-${++feldNummer}`;
   const l = el("label", null, label);
@@ -184,7 +185,7 @@ export function namensFeld({ wert, endung, beiEingabe, label = "Dateiname", mitH
   const ext = el("span", "field-ext", `.${endung}`);
   box.append(input, ext);
   feld.append(l, box);
-  const hinweisText = el("p", "field-hint", HINWEIS_NEU[1]);
+  const hinweisText = el("p", "field-hint", hinweis || HINWEIS_NEU[1]);
   if (mitHinweis) feld.append(hinweisText);
   return {
     element: feld,

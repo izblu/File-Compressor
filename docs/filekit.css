@@ -108,8 +108,9 @@
   -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
 }
 .fk-app *, .fk-page * { box-sizing: border-box; }
-.fk-app button, .fk-page button, .fk-app input, .fk-page input { font: inherit; color: inherit; }
-.fk-app a, .fk-page a { color: inherit; text-decoration: none; }
+/* :where() = ohne Gewicht, damit Komponenten wie .btn, .btn-link, .chip ihre Schrift/Farbe behalten */
+:where(.fk-app, .fk-page) :where(button, input) { font: inherit; color: inherit; }
+:where(.fk-app, .fk-page) :where(a) { color: inherit; text-decoration: none; }
 .fk-app p, .fk-page p, .fk-app h1, .fk-app h2, .fk-page h1, .fk-page h2, .fk-page h3 { margin: 0; }
 .fk-page {
   min-height: 100dvh; background: radial-gradient(90% 50% at 50% -10%, var(--fk-bg-glow), transparent 60%), var(--fk-bg);

@@ -84,9 +84,14 @@ async function waehle(files, hinzufuegen) {
     return;
   }
   zeigeDateien(ersteWahl);
+  meldeOeffnenFehler(fehler);
+  if (neu.length) ansage(beschreibeAuswahl());
+}
+
+// Kurzer Toast für Dateien, die sich nicht öffnen ließen (auch im Seiten-Editor).
+export function meldeOeffnenFehler(fehler) {
   if (fehler.length === 1) zeigeToast(FEHLER[fehler[0].art].kurz(kurzerName(fehler[0].datei.name)));
   else if (fehler.length > 1) zeigeToast(`${fehler.length} Dateien ließen sich nicht öffnen.`);
-  if (neu.length) ansage(beschreibeAuswahl());
 }
 
 function beschreibeAuswahl() {

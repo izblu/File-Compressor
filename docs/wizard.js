@@ -16,6 +16,10 @@
 //
 // ctx.signal wird abgebrochen, sobald die Ansicht wechselt (anderer Schritt,
 // Zurück aus dem Zwischen-Screen, Abbrechen) – laufende Arbeit hört dann auf.
+//
+// Zurück (Pfeil, Browser, Android-Geste) schließt zuerst, was gerade offen ist:
+// ein Sheet/Dialog oder das, was der Schritt über ctx.beiZurueck meldet (z. B.
+// den Auswahlmodus im Seiten-Editor). Erst dann geht es einen Schritt zurück.
 
 import { el } from "./shared.js";
 import { icon } from "./icons.js";
@@ -23,7 +27,7 @@ import { oeffneDialog, schliesseOverlay, sheetIstOffen, ansage } from "./ui.js";
 
 const start = document.getElementById("app");
 
-let rahmen = null;      // Elemente: { wizard, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen }
+let rahmen = null;      // Elemente: { wizard, reihe, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen, sonderKopf }
 let z = null;           // Zustand des laufenden Wizards (null = Startscreen)
 let beiEnde = () => {}; // zurück zum Startscreen: beiEnde({ leeren })
 
@@ -65,7 +69,24 @@ function baueRahmen() {
   zurueck.addEventListener("click", () => history.back());
   abbrechen.addEventListener("click", () => abbrechenMitRueckfrage(abbrechen));
 
-  return { wizard, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen };
+  return { wizard, reihe, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen, sonderKopf: null };
+}
+
+// Eigene Kopfzeile für einen Modus im Schritt (z. B. "3 ausgewählt" mit ×
+// links und "Alle" rechts); die Schritt-Anzeige bleibt. null = normale Kopfzeile.
+function setzeKopf(teile) {
+  if (rahmen.sonderKopf) {
+    rahmen.sonderKopf.remove();
+    rahmen.sonderKopf = null;
+  }
+  rahmen.reihe.hidden = Boolean(teile);
+  if (!teile) return;
+  const reihe = el("div", "fk-top-row");
+  const titelBox = el("div", "fk-top-title");
+  titelBox.append(teile.titel, el("span", null, rahmen.schrittText.textContent));
+  reihe.append(teile.links || el("span"), titelBox, teile.rechts || el("span"));
+  rahmen.reihe.after(reihe);
+  rahmen.sonderKopf = reihe;
 }
 
 // Animation neu starten (Klasse entfernen, Reflow, wieder setzen).
@@ -90,7 +111,9 @@ function neuerLauf() {
 function zeigeSchritt(index, richtung) {
   z.schritt = index;
   z.zwischen = false;
+  z.beiZurueck = null;
   neuerLauf();
+  setzeKopf(null);
   const schritt = z.schritte[index];
   const nummer = index + 2;              // Schritt 1 ist immer "Datei wählen"
   const gesamt = z.schritte.length + 1;
@@ -126,6 +149,13 @@ function kontext() {
     geaendert() { z.dirty = true; }, // etwas bearbeitet → Abbrechen fragt nach
     zeigeZwischen,
     schliesseZwischen,
+    // fn() bei Zurück; liefert true, wenn der Schritt es selbst erledigt hat
+    // (z. B. Auswahlmodus beendet) – dann bleibt der Schritt stehen.
+    beiZurueck(fn) { z.beiZurueck = fn; },
+    setzeKopf,
+    setzeDock(inhalt) { rahmen.dock.replaceChildren(...alsListe(inhalt)); },
+    // fn() läuft, wenn der Wizard endet (z. B. im Schritt geöffnete Dateien freigeben).
+    beimEnde(fn) { z.aufraeumen.push(fn); },
   };
 }
 
@@ -144,6 +174,7 @@ function zeigeZwischen({ titel, inhalt, dock }) {
   if (!z) return;
   if (!z.zwischen) history.pushState({ fk: "wizard", schritt: z.schritt, zwischen: true }, "");
   z.zwischen = true;
+  setzeKopf(null);
   if (titel) rahmen.titel.textContent = titel;
   rahmen.body.replaceChildren(...alsListe(inhalt));
   rahmen.dock.replaceChildren(...alsListe(dock));
@@ -180,6 +211,7 @@ function abbrechenMitRueckfrage(ausloeser) {
 function abbrechen() {
   z.leeren = true;
   z.dirty = false;
+  z.springt = true;
   // Alle Wizard-Einträge im Verlauf überspringen; popstate beendet dann den Wizard.
   history.go(-(z.schritt + 1 + (z.zwischen ? 1 : 0)));
 }
@@ -187,7 +219,9 @@ function abbrechen() {
 function beende({ leeren }) {
   schliesseOverlay();
   z.lauf.abort();
+  for (const fn of z.aufraeumen) fn();
   z = null;
+  setzeKopf(null);
   rahmen.wizard.hidden = true;
   rahmen.body.replaceChildren();
   rahmen.dock.replaceChildren();
@@ -205,6 +239,17 @@ function beiPopstate(e) {
     return;
   }
 
+  // Zurück, während ein Sheet/Dialog offen ist oder der Schritt selbst etwas zu
+  // schließen hat: nur das schließen und im Schritt bleiben (Eintrag zurücklegen).
+  const zurueck = ziel === null || ziel < z.schritt;
+  if (zurueck && !z.zwischen && !z.springt) {
+    const overlay = sheetIstOffen();
+    if (overlay || (z.beiZurueck && z.beiZurueck())) {
+      if (overlay) schliesseOverlay(false);
+      history.pushState({ fk: "wizard", schritt: z.schritt }, "");
+      return;
+    }
+  }
   if (sheetIstOffen()) schliesseOverlay();
 
   if (ziel === null) {
@@ -213,6 +258,7 @@ function beiPopstate(e) {
       history.pushState({ fk: "wizard", schritt: z.schritt }, "");
       rueckfrage(rahmen.zurueck, () => {
         z.dirty = false;
+        z.springt = true;
         history.go(-(z.schritt + 1));
       });
       return;
@@ -248,7 +294,10 @@ export function initWizard(optionen) {
 
 // Startet den Wizard für eine Aktion. schritte = [{ titel, baue(ctx) }].
 export function starteWizard({ aktion, dateien, schritte }) {
-  z = { aktion, dateien, schritte, schritt: 0, optionen: {}, dirty: false, zwischen: false, lauf: null };
+  z = {
+    aktion, dateien, schritte, schritt: 0, optionen: {}, dirty: false, zwischen: false, lauf: null,
+    beiZurueck: null, aufraeumen: [], springt: false,
+  };
   history.pushState({ fk: "wizard", schritt: 0 }, "");
   start.hidden = true;
   rahmen.wizard.hidden = false;
