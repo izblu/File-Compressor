@@ -14,6 +14,10 @@
 // Verarbeitung ab und zeigt den Schritt wieder; geht es danach weiter, ersetzt
 // der nächste Schritt den Eintrag des Zwischen-Screens.
 //
+// Abschluss: "Gespeichert ✓" (ctx.zeigeFertig) ist ein Zwischen-Screen ohne
+// Kopfzeile – Zurück zeigt wieder den Speichern-Schritt, ctx.vonVorn
+// ("Noch eine Datei bearbeiten") führt zum leeren Startscreen.
+//
 // ctx.signal wird abgebrochen, sobald die Ansicht wechselt (anderer Schritt,
 // Zurück aus dem Zwischen-Screen, Abbrechen) – laufende Arbeit hört dann auf.
 //
@@ -27,7 +31,7 @@ import { oeffneDialog, schliesseOverlay, sheetIstOffen, ansage } from "./ui.js";
 
 const start = document.getElementById("app");
 
-let rahmen = null;      // Elemente: { wizard, reihe, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen, sonderKopf }
+let rahmen = null;      // Elemente: { wizard, kopf, reihe, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen, sonderKopf }
 let z = null;           // Zustand des laufenden Wizards (null = Startscreen)
 let beiEnde = () => {}; // zurück zum Startscreen: beiEnde({ leeren })
 
@@ -69,7 +73,7 @@ function baueRahmen() {
   zurueck.addEventListener("click", () => history.back());
   abbrechen.addEventListener("click", () => abbrechenMitRueckfrage(abbrechen));
 
-  return { wizard, reihe, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen, sonderKopf: null };
+  return { wizard, kopf, reihe, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen, sonderKopf: null };
 }
 
 // Eigene Kopfzeile für einen Modus im Schritt (z. B. "3 ausgewählt" mit ×
@@ -114,6 +118,7 @@ function zeigeSchritt(index, richtung) {
   z.beiZurueck = null;
   neuerLauf();
   setzeKopf(null);
+  rahmen.kopf.hidden = false;
   const schritt = z.schritte[index];
   const nummer = index + 2;              // Schritt 1 ist immer "Datei wählen"
   const gesamt = z.schritte.length + 1;
@@ -149,6 +154,8 @@ function kontext() {
     geaendert() { z.dirty = true; }, // etwas bearbeitet → Abbrechen fragt nach
     zeigeZwischen,
     schliesseZwischen,
+    zeigeFertig,
+    vonVorn: abbrechen,              // "Noch eine Datei bearbeiten": leerer Startscreen
     // fn() bei Zurück; liefert true, wenn der Schritt es selbst erledigt hat
     // (z. B. Auswahlmodus beendet) – dann bleibt der Schritt stehen.
     beiZurueck(fn) { z.beiZurueck = fn; },
@@ -169,18 +176,29 @@ function weiter() {
 }
 
 // Zwischen-Screen im laufenden Schritt (z. B. "Wird verkleinert …"). Kopfzeile
-// und Schritt-Anzeige bleiben, nur der Titel wechselt.
-function zeigeZwischen({ titel, inhalt, dock }) {
+// und Schritt-Anzeige bleiben, nur der Titel wechselt. Folgt er auf einen
+// anderen Zwischen-Screen, übernimmt er dessen History-Eintrag.
+// ohneKopf: Kopfzeile ausblenden; den Fokus bekommt dann die Überschrift im Inhalt.
+function zeigeZwischen({ titel, inhalt, dock, ohneKopf = false }) {
   if (!z) return;
   if (!z.zwischen) history.pushState({ fk: "wizard", schritt: z.schritt, zwischen: true }, "");
   z.zwischen = true;
   setzeKopf(null);
+  rahmen.kopf.hidden = ohneKopf;
   if (titel) rahmen.titel.textContent = titel;
   rahmen.body.replaceChildren(...alsListe(inhalt));
   rahmen.dock.replaceChildren(...alsListe(dock));
   rahmen.body.scrollTop = 0;
   spieleAb(rahmen.body, "in-fade");
-  rahmen.titel.focus({ preventScroll: true });
+  (ohneKopf ? rahmen.body.querySelector("h1") || rahmen.body : rahmen.titel).focus({ preventScroll: true });
+}
+
+// "Gespeichert ✓": Zwischen-Screen ohne Kopfzeile. Gespeichert ist
+// gespeichert – Abbrechen fragt danach nicht mehr nach.
+function zeigeFertig({ inhalt, dock }) {
+  if (!z) return;
+  zeigeZwischen({ inhalt, dock, ohneKopf: true });
+  z.dirty = false;
 }
 
 // Zwischen-Screen verlassen und den Schritt wieder zeigen.

@@ -6,12 +6,12 @@
 import { el, humanSize, ersparnis, ohneEndung, sichererName, eindeutigeNamen } from "./shared.js";
 import { icon } from "./icons.js";
 import { hauptKnopf } from "./wizard.js";
-import { zeigeToast } from "./ui.js";
 import { STAERKEN, verkleinere, endungNachVerkleinern } from "./compress.js";
-import { speichere } from "./save.js";
+import { speicherZiel } from "./save.js";
+import { zeigeGespeichert } from "./gespeichert.js";
 import {
   schrittInhalt, abschnitt, miniatur, dateiInfo, dateiZeile, optKarte, radioGruppe,
-  hinweis, namensFeld, ausgabeZeile, mitVerarbeitung, fortschrittText, arbeitet,
+  hinweis, namensFeld, ausgabeZeile, mitVerarbeitung, fortschrittText, speichereErgebnis,
 } from "./flow-teile.js";
 
 // Zielgrößen dezimal gerechnet (2 MB = 2 000 000 Byte): So passt "unter 2 MB"
@@ -216,7 +216,7 @@ function staerkeSchritt(ctx) {
     if (o.ergebnis && o.ergebnis.schluessel === schluessel) return ctx.weiter();
 
     const seiten = einzeln && dateien[0].art === "pdf" ? dateien[0].seiten : 0;
-    const { ergebnis } = await mitVerarbeitung(ctx, {
+    const ergebnis = await mitVerarbeitung(ctx, {
       knopf: weiterKnopf,
       titel: "Verkleinern",
       text: "Wird verkleinert …",
@@ -423,13 +423,17 @@ function speichernSchritt(ctx) {
   const n = zuSpeichern.length;
   const speichern = hauptKnopf(n > 1 ? `Alle speichern (${n})` : "Speichern", async () => {
     const dateiNamen = namen();
-    const fertig = arbeitet(speichern, "Wird gespeichert …");
-    try {
-      await speichere(zuSpeichern.map((r, i) => ({ blob: r.blob, name: dateiNamen[i] })));
-    } finally {
-      fertig();
-    }
-    zeigeToast(n > 1 ? `${n} Dateien gespeichert.` : `Gespeichert: ${dateiNamen[0]}`);
+    const ziel = await speicherZiel(dateiNamen);
+    if (!ziel) return; // "Speichern unter" abgebrochen
+    const gespeichert = await speichereErgebnis(speichern, ziel,
+      zuSpeichern.map((r, i) => ({ blob: r.blob, name: dateiNamen[i] })));
+    if (!gespeichert) return;
+    const vorher = zuSpeichern.reduce((s, r) => s + r.eintrag.file.size, 0);
+    zeigeGespeichert(ctx, {
+      gespeichert,
+      bilder: zuSpeichern.map((r) => ({ eintrag: r.eintrag })),
+      badge: ersparnis(vorher, gespeichert.reduce((s, d) => s + d.groesse, 0)),
+    });
   }, "speichern");
 
   const dock = [speichern];

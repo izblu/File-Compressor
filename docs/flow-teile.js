@@ -1,10 +1,12 @@
 // flow-teile.js – Bausteine, die mehrere Abläufe teilen: Dateizeile,
 // Auswahl-Karten (radiogroup), Hinweise, Dateiname-Feld mit Namensvorschau,
-// Ausgabe-Zeile und der Verarbeiten-Screen samt Ablauf ("mitVerarbeitung").
+// Ausgabe-Zeile, der Verarbeiten-Screen samt Ablauf ("mitVerarbeitung") und
+// das Speichern ("speichereErgebnis").
 
 import { el, humanSize, seitenText, zusammensetzung } from "./shared.js";
 import { icon } from "./icons.js";
 import { ansage, zeigeToast, wenigBewegung } from "./ui.js";
+import { seitenBild } from "./thumbs.js";
 
 // Inhalt eines Schritts: senkrechter Stapel mit Abstand.
 export function schrittInhalt(...kinder) {
@@ -36,6 +38,31 @@ export function miniatur(eintrag, klasse = "mini") {
   img.draggable = false;
   box.append(img);
   return box;
+}
+
+// Kleine Seite in einem Hochformat-Rahmen (klasse bestimmt die Größe), auch
+// gedreht. Seite 1 ist die Vorschau der Datei; andere Seiten kommen nach.
+export function seitenMini({ eintrag, nr = 1, drehung = 0 }, klasse) {
+  const rahmen = el("span", `${klasse} seite-rahmen`);
+  rahmen.setAttribute("aria-hidden", "true");
+  const seite = el("span", "seite");
+  seite.style.setProperty("--r", eintrag.verhaeltnis);
+  seite.style.setProperty("--grad", `${drehung}deg`);
+  seite.classList.toggle("ist-quer", drehung % 180 !== 0);
+  rahmen.append(seite);
+  const zeige = (b) => {
+    if (!b) return;
+    const img = el("img");
+    img.src = b.url;
+    img.alt = "";
+    img.draggable = false;
+    seite.style.setProperty("--r", b.verhaeltnis);
+    seite.replaceChildren(img);
+    seite.classList.add("ist-da");
+  };
+  if (nr === 1) zeige({ url: eintrag.vorschau, verhaeltnis: eintrag.verhaeltnis });
+  else seitenBild(eintrag, nr).then(zeige);
+  return rahmen;
 }
 
 // Untertitel einer Datei: "12 Seiten" bzw. "4032 × 3024 px".
@@ -325,14 +352,23 @@ export function arbeitet(knopf, text) {
 
 const MIN_SICHTBAR = 700; // ms – der Verarbeiten-Screen soll nicht nur aufblitzen
 
+const SPEICHERN_FEHLER = "Das Speichern hat leider nicht geklappt. Versuche es noch einmal.";
+
+function meldeFehler(text) {
+  zeigeToast(text);
+  ansage(text);
+}
+
 // Führt job({ signal, melde }) aus. Der Haupt-Button zeigt sofort "arbeitet";
 // dauert es länger als 400 ms, erscheint der Verarbeiten-Screen (Abbrechen
 // bzw. Zurück → wieder der Schritt, die Arbeit hört auf).
-// danach(ergebnis) läuft im Anschluss, solange der Button noch arbeitet
-// (z. B. das Speichern).
-// Rückgabe: { ergebnis, zwischen } – ergebnis = null bei Abbruch oder Fehler
-// (dann mit Toast fehlerText); zwischen = Verarbeiten-Screen ist noch zu sehen.
-export async function mitVerarbeitung(ctx, { knopf, titel, text, einheiten, fehlerText, job, danach }) {
+// Mit ziel (aus save.js/speicherZiel) wird das Ergebnis gleich gespeichert;
+// dateien(ergebnis) liefert dafür [{ blob, name }].
+// Rückgabe: das Ergebnis des job – mit ziel die gespeicherten Dateien
+// [{ name, groesse }] – oder null bei Abbruch oder Fehler (dann mit Toast).
+// Ein noch sichtbarer Verarbeiten-Screen wird danach vom nächsten Schritt bzw.
+// vom "Gespeichert"-Screen abgelöst.
+export async function mitVerarbeitung(ctx, { knopf, titel, text, einheiten, fehlerText, job, ziel, dateien }) {
   const { signal } = ctx;
   const screen = verarbeitenScreen({ text, einheiten, eintrag: ctx.dateien[0] });
   const zuruecksetzen = arbeitet(knopf, text);
@@ -347,30 +383,56 @@ export async function mitVerarbeitung(ctx, { knopf, titel, text, einheiten, fehl
     gezeigtUm = performance.now();
   }, 400);
 
-  try {
-    const ergebnis = await job({ signal, melde: screen.setze });
+  // Abbruch oder Fehler: nichts speichern, ggf. zurück zum Schritt.
+  function nichts(fehler) {
     clearTimeout(timer);
-    if (signal.aborted) return { ergebnis: null, zwischen: false };
+    if (ziel) ziel.verwerfe();
+    if (signal.aborted) return null;
+    if (gezeigtUm) ctx.schliesseZwischen();
+    meldeFehler(fehler);
+    return null;
+  }
+
+  try {
+    let ergebnis;
+    try {
+      ergebnis = await job({ signal, melde: screen.setze });
+    } catch (e) {
+      if (!signal.aborted) console.error(e);
+      return nichts(fehlerText);
+    }
+    clearTimeout(timer);
+    if (signal.aborted) return nichts();
     if (gezeigtUm) {
       // Ring zu Ende füllen, kurz stehen lassen, dann geht es weiter.
       screen.setze({ anteil: 1, fertig: einheiten });
       const rest = MIN_SICHTBAR - (performance.now() - gezeigtUm);
       if (rest > 0 && !wenigBewegung()) await new Promise((r) => setTimeout(r, rest));
-      if (signal.aborted) return { ergebnis: null, zwischen: false };
+      if (signal.aborted) return nichts();
     }
-    if (danach) {
-      knopf.lastChild.textContent = "Wird gespeichert …";
-      await danach(ergebnis);
+    if (!ziel) return ergebnis;
+    knopf.lastChild.textContent = "Wird gespeichert …";
+    try {
+      return await ziel.schreibe(dateien(ergebnis));
+    } catch (e) {
+      console.error(e);
+      return nichts(SPEICHERN_FEHLER);
     }
-    return { ergebnis, zwischen: Boolean(gezeigtUm) };
+  } finally {
+    if (knopf.isConnected) zuruecksetzen();
+  }
+}
+
+// Speichert schon fertige Ergebnisse (Verkleinern: verarbeitet wird vorher).
+// Rückgabe wie mitVerarbeitung.
+export async function speichereErgebnis(knopf, ziel, dateien) {
+  const zuruecksetzen = arbeitet(knopf, "Wird gespeichert …");
+  try {
+    return await ziel.schreibe(dateien);
   } catch (e) {
-    clearTimeout(timer);
-    if (signal.aborted) return { ergebnis: null, zwischen: false };
     console.error(e);
-    if (gezeigtUm) ctx.schliesseZwischen();
-    zeigeToast(fehlerText);
-    ansage(fehlerText);
-    return { ergebnis: null, zwischen: false };
+    meldeFehler(SPEICHERN_FEHLER);
+    return null;
   } finally {
     if (knopf.isConnected) zuruecksetzen();
   }

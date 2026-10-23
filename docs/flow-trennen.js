@@ -3,13 +3,13 @@
 // "Speichern" (eine Datei oder je Seite eine, Dateiname mit Live-Vorschau).
 // Verarbeitet wird nach dem Tipp auf "Speichern".
 
-import { el, ohneEndung, sichererName } from "./shared.js";
+import { el, ohneEndung, sichererName, seitenText } from "./shared.js";
 import { icon } from "./icons.js";
 import { hauptKnopf, setzeKnopfText } from "./wizard.js";
-import { zeigeToast } from "./ui.js";
 import { beobachteSeiten } from "./thumbs.js";
 import { trenne } from "./split.js";
-import { speichere } from "./save.js";
+import { speicherZiel } from "./save.js";
+import { zeigeGespeichert } from "./gespeichert.js";
 import {
   schrittInhalt, abschnitt, optKarte, radioGruppe, namensFeld, namensListe,
   mitVerarbeitung, fortschrittText,
@@ -193,7 +193,9 @@ function speichernSchritt(ctx) {
 
   async function speichern() {
     const dateiNamen = namen();
-    const { ergebnis, zwischen } = await mitVerarbeitung(ctx, {
+    const ziel = await speicherZiel(dateiNamen);
+    if (!ziel) return; // "Speichern unter" abgebrochen
+    const gespeichert = await mitVerarbeitung(ctx, {
       knopf,
       titel: "Trennen",
       text: "Wird getrennt …",
@@ -206,11 +208,16 @@ function speichernSchritt(ctx) {
           beiDatei: (f, gesamt) => melde({ anteil: f / gesamt, fertig: f, text: fortschrittText("Datei", f, gesamt, f / gesamt) }),
         });
       },
-      danach: (teile) => speichere(teile.map((e, i) => ({ blob: e.blob, name: dateiNamen[i] }))),
+      ziel,
+      dateien: (teile) => teile.map((e, i) => ({ blob: e.blob, name: dateiNamen[i] })),
     });
-    if (!ergebnis) return;
-    if (zwischen) ctx.schliesseZwischen();
-    zeigeToast(dateiNamen.length > 1 ? `${dateiNamen.length} Dateien gespeichert.` : `Gespeichert: ${dateiNamen[0]}`);
+    if (!gespeichert) return;
+    const mehrere = gespeichert.length > 1;
+    zeigeGespeichert(ctx, {
+      gespeichert,
+      bilder: (mehrere ? seiten : seiten.slice(0, 1)).map((nr) => ({ eintrag: d, nr })),
+      info: mehrere ? "je 1 Seite" : seitenText(n),
+    });
   }
 
   aktualisiere();

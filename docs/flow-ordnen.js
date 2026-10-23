@@ -6,12 +6,11 @@
 import { el, ohneEndung, sichererName, seitenText } from "./shared.js";
 import { icon } from "./icons.js";
 import { hauptKnopf } from "./wizard.js";
-import { zeigeToast } from "./ui.js";
-import { seitenBild } from "./thumbs.js";
 import { baueDokument } from "./merge.js";
-import { speichere } from "./save.js";
+import { speicherZiel } from "./save.js";
+import { zeigeGespeichert } from "./gespeichert.js";
 import { editorSchritt, markeVon } from "./editor.js";
-import { schrittInhalt, abschnitt, namensFeld, mitVerarbeitung, fortschrittText } from "./flow-teile.js";
+import { schrittInhalt, abschnitt, namensFeld, mitVerarbeitung, fortschrittText, seitenMini } from "./flow-teile.js";
 
 // Gleiche Schritte für beide Aktionen; der Editor unterscheidet über ctx.aktion.
 export function seitenSchritte() {
@@ -78,22 +77,7 @@ function ordnenKarte(o) {
   karte.setAttribute("aria-label", "Ergebnis");
 
   const kopf = el("div", "fk-row ed-ordnen-kopf");
-  const rahmen = el("span", "ed-ordnen-mini seite-rahmen");
-  rahmen.setAttribute("aria-hidden", "true");
-  const seite = el("span", "seite");
-  seite.style.setProperty("--r", d.verhaeltnis);
-  seite.style.setProperty("--grad", `${erste.drehung}deg`);
-  seite.classList.toggle("ist-quer", erste.drehung % 180 !== 0);
-  rahmen.append(seite);
-  seitenBild(d, erste.nr).then((b) => {
-    if (!b) return;
-    const img = el("img");
-    img.src = b.url;
-    img.alt = "";
-    seite.style.setProperty("--r", b.verhaeltnis);
-    seite.replaceChildren(img);
-    seite.classList.add("ist-da");
-  });
+  const rahmen = seitenMini({ eintrag: d, nr: erste.nr, drehung: erste.drehung }, "ed-ordnen-mini");
   const text = el("div", "fk-stack ed-ordnen-text");
   const name = el("p", "t-h ed-ordnen-name", d.file.name);
   name.title = d.file.name;
@@ -135,10 +119,12 @@ function speichernSchritt(ctx) {
 
   async function speichern() {
     const name = `${sichererName(o.name, vorschlag)}.pdf`;
+    const ziel = await speicherZiel([name]);
+    if (!ziel) return; // "Speichern unter" abgebrochen
     const seiten = o.seiten;
     const n = seiten.length;
     let zuletzt = null; // Datei, deren Vorschau der Verarbeiten-Screen gerade zeigt
-    const { ergebnis, zwischen } = await mitVerarbeitung(ctx, {
+    const gespeichert = await mitVerarbeitung(ctx, {
       knopf,
       titel: zusammen ? "Zusammenführen" : "Seiten ordnen",
       text: zusammen ? "Wird zusammengeführt …" : "Wird geordnet …",
@@ -157,11 +143,16 @@ function speichernSchritt(ctx) {
           },
         });
       },
-      danach: (blob) => speichere([{ blob, name }]),
+      ziel,
+      dateien: (blob) => [{ blob, name }],
     });
-    if (!ergebnis) return;
-    if (zwischen) ctx.schliesseZwischen();
-    zeigeToast(`Gespeichert: ${name}`);
+    if (!gespeichert) return;
+    const erste = seiten[0];
+    zeigeGespeichert(ctx, {
+      gespeichert,
+      bilder: [{ eintrag: erste.datei, nr: erste.nr, drehung: erste.drehung }],
+      info: seitenText(n),
+    });
   }
 
   return {

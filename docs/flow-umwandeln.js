@@ -7,9 +7,9 @@
 
 import { el, ohneEndung, sichererName, eindeutigeNamen } from "./shared.js";
 import { hauptKnopf, setzeKnopfText } from "./wizard.js";
-import { zeigeToast } from "./ui.js";
 import { pdfZuBildern, bildUmwandeln, formatVon } from "./convert.js";
-import { speichere } from "./save.js";
+import { speicherZiel } from "./save.js";
+import { zeigeGespeichert } from "./gespeichert.js";
 import {
   schrittInhalt, abschnitt, optKarte, radioGruppe, hinweis, namensFeld, namensListe,
   mitVerarbeitung, fortschrittText,
@@ -108,18 +108,25 @@ function speichernSchritt(ctx) {
 
   async function speichern() {
     const dateiNamen = namen();
-    const { ergebnis, zwischen } = await mitVerarbeitung(ctx, {
+    const ziel = await speicherZiel(dateiNamen);
+    if (!ziel) return; // "Speichern unter" abgebrochen
+    const gespeichert = await mitVerarbeitung(ctx, {
       knopf,
       titel: "Umwandeln",
       text: "Wird umgewandelt …",
       einheiten: einPdf ? seiten : dateien.length,
       fehlerText: "Das Umwandeln hat leider nicht geklappt. Versuche es noch einmal.",
       job: ({ signal, melde }) => wandleUm(dateien, o.format, { signal, melde }),
-      danach: (blobs) => speichere(blobs.map((blob, i) => ({ blob, name: dateiNamen[i] }))),
+      ziel,
+      dateien: (blobs) => blobs.map((blob, i) => ({ blob, name: dateiNamen[i] })),
     });
-    if (!ergebnis) return;
-    if (zwischen) ctx.schliesseZwischen();
-    zeigeToast(dateiNamen.length > 1 ? `${dateiNamen.length} Dateien gespeichert.` : `Gespeichert: ${dateiNamen[0]}`);
+    if (!gespeichert) return;
+    zeigeGespeichert(ctx, {
+      gespeichert,
+      bilder: einPdf
+        ? Array.from({ length: Math.min(seiten, 3) }, (_, i) => ({ eintrag: d, nr: i + 1 }))
+        : dateien.map((x) => ({ eintrag: x })),
+    });
   }
 
   aktualisiere();
