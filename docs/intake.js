@@ -128,9 +128,12 @@ async function oeffneBild(file) {
   };
 }
 
-// Speicher der Vorschau wieder freigeben, wenn eine Datei entfernt wird.
+// Speicher der Vorschau (und z. B. der Seiten-Miniaturen aus thumbs.js) wieder
+// freigeben, wenn eine Datei entfernt wird.
 export function freigeben(eintrag) {
   URL.revokeObjectURL(eintrag.vorschau);
+  for (const aufraeumen of eintrag.aufraeumen || []) aufraeumen();
+  eintrag.aufraeumen = [];
 }
 
 // --- Regeln für das Aktionen-Menü (HANDOFF 6.1) ---

@@ -2,12 +2,20 @@
 // Titel + "Schritt 2 von 3" · Abbrechen), Fortschrittsbalken, scrollender
 // Inhalt (.fk-body) und Dock mit genau einem Haupt-Button.
 //
-// Zustand: { aktion, dateien, schritte, schritt, optionen, dirty }.
+// Zustand: { aktion, dateien, schritte, schritt, optionen, dirty, zwischen, lauf }.
 // Jeder Schritt einer Aktion ist ein Objekt { titel, baue(ctx) }; baue liefert
 // { inhalt, dock } (je ein Element oder eine Liste von Elementen).
 //
 // Verlauf: Jeder Schritt hat einen eigenen History-Eintrag. So ist
 // Browser-Zurück (Android-Geste) dasselbe wie der Zurück-Pfeil.
+//
+// Zwischen-Screen: Während einer Verarbeitung zeigt ein Schritt einen eigenen
+// Screen (ctx.zeigeZwischen) mit eigenem History-Eintrag. Zurück bricht die
+// Verarbeitung ab und zeigt den Schritt wieder; geht es danach weiter, ersetzt
+// der nächste Schritt den Eintrag des Zwischen-Screens.
+//
+// ctx.signal wird abgebrochen, sobald die Ansicht wechselt (anderer Schritt,
+// Zurück aus dem Zwischen-Screen, Abbrechen) – laufende Arbeit hört dann auf.
 
 import { el } from "./shared.js";
 import { icon } from "./icons.js";
@@ -72,9 +80,17 @@ const alsListe = (x) => (x == null ? [] : Array.isArray(x) ? x : [x]);
 
 // --- Schritte anzeigen ---
 
+// Laufende Arbeit der bisherigen Ansicht beenden und eine neue beginnen.
+function neuerLauf() {
+  if (z.lauf) z.lauf.abort();
+  z.lauf = new AbortController();
+}
+
 // richtung: "neu" (aus dem Startscreen), "vor" oder "zurueck".
 function zeigeSchritt(index, richtung) {
   z.schritt = index;
+  z.zwischen = false;
+  neuerLauf();
   const schritt = z.schritte[index];
   const nummer = index + 2;              // Schritt 1 ist immer "Datei wählen"
   const gesamt = z.schritte.length + 1;
@@ -104,16 +120,41 @@ function kontext() {
     dateien: z.dateien,
     optionen: z.optionen,            // Eingaben, bleiben bei Zurück erhalten
     istLetzter: z.schritt === z.schritte.length - 1,
+    signal: z.lauf.signal,
     weiter,
+    zurueck: () => history.back(),   // wie der Zurück-Pfeil
     geaendert() { z.dirty = true; }, // etwas bearbeitet → Abbrechen fragt nach
+    zeigeZwischen,
+    schliesseZwischen,
   };
 }
 
 function weiter() {
   if (!z || z.schritt >= z.schritte.length - 1) return;
   const neu = z.schritt + 1;
-  history.pushState({ fk: "wizard", schritt: neu }, "");
+  const eintrag = { fk: "wizard", schritt: neu };
+  if (z.zwischen) history.replaceState(eintrag, "");
+  else history.pushState(eintrag, "");
   zeigeSchritt(neu, "vor");
+}
+
+// Zwischen-Screen im laufenden Schritt (z. B. "Wird verkleinert …"). Kopfzeile
+// und Schritt-Anzeige bleiben, nur der Titel wechselt.
+function zeigeZwischen({ titel, inhalt, dock }) {
+  if (!z) return;
+  if (!z.zwischen) history.pushState({ fk: "wizard", schritt: z.schritt, zwischen: true }, "");
+  z.zwischen = true;
+  if (titel) rahmen.titel.textContent = titel;
+  rahmen.body.replaceChildren(...alsListe(inhalt));
+  rahmen.dock.replaceChildren(...alsListe(dock));
+  rahmen.body.scrollTop = 0;
+  spieleAb(rahmen.body, "in-fade");
+  rahmen.titel.focus({ preventScroll: true });
+}
+
+// Zwischen-Screen verlassen und den Schritt wieder zeigen.
+function schliesseZwischen() {
+  if (z && z.zwischen) history.back();
 }
 
 // --- Abbrechen & Zurück ---
@@ -140,11 +181,12 @@ function abbrechen() {
   z.leeren = true;
   z.dirty = false;
   // Alle Wizard-Einträge im Verlauf überspringen; popstate beendet dann den Wizard.
-  history.go(-(z.schritt + 1));
+  history.go(-(z.schritt + 1 + (z.zwischen ? 1 : 0)));
 }
 
 function beende({ leeren }) {
   schliesseOverlay();
+  z.lauf.abort();
   z = null;
   rahmen.wizard.hidden = true;
   rahmen.body.replaceChildren();
@@ -180,7 +222,15 @@ function beiPopstate(e) {
   }
 
   const index = Math.min(Math.max(ziel, 0), z.schritte.length - 1);
-  if (index !== z.schritt) zeigeSchritt(index, index < z.schritt ? "zurueck" : "vor");
+  const zuZwischen = Boolean(e.state.zwischen);
+  if (index !== z.schritt) {
+    zeigeSchritt(index, index < z.schritt ? "zurueck" : "vor");
+    if (zuZwischen) history.back(); // veralteter Zwischen-Eintrag (Browser-Vor)
+  } else if (z.zwischen && !zuZwischen) {
+    zeigeSchritt(index, "zurueck");  // Zurück aus dem Zwischen-Screen: Verarbeitung abbrechen
+  } else if (!z.zwischen && zuZwischen) {
+    history.back();                  // Browser-Vor in einen beendeten Zwischen-Screen
+  }
 }
 
 // --- Öffentlich ---
@@ -198,7 +248,7 @@ export function initWizard(optionen) {
 
 // Startet den Wizard für eine Aktion. schritte = [{ titel, baue(ctx) }].
 export function starteWizard({ aktion, dateien, schritte }) {
-  z = { aktion, dateien, schritte, schritt: 0, optionen: {}, dirty: false };
+  z = { aktion, dateien, schritte, schritt: 0, optionen: {}, dirty: false, zwischen: false, lauf: null };
   history.pushState({ fk: "wizard", schritt: 0 }, "");
   start.hidden = true;
   rahmen.wizard.hidden = false;
@@ -208,11 +258,19 @@ export function starteWizard({ aktion, dateien, schritte }) {
 }
 
 // Haupt-Button fürs Dock ("Weiter" bzw. im letzten Schritt "Speichern").
+// Solange er arbeitet (.is-working), werden weitere Tipps ignoriert.
 export function hauptKnopf(text, beiKlick, iconName) {
   const knopf = el("button", "btn btn-primary btn-block");
   knopf.type = "button";
   if (iconName) knopf.append(icon(iconName, 20, 2.1));
   knopf.append(el("span", null, text));
-  knopf.addEventListener("click", beiKlick);
+  knopf.addEventListener("click", (e) => {
+    if (!knopf.classList.contains("is-working")) beiKlick(e);
+  });
   return knopf;
+}
+
+// Text des Haupt-Buttons ändern (Icon bleibt).
+export function setzeKnopfText(knopf, text) {
+  knopf.querySelector("span:last-child").textContent = text;
 }

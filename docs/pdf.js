@@ -25,8 +25,8 @@ export function ladePdfjs() {
   return pdfjsPromise;
 }
 
-// pdf-lib (~0,5 MB) für Zusammenführen/Trennen: einmal als UMD-Skript laden und
-// das globale PDFLib zurückgeben. Wird nur bei Bedarf geladen.
+// pdf-lib (~0,5 MB) für Zusammenführen/Trennen/Umwandeln: einmal als UMD-Skript
+// laden und das globale PDFLib zurückgeben. Wird nur bei Bedarf geladen.
 let pdfLibPromise = null;
 export function ladePdfLib() {
   if (!pdfLibPromise) {
@@ -36,18 +36,21 @@ export function ladePdfLib() {
       s.src = "./lib/pdf-lib.min.js";
       s.onload = () =>
         window.PDFLib ? resolve(window.PDFLib) : reject(new Error("pdf-lib nicht verfügbar"));
-      s.onerror = () => reject(new Error("pdf-lib konnte nicht geladen werden"));
+      s.onerror = () => {
+        pdfLibPromise = null; // beim nächsten Mal erneut versuchen
+        reject(new Error("pdf-lib nicht verfügbar"));
+      };
       document.head.appendChild(s);
     });
   }
   return pdfLibPromise;
 }
 
-// "Dokument.pdf" -> "Dokument_compressed.pdf"
-function zielName(originalName) {
-  const punkt = originalName.lastIndexOf(".");
-  const stamm = punkt > 0 ? originalName.slice(0, punkt) : originalName;
-  return `${stamm}_compressed.pdf`;
+// Ein PDF mit pdf.js öffnen (die Datei wird dafür einmal gelesen).
+export async function oeffnePdfjs(file) {
+  const pdfjsLib = await ladePdfjs();
+  const daten = new Uint8Array(await file.arrayBuffer());
+  return pdfjsLib.getDocument({ data: daten }).promise;
 }
 
 // Render-Faktor so wählen, dass die längste Pixelkante der Seite ≈ maxSide ist
@@ -60,14 +63,58 @@ function zielSkalierung(breite, hoehe, maxSide) {
   return skala;
 }
 
-// Canvas -> JPEG-Blob (klassisches Canvas-Element, läuft im Hauptthread).
-function canvasZuJpeg(canvas, qualitaet) {
-  return new Promise((resolve) =>
-    canvas.toBlob(resolve, "image/jpeg", qualitaet)
+// Leeres Canvas mit weißem Papier (JPEG kann keine Transparenz).
+function papier(breite, hoehe) {
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.ceil(breite));
+  canvas.height = Math.max(1, Math.ceil(hoehe));
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  return canvas;
+}
+
+// Speicher eines Canvas sofort freigeben (hilft vor allem Safari).
+function canvasWeg(canvas) {
+  canvas.width = 0;
+  canvas.height = 0;
+}
+
+// Eine Seite so rendern, dass ihre längste Kante maxSide Pixel hat.
+// Rückgabe: { canvas, breite, hoehe } – breite/hoehe = Seitengröße in Punkt.
+export async function rendereSeite(page, maxSide) {
+  const basis = page.getViewport({ scale: 1 });
+  const viewport = page.getViewport({ scale: zielSkalierung(basis.width, basis.height, maxSide) });
+  const canvas = papier(viewport.width, viewport.height);
+  await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+  page.cleanup();
+  return { canvas, breite: basis.width, hoehe: basis.height };
+}
+
+// Canvas -> Blob (klassisches Canvas-Element, läuft im Hauptthread).
+export function canvasZuBlob(canvas, typ, qualitaet) {
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Bild nicht erzeugt"))), typ, qualitaet)
   );
 }
 
+// Canvas auf neue Pixelmaße verkleinern (für die kleineren Stufen).
+function verkleinert(canvas, breite, hoehe) {
+  const ziel = document.createElement("canvas");
+  ziel.width = breite;
+  ziel.height = hoehe;
+  const ctx = ziel.getContext("2d");
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(canvas, 0, 0, breite, hoehe);
+  return ziel;
+}
+
+// Zahl für das PDF (Punkt-Maße, höchstens 2 Nachkommastellen).
+const pt = (n) => String(Math.round(n * 100) / 100);
+
 // Baut aus einer Liste von JPEG-Seiten ein gültiges PDF (ein Bild pro Seite).
+// Jede Seite: { breite, hoehe (Punkt), pxBreite, pxHoehe, jpeg }. Die Seite
+// behält ihre Originalgröße, das Bild wird darauf gezogen.
 // Bewusst von Hand geschrieben – ein "ein JPEG je Seite"-PDF ist sehr einfach
 // und spart eine weitere Bibliothek.
 function bauePdf(seiten) {
@@ -107,7 +154,7 @@ function bauePdf(seiten) {
   endeObjekt();
 
   for (let i = 0; i < anzahl; i++) {
-    const { breite, hoehe, jpeg } = seiten[i];
+    const { breite, hoehe, pxBreite, pxHoehe, jpeg } = seiten[i];
     const seitenNr = 3 + i * 3;
     const inhaltNr = 4 + i * 3;
     const bildNr = 5 + i * 3;
@@ -115,13 +162,13 @@ function bauePdf(seiten) {
     // Seite
     beginnObjekt(seitenNr);
     schreib(
-      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${breite} ${hoehe}] ` +
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pt(breite)} ${pt(hoehe)}] ` +
         `/Resources << /XObject << /Im0 ${bildNr} 0 R >> >> /Contents ${inhaltNr} 0 R >>`
     );
     endeObjekt();
 
     // Inhalts-Stream: Bild über die ganze Seite zeichnen.
-    const inhalt = `q\n${breite} 0 0 ${hoehe} 0 0 cm\n/Im0 Do\nQ\n`;
+    const inhalt = `q\n${pt(breite)} 0 0 ${pt(hoehe)} 0 0 cm\n/Im0 Do\nQ\n`;
     const inhaltBytes = enc.encode(inhalt);
     beginnObjekt(inhaltNr);
     schreib(`<< /Length ${inhaltBytes.length} >>\nstream\n`);
@@ -132,7 +179,7 @@ function bauePdf(seiten) {
     // Bild (JPEG) als XObject.
     beginnObjekt(bildNr);
     schreib(
-      `<< /Type /XObject /Subtype /Image /Width ${breite} /Height ${hoehe} ` +
+      `<< /Type /XObject /Subtype /Image /Width ${pxBreite} /Height ${pxHoehe} ` +
         `/ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`
     );
     schreib(jpeg);
@@ -161,49 +208,43 @@ function bauePdf(seiten) {
   return ergebnis;
 }
 
-// Ein PDF verkleinern. Rückgabe: { blob, name } oder null (keine Einsparung).
-// onProgress(seite, anzahl) wird nach jeder fertigen Seite aufgerufen.
-export async function compressPdf(file, cfg, onProgress) {
-  const pdfjsLib = await ladePdfjs();
-  const daten = new Uint8Array(await file.arrayBuffer());
-  const doc = await pdfjsLib.getDocument({ data: daten }).promise;
+// Ein PDF in einer oder mehreren Stufen ({ maxSide, quality }) verkleinern.
+// Jede Seite wird nur einmal gerendert (in der größten nötigen Auflösung) und
+// dann je Stufe als JPEG kodiert – so kostet "Zielgröße" kaum mehr Zeit.
+// Rückgabe: je Stufe ein PDF-Blob, in der Reihenfolge von stufen.
+// beiSeite(seite, anzahl) meldet den Fortschritt; signal bricht ab.
+export async function verkleinerePdf(file, stufen, { signal, beiSeite } = {}) {
+  const doc = await oeffnePdfjs(file);
   const anzahl = doc.numPages;
-  const seiten = [];
+  const seiten = stufen.map(() => []);
+  const groesste = Math.max(...stufen.map((s) => s.maxSide));
 
   try {
     for (let p = 1; p <= anzahl; p++) {
-      const page = await doc.getPage(p);
+      signal?.throwIfAborted();
+      const { canvas, breite, hoehe } = await rendereSeite(await doc.getPage(p), groesste);
 
-      const basis = page.getViewport({ scale: 1 });
-      const skala = zielSkalierung(basis.width, basis.height, cfg.maxSide);
-      const viewport = page.getViewport({ scale: skala });
+      for (let i = 0; i < stufen.length; i++) {
+        signal?.throwIfAborted();
+        const s = stufen[i];
+        const skala = zielSkalierung(breite, hoehe, s.maxSide);
+        const pxBreite = Math.max(1, Math.ceil(breite * skala));
+        const pxHoehe = Math.max(1, Math.ceil(hoehe * skala));
+        const quelle = pxBreite >= canvas.width ? canvas : verkleinert(canvas, pxBreite, pxHoehe);
+        const blob = await canvasZuBlob(quelle, "image/jpeg", s.quality / 100);
+        seiten[i].push({
+          breite, hoehe, pxBreite: quelle.width, pxHoehe: quelle.height,
+          jpeg: new Uint8Array(await blob.arrayBuffer()),
+        });
+        if (quelle !== canvas) canvasWeg(quelle);
+      }
 
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.ceil(viewport.width));
-      canvas.height = Math.max(1, Math.ceil(viewport.height));
-      const ctx = canvas.getContext("2d");
-
-      // Weißer Hintergrund (JPEG kann keine Transparenz).
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      await page.render({ canvasContext: ctx, viewport }).promise;
-
-      const blob = await canvasZuJpeg(canvas, cfg.quality / 100);
-      const jpeg = new Uint8Array(await blob.arrayBuffer());
-      seiten.push({ breite: canvas.width, hoehe: canvas.height, jpeg });
-
-      page.cleanup();
-      if (onProgress) onProgress(p, anzahl);
+      canvasWeg(canvas);
+      if (beiSeite) beiSeite(p, anzahl);
     }
   } finally {
     await doc.destroy();
   }
 
-  const out = bauePdf(seiten);
-
-  // "Keine Einsparung"-Regel: nicht kleiner -> Original behalten.
-  if (out.length >= file.size) return null;
-
-  return { blob: new Blob([out], { type: "application/pdf" }), name: zielName(file.name) };
+  return seiten.map((s) => new Blob([bauePdf(s)], { type: "application/pdf" }));
 }

@@ -4,7 +4,7 @@
 // Cache gelegt; danach werden Anfragen bevorzugt aus dem Cache beantwortet.
 // So startet die App auch ohne Internet.
 
-const CACHE = "filekit-v6";
+const CACHE = "filekit-v7";
 
 // Die zur App gehörenden Dateien. Bei Änderungen die Versionsnummer oben
 // erhöhen (z. B. v6), damit Browser die neue Fassung laden.
@@ -20,11 +20,19 @@ const DATEIEN = [
   "start.js",
   "wizard.js",
   "flows.js",
+  "flow-teile.js",
+  "flow-verkleinern.js",
+  "flow-umwandeln.js",
+  "flow-trennen.js",
   "intake.js",
   "ui.js",
   "icons.js",
   "shared.js",
+  "thumbs.js",
+  "save.js",
   "compress.js",
+  "convert.js",
+  "split.js",
   "image.js",
   "pdf.js",
   "manifest.json",

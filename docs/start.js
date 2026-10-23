@@ -4,7 +4,7 @@
 // Hauptteil = vorgeschlagene Aktion, ▾ = Aktionen-Menü (Bottom Sheet).
 // Beim ersten Mal erscheint einmalig der Hinweis "Weitere Aktionen".
 
-import { el, humanSize } from "./shared.js";
+import { el, humanSize, seitenText, zusammensetzung, kurzerName } from "./shared.js";
 import { icon } from "./icons.js";
 import { oeffneDatei, freigeben, aktionenFuer, AKTIONEN, OeffnenFehler } from "./intake.js";
 import { oeffneSheet, sheetIstOffen, zeigeToast, ansage } from "./ui.js";
@@ -27,22 +27,6 @@ let ansicht = null;          // Elemente der Dateiansicht: { vorschau, mehr, doc
 let fehlerKarte = null;
 
 // --- Texte ---
-
-const seitenText = (n) => (n === 1 ? "1 Seite" : `${n} Seiten`);
-
-// "2 Bilder, 1 PDF"
-function zusammensetzung(dateien) {
-  const pdfs = dateien.filter((d) => d.art === "pdf").length;
-  const bilder = dateien.length - pdfs;
-  const teile = [];
-  if (bilder) teile.push(bilder === 1 ? "1 Bild" : `${bilder} Bilder`);
-  if (pdfs) teile.push(pdfs === 1 ? "1 PDF" : `${pdfs} PDFs`);
-  return teile.join(", ");
-}
-
-function kurzerName(name) {
-  return name.length > 30 ? `${name.slice(0, 19)}…${name.slice(-9)}` : name;
-}
 
 const FEHLER = {
   geschuetzt: {

@@ -243,7 +243,153 @@ p, h1, h2, h3 { margin: 0; }
 
 /* ===== Wizard (ab Schritt 2) – am PC eine zentrierte Spalte ===== */
 .fk-top-title b:focus { outline: none; } /* Titel bekommt nur programmatisch den Fokus */
-.wizard-stapel { gap: var(--fk-s-5); }
+.schritt { gap: var(--fk-s-4); padding-top: 4px; }
+.schritt-bereich, .abschnitt { gap: 10px; }
+.abschnitt-zusatz { font-weight: 500; }
+.opt-liste { gap: 10px; }
+.notiz:empty { display: none; }
+.note-text { gap: 4px; min-width: 0; }
+.note-titel { color: var(--fk-text); }
+.fk-dock:has(.btn-ghost-klein) { gap: 6px; }
+.fk-dock .btn-ghost-klein { height: 48px; }
+
+/* Miniaturen (echte Vorschau der 1. Seite bzw. des Bildes) */
+.mini { position: relative; width: 32px; height: 44px; flex: none; display: flex; align-items: center; justify-content: center; }
+.mini img { display: block; max-width: 100%; max-height: 100%; border-radius: 3px; box-shadow: 0 0 0 1px var(--fk-line-strong), 0 6px 12px -6px rgba(0, 0, 0, .8); }
+.mini-gross { width: 52px; height: 72px; }
+.mini-gross img { border-radius: 5px; }
+.mini-stapel { position: relative; width: 44px; height: 46px; flex: none; }
+.mini-stapel .mini { position: absolute; top: 1px; left: 0; }
+.mini-stapel .mini:nth-child(1) { z-index: 3; }
+.mini-stapel .mini:nth-child(2) { z-index: 2; left: 6px; transform: rotate(4deg); }
+.mini-stapel .mini:nth-child(3) { z-index: 1; left: 12px; transform: rotate(8deg); }
+.mini-stapel-gross { width: 62px; height: 72px; }
+.mini-stapel-gross .mini { width: 44px; height: 62px; top: 4px; }
+.mini-stapel-gross .mini:nth-child(2) { left: 8px; }
+.mini-stapel-gross .mini:nth-child(3) { left: 16px; }
+
+/* Dateizeile oben im Schritt */
+.datei-zeile { gap: 12px; padding: 10px 14px 10px 10px; }
+.datei-zeile-text { flex: 1; min-width: 0; gap: 1px; }
+.datei-zeile-name { color: var(--fk-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.datei-zeile-groesse { flex: none; }
+
+/* Verkleinern: Stärke (wachsendes Blatt) und Zielgröße */
+.staerke-vis { width: 48px; height: 48px; flex: none; display: flex; align-items: center; justify-content: center; border-radius: var(--fk-r-m); background: var(--fk-surface-3); }
+.staerke-blatt { background: var(--fk-text); }
+.is-stark .staerke-blatt { width: 14px; height: 19px; border-radius: 2px; }
+.is-mittel .staerke-blatt { width: 20px; height: 27px; border-radius: 2.5px; }
+.is-schonend .staerke-blatt { width: 26px; height: 35px; border-radius: 3px; }
+.chip-reihe { flex-wrap: wrap; gap: 10px; }
+.chip:disabled { color: var(--fk-faint); border-color: var(--fk-line); background: transparent; cursor: not-allowed; }
+.satz-ziel { color: var(--fk-text); }
+.field-hint.is-fehler { color: var(--fk-danger-text); font-weight: 600; }
+.field-hint.is-fehler:empty { display: none; }
+
+/* Ergebnis (Verkleinern) */
+.ergebnis { padding: 16px; gap: 16px; }
+.ergebnis-kopf { gap: 14px; align-items: flex-start; }
+.ergebnis-text { flex: 1; min-width: 0; gap: 6px; }
+.ergebnis-titel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ergebnis-werte { gap: 8px; flex-wrap: wrap; }
+.ergebnis-balken { gap: 8px; }
+.ergebnis-balken.mit-ziel { padding-bottom: 20px; }
+.balken-reihe { gap: 10px; }
+.balken-label { width: 56px; flex: none; }
+.balken { display: block; height: 10px; border-radius: 5px; }
+.balken-voll { flex: 1; background: var(--fk-surface-3); }
+.balken-spur { position: relative; flex: 1; display: flex; }
+.bar-after {
+  background: var(--fk-accent-text); box-shadow: 0 0 12px var(--fk-accent-glow);
+  transform-origin: left center; animation: fk-schrumpfen 900ms var(--fk-ease-out) 300ms both;
+}
+.bar-after.is-warning { background: var(--fk-warning-text); box-shadow: none; }
+@keyframes fk-schrumpfen { from { transform: scaleX(var(--von, 4)); } }
+.balken-ziel { position: absolute; top: -6px; bottom: -6px; width: 2px; border-radius: 1px; background: var(--fk-text); }
+.balken-ziel-text { position: absolute; top: 16px; transform: translateX(-50%); white-space: nowrap; color: var(--fk-text); }
+.balken-ziel-text.am-anfang { transform: none; }
+.balken-ziel-text.am-ende { transform: translateX(-100%); }
+.ergebnis-liste { list-style: none; margin: 0; padding: 4px 0; }
+.ergebnis-zeile { gap: 12px; padding: 10px 14px 10px 12px; }
+.ergebnis-zeile + .ergebnis-zeile { border-top: 1px solid var(--fk-line); }
+.ergebnis-zeile-text { flex: 1; min-width: 0; gap: 2px; }
+.ergebnis-zeile-name { color: var(--fk-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Ausgabe-Zeile mit „Ändern“ */
+.ausgabe-zeile { gap: 12px; min-height: 56px; padding: 4px 6px 4px 16px; }
+.ausgabe-text { flex: 1; min-width: 0; }
+.ausgabe-zeile .btn-link { padding: 0 12px; margin: 0; }
+
+/* Dateinamen-Vorschau */
+.namelist > span > svg { flex: none; color: var(--fk-accent-text); }
+.namelist-name { overflow: hidden; text-overflow: ellipsis; }
+.namelist > .namelist-luecke { padding-left: 24px; }
+
+/* Umwandeln: Format-Kachel */
+.fmt {
+  width: 52px; height: 52px; flex: none; display: flex; align-items: center; justify-content: center;
+  border-radius: var(--fk-r-m); background: var(--fk-surface-3); color: var(--fk-text);
+  font-size: 13px; font-weight: 800; letter-spacing: .06em;
+  transition: background-color var(--fk-d-fast) ease, box-shadow var(--fk-d-fast) ease;
+}
+.is-selected .fmt { background: var(--fk-accent); color: var(--fk-paper); box-shadow: 0 8px 18px -8px var(--fk-accent-glow); }
+
+/* Trennen: Seiten-Raster (Antippen = Haken) */
+.toolbar .btn-link { padding: 0 10px; margin: 0; }
+.zaehler { flex: 1; }
+.seiten-raster { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+button.tile { width: 100%; text-align: left; cursor: pointer; }
+.tile:focus-visible { outline: 3px solid var(--fk-focus); outline-offset: 2px; }
+.seite-rahmen { display: flex; align-items: center; justify-content: center; box-shadow: none; }
+.seite {
+  --r: .707; position: relative; display: block; overflow: hidden;
+  width: calc(100% * min(1, var(--r) / .707)); aspect-ratio: var(--r);
+  border-radius: var(--fk-r-xs); background: var(--fk-surface-3); box-shadow: 0 6px 16px -8px rgba(0, 0, 0, .7);
+}
+.seite.ist-da { background: var(--fk-paper); }
+.seite img { display: block; width: 100%; height: 100%; object-fit: cover; animation: fk-fade var(--fk-d-fast) ease both; }
+
+/* Trennen: Ausgabe-Karten nebeneinander mit Mini-Grafik */
+.trenn-karten { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.opt.ocard { position: relative; flex-direction: column; align-items: stretch; gap: 12px; padding: 14px; }
+.ocard .radio { position: absolute; top: 12px; right: 12px; }
+.ocard .opt-title { font-size: 15px; line-height: 1.3; }
+.trenn-vis { height: 64px; display: flex; align-items: center; justify-content: center; gap: 5px; border-radius: 12px; background: var(--fk-surface-3); color: var(--fk-muted); }
+.trenn-stapel { gap: 3px; }
+.pg { width: 22px; height: 30px; border-radius: 3px; background: var(--fk-text); box-shadow: 0 4px 8px -4px rgba(0, 0, 0, .6); }
+.pg-klein { width: 14px; height: 20px; }
+.pg.pdf { background: var(--fk-paper); box-shadow: inset 0 3px 0 var(--fk-accent-text), 0 4px 8px -4px rgba(0, 0, 0, .6); }
+
+/* Verarbeiten (Referenz 08): Ring um die Seite, Scan-Strahl, Segmente */
+.verarb { min-height: 100%; align-items: center; justify-content: center; gap: 28px; padding-bottom: 40px; }
+.verarb-ring { position: relative; width: 236px; height: 236px; flex: none; display: flex; align-items: center; justify-content: center; }
+.verarb-glow { position: absolute; inset: -30px; border-radius: 50%; background: radial-gradient(closest-side, var(--fk-accent-glow), transparent); opacity: .7; }
+.verarb-kreis { position: absolute; inset: 0; width: 236px; height: 236px; transform: rotate(-90deg); }
+.verarb-bahn { stroke: var(--fk-line); }
+.verarb-bogen { stroke: var(--fk-accent-text); filter: drop-shadow(0 0 6px var(--fk-accent-glow)); transition: stroke-dashoffset 420ms var(--fk-ease-out); }
+.verarb-seite {
+  --r: .707; position: relative; overflow: hidden;
+  height: min(142px, calc(150px / var(--r))); aspect-ratio: var(--r);
+  border-radius: 6px; background: var(--fk-paper);
+  box-shadow: 0 20px 40px -14px rgba(0, 0, 0, .8), 0 0 40px -8px var(--fk-accent-glow);
+  animation: fk-squeeze 900ms var(--fk-ease-io) infinite;
+}
+.verarb-seite img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.verarb-strahl {
+  position: absolute; left: 0; right: 0; top: 0; height: 40%;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--fk-accent-text) 35%, transparent), transparent);
+  animation: fk-strahl 900ms var(--fk-ease-io) infinite;
+}
+@keyframes fk-strahl { from { transform: translateY(-100%); } to { transform: translateY(250%); } }
+.verarb-status { align-items: center; gap: 6px; text-align: center; }
+.verarb-leiste { gap: 4px; width: 100%; max-width: 260px; }
+.verarb-leiste .sd { height: 6px; flex: 1; border-radius: 3px; background: var(--fk-line-strong); transition: background-color 300ms ease; }
+.verarb-leiste .sd.done { background: var(--fk-accent-text); }
+.verarb-leiste .sd.now { background: var(--fk-accent-text); animation: fk-sd-puls 900ms ease-in-out infinite; }
+@keyframes fk-sd-puls { 50% { opacity: .35; } }
+.verarb-leiste.ist-balken { height: 6px; border-radius: 3px; background: var(--fk-line-strong); overflow: hidden; }
+.verarb-leiste.ist-balken .sd { flex: none; width: 0; transition: width 420ms var(--fk-ease-out); }
+
 .wizard-platzhalter {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   padding: 28px 20px; text-align: center; border-style: dashed; border-color: var(--fk-line-strong);
@@ -275,4 +421,6 @@ p, h1, h2, h3 { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   .start-fehler, .dz-ring.is-neu { animation: fk-fade 200ms ease both !important; }
   .start-preview, .dz-inner { transition: none; }
+  .verarb-seite, .verarb-leiste .sd.now, .bar-after { animation: none; }
+  .verarb-strahl { display: none; }
 }

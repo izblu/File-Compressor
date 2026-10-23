@@ -3,7 +3,8 @@
 // Reproduziert das Verhalten von compress.py:
 //   - Bild auf max_side herunterskalieren (nur verkleinern, nie vergrößern)
 //   - als JPEG mit fester Qualität neu speichern (PNG bleibt PNG)
-//   - wenn das Ergebnis nicht kleiner ist, wird es verworfen ("keine Einsparung")
+//   - wenn das Ergebnis nicht kleiner ist, wird es verworfen ("keine Einsparung",
+//     entscheidet compress.js)
 //
 // Es wird KEINE externe Bibliothek gebraucht – der Browser kann das von Haus aus.
 
@@ -16,18 +17,13 @@ function zielMasse(breite, hoehe, maxSide) {
   }
   const faktor = maxSide / laengsteKante;
   return {
-    breite: Math.round(breite * faktor),
-    hoehe: Math.round(hoehe * faktor),
+    breite: Math.max(1, Math.round(breite * faktor)),
+    hoehe: Math.max(1, Math.round(hoehe * faktor)),
   };
 }
 
-// Hängt "_compressed" an den Dateinamen an und setzt die gewünschte Endung.
-// Beispiel: "Urlaub.JPG" -> "Urlaub_compressed.jpg"
-function zielName(originalName, endung) {
-  const punkt = originalName.lastIndexOf(".");
-  const stamm = punkt > 0 ? originalName.slice(0, punkt) : originalName;
-  return `${stamm}_compressed.${endung}`;
-}
+export const istPng = (file) =>
+  file.type === "image/png" || file.name.toLowerCase().endsWith(".png");
 
 // Wandelt ein Canvas in ein Blob (Datei-Inhalt) um. Die nötige Methode
 // unterscheidet sich je nachdem, ob ein normales oder ein Offscreen-Canvas
@@ -38,57 +34,84 @@ function canvasZuBlob(canvas, typ, qualitaet) {
     return canvas.convertToBlob({ type: typ, quality: qualitaet });
   }
   // Normales <canvas>-Element
-  return new Promise((resolve) => canvas.toBlob(resolve, typ, qualitaet));
+  return new Promise((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Bild nicht erzeugt"))), typ, qualitaet)
+  );
 }
 
-// Komprimiert eine einzelne Bilddatei.
-// Rückgabe: { blob, name }  oder  null, wenn keine Einsparung möglich war.
-export async function compressImage(file, cfg) {
-  const istPng =
-    file.type === "image/png" || file.name.toLowerCase().endsWith(".png");
+// Passendes Canvas anlegen (Offscreen, falls verfügbar – sonst klassisch).
+function neuesCanvas(breite, hoehe) {
+  if (typeof OffscreenCanvas !== "undefined") return new OffscreenCanvas(breite, hoehe);
+  const canvas = document.createElement("canvas");
+  canvas.width = breite;
+  canvas.height = hoehe;
+  return canvas;
+}
 
-  // Bild dekodieren. createImageBitmap ist schnell und beachtet die
-  // EXIF-Drehung (damit Handy-Fotos nicht auf der Seite liegen).
-  let bitmap;
+// Bild dekodieren. createImageBitmap ist schnell und beachtet die EXIF-Drehung
+// (damit Handy-Fotos nicht auf der Seite liegen). Für Formate, die nur ein
+// <img> öffnen kann (z. B. HEIC in Safari), gibt es einen Umweg.
+// Rückgabe: { quelle, breite, hoehe, schliessen() } – quelle passt in drawImage.
+export async function dekodiere(file) {
+  let bitmap = null;
   try {
     bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   } catch {
-    // Ältere Browser kennen die Option nicht -> ohne erneut versuchen.
-    bitmap = await createImageBitmap(file);
+    try {
+      bitmap = await createImageBitmap(file); // ältere Browser kennen die Option nicht
+    } catch {
+      bitmap = null;
+    }
   }
-
-  const { breite, hoehe } = zielMasse(bitmap.width, bitmap.height, cfg.maxSide);
-
-  // Passendes Canvas anlegen (Offscreen, falls verfügbar – sonst klassisch).
-  let canvas;
-  if (typeof OffscreenCanvas !== "undefined") {
-    canvas = new OffscreenCanvas(breite, hoehe);
-  } else {
-    canvas = document.createElement("canvas");
-    canvas.width = breite;
-    canvas.height = hoehe;
+  if (bitmap) {
+    return { quelle: bitmap, breite: bitmap.width, hoehe: bitmap.height, schliessen: () => bitmap.close() };
   }
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.src = url;
+  try {
+    await img.decode();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+  return { quelle: img, breite: img.naturalWidth, hoehe: img.naturalHeight, schliessen: () => {} };
+}
 
+// Bild auf ein Canvas zeichnen. weiss = Hintergrund füllen (für JPEG/PDF,
+// sonst würden transparente Bereiche schwarz).
+export function zeichne(bild, breite, hoehe, weiss) {
+  const canvas = neuesCanvas(breite, hoehe);
   const ctx = canvas.getContext("2d");
-
-  // Für JPEG (kann keine Transparenz) zuerst weißen Hintergrund füllen,
-  // damit transparente Bereiche nicht schwarz werden.
-  if (!istPng) {
+  if (weiss) {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, breite, hoehe);
   }
-  ctx.drawImage(bitmap, 0, 0, breite, hoehe);
-  if (bitmap.close) bitmap.close(); // Speicher früh freigeben.
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(bild.quelle, 0, 0, breite, hoehe);
+  return canvas;
+}
 
-  // PNG bleibt PNG; alles andere wird als JPEG mit gewählter Qualität gespeichert.
-  const typ = istPng ? "image/png" : "image/jpeg";
-  const qualitaet = istPng ? undefined : cfg.quality / 100;
-  const blob = await canvasZuBlob(canvas, typ, qualitaet);
+export function alsBlob(canvas, format, qualitaet) {
+  return canvasZuBlob(canvas, format === "png" ? "image/png" : "image/jpeg",
+    format === "png" ? undefined : qualitaet);
+}
 
-  // "Keine Einsparung"-Regel wie in compress.py: nicht kleiner -> verwerfen.
-  if (!blob || blob.size >= file.size) {
-    return null;
+// Ein Bild in einer oder mehreren Stufen ({ maxSide, quality }) verkleinern:
+// einmal dekodieren, je Stufe neu kodieren. PNG bleibt PNG; alles andere wird
+// JPEG. Rückgabe: je Stufe ein Blob, in der Reihenfolge von stufen.
+export async function verkleinereBild(file, stufen, { signal } = {}) {
+  const png = istPng(file);
+  const bild = await dekodiere(file);
+  try {
+    const ergebnisse = [];
+    for (const s of stufen) {
+      signal?.throwIfAborted();
+      const { breite, hoehe } = zielMasse(bild.breite, bild.hoehe, s.maxSide);
+      const canvas = zeichne(bild, breite, hoehe, !png);
+      ergebnisse.push(await alsBlob(canvas, png ? "png" : "jpg", s.quality / 100));
+    }
+    return ergebnisse;
+  } finally {
+    bild.schliessen(); // Speicher früh freigeben.
   }
-
-  return { blob, name: zielName(file.name, istPng ? "png" : "jpg") };
 }
