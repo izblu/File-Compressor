@@ -9,6 +9,11 @@
 //     Verschieben (danach Ziel antippen) · Drehen · Löschen.
 //   · Löschen immer mit Toast "Rückgängig", keine Rückfrage.
 //
+// Am PC (ab 1024 px, HANDOFF 21b) nutzt der Editor die volle Breite: Raster mit
+// 4–5 Spalten, Fußleiste "8 Seiten aus 5 Dateien" + "Weiter". Beim Ziehen
+// bleiben die anderen Kacheln stehen, eine Einfüge-Linie zeigt das Ziel. Beim
+// Zusammenführen lassen sich Dateien direkt in den Editor ziehen.
+//
 // Zustand in ctx.optionen (bleibt bei Zurück/Weiter erhalten):
 //   o.dateien – Ursprungsdateien; Position + 1 = Dateinummer
 //   o.seiten  – [{ id, datei, nr, drehung }] in der neuen Reihenfolge
@@ -18,11 +23,13 @@ import { icon } from "./icons.js";
 import { hauptKnopf } from "./wizard.js";
 import { oeffneSheet, zeigeToast, ansage, wenigBewegung } from "./ui.js";
 import { oeffneDatei, freigeben, OeffnenFehler } from "./intake.js";
-import { meldeOeffnenFehler } from "./start.js";
+import { meldeOeffnenFehler, meldeAblage } from "./start.js";
 import { beobachteSeiten } from "./thumbs.js";
 import { zeigeVollbild } from "./vollbild.js";
 
-const ANSICHT_KEY = "fk-editor-spalten"; // "2" | "1"
+const ANSICHT_KEY = "fk-editor-spalten"; // "2" | "1" (am PC: kleine | große Vorschau)
+const breit = window.matchMedia("(min-width: 1024px)");                  // PC-Layout
+const maus = window.matchMedia("(hover: hover) and (pointer: fine)");    // "Klicke" statt "Tippe"
 const HEBEN_MS = 250;       // Touch: so lange halten, bis die Seite angehoben ist
 const AUSWAHL_MS = 500;     // so lange halten (ohne Bewegung) → Mehrfachauswahl
 const MAUS_SCHWELLE = 4;    // px – ab hier zieht die Maus
@@ -87,12 +94,16 @@ export function editorSchritt(ctx) {
   let zug = null;               // Ziehen mit Finger/Maus
   let tasten = null;            // per Tastatur angehobene Seite
   let klickSperreBis = 0;       // Klick direkt nach Ziehen/Long-Press ignorieren
+  let nachAbbruch = false;      // Ziehen per Esc abgebrochen → folgenden Klick ignorieren
   let oeffnet = false;          // weitere Dateien werden gerade geöffnet
+  let ablageAn = false;         // Dateien werden gerade über den Editor gezogen
   let rueckgaengig = null;      // Toast mit "Rückgängig"
 
   const teil = (k) => teile.get(Number(k.dataset.id));
   const body = () => box.closest(".fk-body");
   const gewaehlte = () => o.seiten.filter((s) => auswahl.has(s.id));
+  // Spalten, die das Raster gerade wirklich zeigt (Handy 1–2, PC 2–6).
+  const spaltenJetzt = () => getComputedStyle(raster).gridTemplateColumns.split(" ").length;
 
   // --- Aufbau ---
 
@@ -113,9 +124,10 @@ export function editorSchritt(ctx) {
   const ansicht = el("div", "viewtoggle");
   ansicht.setAttribute("role", "group");
   ansicht.setAttribute("aria-label", "Ansicht");
-  const zwei = ansichtKnopf(2, "2 Spalten", "ansicht-2-spalten");
-  const eine = ansichtKnopf(1, "1 Spalte", "ansicht-1-spalte");
+  const zwei = ansichtKnopf(2, "ansicht-2-spalten");
+  const eine = ansichtKnopf(1, "ansicht-1-spalte");
   ansicht.append(zwei, eine);
+  beschrifteAnsicht();
   leiste.append(zahl, auswaehlen, ansicht);
 
   const raster = el("div", "ed-raster ist-normal");
@@ -143,7 +155,8 @@ export function editorSchritt(ctx) {
     neu.type = "button";
     neuPlus = el("span", "plus");
     neuText = el("span", null, "Weitere Dateien hinzufügen");
-    neu.append(neuPlus, neuText);
+    // Nur mit Maus: Dateien lassen sich auch in den Editor ziehen.
+    neu.append(neuPlus, neuText, el("span", "t-xs t-muted ed-neu-oder", "oder hierher ziehen"));
     zeigeNeuBereit();
     eingabe = el("input");
     eingabe.type = "file";
@@ -163,8 +176,10 @@ export function editorSchritt(ctx) {
 
   box.append(...(zusammen ? [legende] : []), leiste, raster, hilfe, ...(eingabe ? [eingabe] : []));
 
-  // Dock je Modus
+  // Dock je Modus. Am PC steht links daneben "8 Seiten aus 5 Dateien".
   const weiterKnopf = hauptKnopf("Weiter", ctx.weiter);
+  const fussText = el("p", "t-body t-muted ed-fuss");
+  fussText.setAttribute("aria-live", "polite");
 
   const selbar = el("div", "selbar");
   selbar.setAttribute("role", "toolbar");
@@ -203,13 +218,18 @@ export function editorSchritt(ctx) {
     titel: el("b", null, "Wohin verschieben?"),
   };
 
-  function ansichtKnopf(n, label, iconName) {
+  function ansichtKnopf(n, iconName) {
     const b = el("button");
     b.type = "button";
-    b.setAttribute("aria-label", label);
     b.append(icon(iconName, 18, 2));
     b.addEventListener("click", () => setzeSpalten(n));
     return b;
+  }
+
+  // Am PC gibt es mehr als 2 Spalten – dort heißt es "Kleine/Große Vorschau".
+  function beschrifteAnsicht() {
+    zwei.setAttribute("aria-label", breit.matches ? "Kleine Vorschau" : "2 Spalten");
+    eine.setAttribute("aria-label", breit.matches ? "Große Vorschau" : "1 Spalte");
   }
 
   function selKnopf(iconName, text, beiKlick) {
@@ -300,6 +320,7 @@ export function editorSchritt(ctx) {
     zahl.textContent = zusammen ? seitenText(n) : `${o.dateien[0].file.name} · ${seitenText(n)}`;
     zahl.title = zusammen ? "" : o.dateien[0].file.name;
     if (zusammen) zeigeLegende();
+    zeigeFuss();
 
     if (modus === "auswahl") {
       auswahlTitel.textContent = `${auswahl.size} ausgewählt`;
@@ -309,6 +330,16 @@ export function editorSchritt(ctx) {
       drehenK.disabled = keine;
       loeschenK.disabled = keine;
     }
+  }
+
+  // Fußleiste am PC: "8 Seiten aus 5 Dateien" bzw. beim Ziehen von Dateien der Hinweis.
+  function zeigeFuss() {
+    const n = o.seiten.length;
+    const dateien = new Set(o.seiten.map((s) => s.datei)).size;
+    if (ablageAn) fussText.textContent = "Loslassen zum Hinzufügen – die Seiten kommen ans Ende.";
+    else if (zusammen) fussText.textContent = `${seitenText(n)} aus ${dateien === 1 ? "1 Datei" : `${dateien} Dateien`}`;
+    else fussText.textContent = `${o.dateien[0].file.name} · ${seitenText(n)}`;
+    fussText.classList.toggle("t-accent", ablageAn);
   }
 
   // Legende: nur Dateien, von denen noch Seiten übrig sind.
@@ -364,13 +395,13 @@ export function editorSchritt(ctx) {
     ende.hidden = modus !== "ziel";
     if (modus === "normal") {
       ctx.setzeKopf(null);
-      ctx.setzeDock(weiterKnopf);
+      ctx.setzeDock([fussText, weiterKnopf]);
     } else if (modus === "auswahl") {
       ctx.setzeKopf(auswahlKopf);
       ctx.setzeDock(selbar);
     } else {
       const n = auswahl.size;
-      zielHinweis.textContent = `Tippe auf „Hier einfügen“ – ${n === 1 ? "die Seite kommt" : `die ${n} Seiten kommen`} dorthin.`;
+      zielHinweis.textContent = `${maus.matches ? "Klicke" : "Tippe"} auf „Hier einfügen“ – ${n === 1 ? "die Seite kommt" : `die ${n} Seiten kommen`} dorthin.`;
       ctx.setzeKopf(zielKopf);
       ctx.setzeDock(zielHinweis);
     }
@@ -538,6 +569,10 @@ export function editorSchritt(ctx) {
   const sperreKlick = () => { klickSperreBis = performance.now() + 400; };
 
   raster.addEventListener("click", (e) => {
+    if (nachAbbruch) {
+      nachAbbruch = false;
+      return;
+    }
     if (performance.now() < klickSperreBis) return;
     const k = e.target.closest(".ed-kachel");
     if (k) tippe(teil(k));
@@ -619,8 +654,8 @@ export function editorSchritt(ctx) {
 
   function schrittWeite(taste) {
     const p = PFEILE[taste];
-    if (p === "hoch") return -spalten;
-    if (p === "runter") return spalten;
+    if (p === "hoch") return -spaltenJetzt();
+    if (p === "runter") return spaltenJetzt();
     return p;
   }
 
@@ -698,6 +733,7 @@ export function editorSchritt(ctx) {
   // --- Ziehen mit Finger oder Maus (Pointer Events) ---
 
   raster.addEventListener("pointerdown", (e) => {
+    nachAbbruch = false;
     if (modus !== "normal" || tasten || zug || !e.isPrimary || e.button !== 0) return;
     const k = e.target.closest(".ed-kachel");
     if (!k) return;
@@ -762,11 +798,23 @@ export function editorSchritt(ctx) {
   function endeZug() {
     if (!zug) return;
     clearTimeout(zug.timer);
+    document.removeEventListener("keydown", escBeimZiehen, true);
     try { zug.t.k.releasePointerCapture(zug.id); } catch {}
     zug = null;
   }
 
+  // Esc bricht das Ziehen ab: Die Seite kehrt an ihren Platz zurück.
+  function escBeimZiehen(e) {
+    if (e.key !== "Escape" || !zug || zug.phase !== "zieht") return;
+    e.preventDefault();
+    e.stopPropagation();
+    lege(true);
+    nachAbbruch = true; // der Klick beim Loslassen öffnet kein Seitenmenü
+  }
+
   // Seite anheben: Platzhalter an ihre Stelle, die Kachel folgt dem Zeiger.
+  // Handy: Der Platzhalter wandert mit, die anderen Kacheln rutschen nach.
+  // PC: Platzhalter und Kacheln bleiben stehen, eine Einfüge-Linie zeigt das Ziel.
   function hebe() {
     if (!zug || zug.phase !== "wartet") return;
     clearTimeout(zug.timer);
@@ -776,15 +824,25 @@ export function editorSchritt(ctx) {
     zug.phase = "zieht";
     zug.dx = zug.x - r.left;
     zug.dy = zug.y - r.top;
-    zug.ziel = o.seiten.indexOf(zug.t.s);
+    zug.ziel = zug.start = o.seiten.indexOf(zug.t.s);
     zug.platz = el("div", "tile-slot ed-platz");
     zug.platz.setAttribute("aria-hidden", "true");
     k.before(zug.platz);
+    if (breit.matches) {
+      zug.linie = el("span", "ed-linie");
+      zug.linie.setAttribute("aria-hidden", "true");
+      zug.linie.hidden = true;
+      raster.append(zug.linie);
+      // Kleiner und leicht durchscheinend (Referenz 21b), zum Zeiger hin verkleinert.
+      k.classList.add("ist-pc-zug");
+      k.style.transformOrigin = `${zug.dx}px ${zug.dy}px`;
+    }
     Object.assign(k.style, {
       position: "fixed", left: `${r.left}px`, top: `${r.top}px`,
       width: `${r.width}px`, height: `${r.height}px`, margin: "0", zIndex: "20",
     });
     k.classList.add("is-dragging");
+    document.addEventListener("keydown", escBeimZiehen, true);
     try { navigator.vibrate?.(10); } catch {}
     zug.raf = requestAnimationFrame(rolle);
   }
@@ -796,24 +854,71 @@ export function editorSchritt(ctx) {
     pruefeZiel();
   }
 
-  // Wohin käme die Seite, wenn man jetzt losließe? Platzhalter dorthin.
+  // Wohin käme die Seite, wenn man jetzt losließe? Platzhalter (Handy) bzw.
+  // Einfüge-Linie (PC) dorthin.
   function pruefeZiel() {
     const andere = o.seiten.filter((s) => s !== zug.t.s).map((s) => teile.get(s.id).k);
     const r = raster.getBoundingClientRect();
     const px = zug.x - r.left;
     const py = zug.y - r.top;
+    const eineSpalte = spaltenJetzt() === 1;
     let ziel = 0;
     for (const k of andere) {
       const links = k.offsetLeft;
       const oben = k.offsetTop;
-      const danach = spalten === 1
+      const danach = eineSpalte
         ? py > oben + k.offsetHeight / 2
         : py > oben + k.offsetHeight || (py >= oben && px > links + k.offsetWidth / 2);
       if (danach) ziel++;
     }
+    if (zug.linie) {
+      zug.ziel = ziel;
+      zeigeLinie(andere, ziel, py, eineSpalte);
+      return;
+    }
     if (ziel === zug.ziel) return;
     zug.ziel = ziel;
     gleite(() => raster.insertBefore(zug.platz, andere[ziel] || ende), zug.t.k);
+  }
+
+  // Einfüge-Linie in die Lücke vor andere[ziel] setzen. Steht der Zeiger noch
+  // in der Reihe der vorigen Seite, sitzt sie rechts neben ihr (Reihenende).
+  // Am alten Platz (Ziel = Start) zeigt nur der Platzhalter, dass sich nichts ändert.
+  function zeigeLinie(andere, ziel, py, eineSpalte) {
+    const linie = zug.linie;
+    if (ziel === zug.start) {
+      linie.hidden = true;
+      return;
+    }
+    const stil = getComputedStyle(raster);
+    const vor = andere[ziel - 1];
+    const nach = andere[ziel];
+    const amEnde = vor && (!nach || (nach.offsetTop !== vor.offsetTop && py < vor.offsetTop + vor.offsetHeight));
+    const k = amEnde ? vor : nach;
+    let x, y, b, h;
+    if (eineSpalte) {
+      const luecke = parseFloat(stil.rowGap) || 0;
+      x = k.offsetLeft + 10;
+      y = (amEnde ? k.offsetTop + k.offsetHeight + luecke / 2 : k.offsetTop - luecke / 2) - 2;
+      b = k.offsetWidth - 20;
+      h = 4;
+    } else {
+      const luecke = parseFloat(stil.columnGap) || 0;
+      x = (amEnde ? k.offsetLeft + k.offsetWidth + luecke / 2 : k.offsetLeft - luecke / 2) - 2;
+      y = k.offsetTop + 10;
+      b = 4;
+      h = k.offsetHeight - 20;
+    }
+    const neuDa = linie.hidden;
+    linie.hidden = false;
+    if (neuDa) linie.style.transition = "none"; // erscheint am Ziel, gleitet erst danach
+    linie.style.width = `${b}px`;
+    linie.style.height = `${h}px`;
+    linie.style.transform = `translate(${x}px, ${y}px)`;
+    if (neuDa) {
+      void linie.offsetWidth;
+      linie.style.transition = "";
+    }
   }
 
   // Auto-Scroll, solange die Seite am oberen/unteren Rand gehalten wird.
@@ -834,9 +939,10 @@ export function editorSchritt(ctx) {
 
   // Ablegen (abbruch = zurück an den alten Platz).
   function lege(abbruch) {
-    const { t, platz, ziel, raf } = zug;
+    const { t, platz, ziel, raf, linie } = zug;
     const { k } = t;
     cancelAnimationFrame(raf);
+    if (linie) linie.remove();
     const vonL = parseFloat(k.style.left);
     const vonT = parseFloat(k.style.top);
     endeZug();
@@ -848,10 +954,12 @@ export function editorSchritt(ctx) {
       if (reihenfolge.every((s, i) => s === o.seiten[i])) reihenfolge = null;
     }
 
+    const angehoben = getComputedStyle(k).transform; // scale + Drehung während des Ziehens
+    const ursprung = k.style.transformOrigin;
     gleite(() => {
       k.style.transition = "none";
-      k.classList.remove("is-dragging");
-      for (const p of ["position", "left", "top", "width", "height", "margin", "zIndex"]) k.style[p] = "";
+      k.classList.remove("is-dragging", "ist-pc-zug");
+      for (const p of ["position", "left", "top", "width", "height", "margin", "zIndex", "transformOrigin"]) k.style[p] = "";
       platz.remove();
       if (reihenfolge) o.seiten = reihenfolge;
       ordneDom();
@@ -861,10 +969,11 @@ export function editorSchritt(ctx) {
     const jetzt = k.getBoundingClientRect();
     k.style.transition = "";
     if (!wenigBewegung()) {
-      laufend.set(k, k.animate([
-        { transform: `translate(${vonL - jetzt.left}px, ${vonT - jetzt.top}px) scale(1.06) rotate(-2.5deg)` },
-        { transform: "none" },
-      ], { duration: 260, easing: "cubic-bezier(.2, .8, .2, 1)" }));
+      const von = `translate(${vonL - jetzt.left}px, ${vonT - jetzt.top}px) ${angehoben === "none" ? "" : angehoben}`;
+      k.style.transformOrigin = ursprung;
+      const anim = k.animate([{ transform: von }, { transform: "none" }], { duration: 260, easing: "cubic-bezier(.2, .8, .2, 1)" });
+      anim.finished.then(() => { k.style.transformOrigin = ""; }, () => { k.style.transformOrigin = ""; });
+      laufend.set(k, anim);
     }
 
     if (reihenfolge) {
@@ -930,15 +1039,42 @@ export function editorSchritt(ctx) {
     meldeOeffnenFehler(fehler);
   }
 
+  // Dateien vom Rechner in den Editor ziehen (nur beim Zusammenführen): Rahmen
+  // um den Editor, die Kachel "Weitere Dateien hinzufügen" leuchtet auf.
+  function zeigeAblage(an) {
+    ablageAn = an;
+    body()?.classList.toggle("ist-ablage", an);
+    neu.classList.toggle("is-over", an);
+    if (an) neuText.textContent = "Loslassen zum Hinzufügen";
+    else if (!oeffnet) zeigeNeuBereit();
+    zeigeFuss();
+  }
+
   // --- Start ---
+
+  const abmelden = zusammen
+    ? meldeAblage({
+        bereit: () => modus === "normal" && !zug && !tasten && !oeffnet,
+        zeige: zeigeAblage,
+        lege: fuegeDateienHinzu,
+      })
+    : () => {};
+
+  const beiBreite = () => {
+    beschrifteAnsicht();
+    aktualisiere();
+  };
+  breit.addEventListener("change", beiBreite);
 
   ctx.signal.addEventListener("abort", () => {
     if (zug) endeZug();
+    abmelden();
+    breit.removeEventListener("change", beiBreite);
     beobachter.beende();
     if (rueckgaengig) rueckgaengig.schliessen();
   }, { once: true });
 
   setzeSpalten(spalten, true);
   aktualisiere();
-  return { inhalt: box, dock: weiterKnopf };
+  return { inhalt: box, dock: [fussText, weiterKnopf] };
 }

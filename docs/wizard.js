@@ -3,8 +3,10 @@
 // Inhalt (.fk-body) und Dock mit genau einem Haupt-Button.
 //
 // Zustand: { aktion, dateien, schritte, schritt, optionen, dirty, zwischen, lauf }.
-// Jeder Schritt einer Aktion ist ein Objekt { titel, baue(ctx) }; baue liefert
-// { inhalt, dock } (je ein Element oder eine Liste von Elementen).
+// Jeder Schritt einer Aktion ist ein Objekt { titel, baue(ctx), breit? }; baue
+// liefert { inhalt, dock } (je ein Element oder eine Liste von Elementen).
+// breit = am PC über die volle Fensterbreite (nur der Seiten-Editor); alle
+// anderen Schritte stehen in einer zentrierten Spalte.
 //
 // Verlauf: Jeder Schritt hat einen eigenen History-Eintrag. So ist
 // Browser-Zurück (Android-Geste) dasselbe wie der Zurück-Pfeil.
@@ -52,11 +54,14 @@ function baueRahmen() {
   titel.tabIndex = -1; // bekommt nach jedem Schrittwechsel den Fokus
   const schrittText = el("span");
   titelBox.append(titel, schrittText);
-  const abbrechen = el("button", "icon-btn");
+  const abbrechen = el("button", "icon-btn fk-top-x");
   abbrechen.type = "button";
   abbrechen.setAttribute("aria-label", "Abbrechen");
   abbrechen.append(icon("schliessen", 20, 2));
-  reihe.append(zurueck, titelBox, abbrechen);
+  // Am PC in der breiten Ansicht (Seiten-Editor) steht "Abbrechen" als Text da.
+  const abbrechenText = el("button", "btn btn-ghost btn-sm fk-top-abbrechen", "Abbrechen");
+  abbrechenText.type = "button";
+  reihe.append(zurueck, titelBox, abbrechen, abbrechenText);
 
   const fortschritt = el("div", "fk-progress");
   fortschritt.setAttribute("role", "progressbar");
@@ -72,6 +77,7 @@ function baueRahmen() {
 
   zurueck.addEventListener("click", () => history.back());
   abbrechen.addEventListener("click", () => abbrechenMitRueckfrage(abbrechen));
+  abbrechenText.addEventListener("click", () => abbrechenMitRueckfrage(abbrechenText));
 
   return { wizard, kopf, reihe, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen, sonderKopf: null };
 }
@@ -88,7 +94,10 @@ function setzeKopf(teile) {
   const reihe = el("div", "fk-top-row");
   const titelBox = el("div", "fk-top-title");
   titelBox.append(teile.titel, el("span", null, rahmen.schrittText.textContent));
-  reihe.append(teile.links || el("span"), titelBox, teile.rechts || el("span"));
+  const links = teile.links || el("span");
+  const rechts = teile.rechts || el("span");
+  rechts.classList.add("fk-top-rechts");
+  reihe.append(links, titelBox, rechts);
   rahmen.reihe.after(reihe);
   rahmen.sonderKopf = reihe;
 }
@@ -124,6 +133,8 @@ function zeigeSchritt(index, richtung) {
   const gesamt = z.schritte.length + 1;
   const text = `Schritt ${nummer} von ${gesamt}`;
 
+  // breit: am PC über die volle Breite (Seiten-Editor), sonst zentrierte Spalte.
+  rahmen.wizard.classList.toggle("ist-breit", Boolean(schritt.breit));
   rahmen.titel.textContent = schritt.titel;
   rahmen.schrittText.textContent = text;
   rahmen.fortschritt.setAttribute("aria-label", text);
@@ -184,6 +195,7 @@ function zeigeZwischen({ titel, inhalt, dock, ohneKopf = false }) {
   if (!z.zwischen) history.pushState({ fk: "wizard", schritt: z.schritt, zwischen: true }, "");
   z.zwischen = true;
   setzeKopf(null);
+  rahmen.wizard.classList.remove("ist-breit");
   rahmen.kopf.hidden = ohneKopf;
   if (titel) rahmen.titel.textContent = titel;
   rahmen.body.replaceChildren(...alsListe(inhalt));
@@ -241,6 +253,7 @@ function beende({ leeren }) {
   z = null;
   setzeKopf(null);
   rahmen.wizard.hidden = true;
+  rahmen.wizard.classList.remove("ist-breit");
   rahmen.body.replaceChildren();
   rahmen.dock.replaceChildren();
   start.hidden = false;

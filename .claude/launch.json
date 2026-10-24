@@ -19,6 +19,13 @@
       "runtimeArgs": ["-m", "http.server", "8010", "--directory", "docs"],
       "port": 8010,
       "autoPort": false
+    },
+    {
+      "name": "web-direkt-8020",
+      "runtimeExecutable": "C:\\Users\\Guenay\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+      "runtimeArgs": ["-m", "http.server", "8020", "--directory", "docs"],
+      "port": 8020,
+      "autoPort": false
     }
   ]
 }

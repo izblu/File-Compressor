@@ -413,8 +413,12 @@ function sheetUnterzeile() {
 }
 
 // --- Ziehen & Ablegen (Drop auf die ganze Seite) ---
+// Dateien nimmt an, wer gerade zu sehen ist: der Startscreen oder – im Wizard –
+// eine angemeldete Ablage (Seiten-Editor beim Zusammenführen). Sonst nichts.
 
 let ziehTiefe = 0;
+let ziehZiel = null;      // Ablage, die gerade "Loslassen …" zeigt
+let wizardAblage = null;  // { bereit(), zeige(an), lege(files) }
 
 const ziehtDateien = (e) => e.dataTransfer && [...e.dataTransfer.types].includes("Files");
 
@@ -427,28 +431,60 @@ function setzeZiehen(an) {
   }
 }
 
+const startAblage = {
+  zeige(an) { if (!an || !zustand.oeffnet) setzeZiehen(an); },
+  lege(files) { waehle(files, zustand.dateien.length > 0); },
+};
+
+// Im Wizard Dateien annehmen: ablage = { bereit(), zeige(an), lege(files) }.
+// Liefert eine Funktion zum Abmelden.
+export function meldeAblage(ablage) {
+  wizardAblage = ablage;
+  return () => {
+    if (wizardAblage !== ablage) return;
+    if (ziehZiel === ablage) beendeZiehen();
+    wizardAblage = null;
+  };
+}
+
+function ablageJetzt() {
+  if (sheetIstOffen()) return null;
+  if (!app.hidden) return startAblage;
+  return wizardAblage && wizardAblage.bereit() ? wizardAblage : null;
+}
+
+function beendeZiehen() {
+  if (ziehZiel) ziehZiel.zeige(false);
+  ziehZiel = null;
+}
+
 function initZiehen() {
   document.addEventListener("dragenter", (e) => {
-    if (!ziehtDateien(e) || app.hidden || sheetIstOffen()) return;
+    if (!ziehtDateien(e)) return;
+    const ziel = ablageJetzt();
+    if (!ziel) return;
     e.preventDefault();
-    if (ziehTiefe++ === 0 && !zustand.oeffnet) setzeZiehen(true);
+    if (ziehTiefe++ === 0) {
+      ziehZiel = ziel;
+      ziel.zeige(true);
+    }
   });
   document.addEventListener("dragover", (e) => {
     if (!ziehtDateien(e)) return;
     e.preventDefault(); // sonst öffnet der Browser die Datei selbst
-    e.dataTransfer.dropEffect = app.hidden || sheetIstOffen() ? "none" : "copy";
+    e.dataTransfer.dropEffect = ablageJetzt() ? "copy" : "none";
   });
   document.addEventListener("dragleave", (e) => {
     if (!ziehtDateien(e) || ziehTiefe === 0) return;
-    if (--ziehTiefe === 0) setzeZiehen(false);
+    if (--ziehTiefe === 0) beendeZiehen();
   });
   document.addEventListener("drop", (e) => {
     if (!ziehtDateien(e)) return;
     e.preventDefault();
     ziehTiefe = 0;
-    setzeZiehen(false);
-    if (app.hidden || sheetIstOffen()) return;
-    waehle([...e.dataTransfer.files], zustand.dateien.length > 0);
+    beendeZiehen();
+    const ziel = ablageJetzt();
+    if (ziel) ziel.lege([...e.dataTransfer.files]);
   });
 }
 

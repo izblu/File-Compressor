@@ -15,7 +15,7 @@ import { schrittInhalt, abschnitt, namensFeld, mitVerarbeitung, fortschrittText,
 // Gleiche Schritte für beide Aktionen; der Editor unterscheidet über ctx.aktion.
 export function seitenSchritte() {
   return [
-    { titel: "Seiten anordnen", baue: editorSchritt },
+    { titel: "Seiten anordnen", baue: editorSchritt, breit: true },
     { titel: "Speichern", baue: speichernSchritt },
   ];
 }

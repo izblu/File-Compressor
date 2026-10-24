@@ -472,6 +472,35 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 }
 .ed-ende-sub { color: var(--fk-text-2); }
 .ed-dock-hinweis { min-height: 56px; display: flex; align-items: center; justify-content: center; text-align: center; text-wrap: balance; }
+/* Fußleisten-Text gibt es nur am PC; "oder hierher ziehen" nur mit Maus */
+.ed-fuss, .ed-neu-oder, .fk-top-abbrechen { display: none; }
+@media (hover: hover) and (pointer: fine) {
+  .ed-neu-oder { display: block; font-weight: 600; }
+  .ed-raster:not(.ist-ziel) .ed-kachel:not(.is-selected):hover { border-color: var(--fk-line-strong); }
+  .tile-add:hover { border-color: var(--fk-accent-text); color: var(--fk-text); }
+}
+.tile-add { transition: border-color var(--fk-d-fast) ease, background-color var(--fk-d-fast) ease, color var(--fk-d-fast) ease, box-shadow var(--fk-d-fast) ease; }
+.tile-add.is-over .ed-neu-oder, .tile-add.ist-beschaeftigt .ed-neu-oder { display: none; }
+
+/* Dateien in den Editor ziehen: Rahmen um den Editor, die Kachel leuchtet auf */
+.tile-add.is-over {
+  border-style: solid; border-color: var(--fk-accent-text); color: var(--fk-text);
+  background: var(--fk-accent-tint); box-shadow: 0 0 0 4px var(--fk-focus), var(--fk-sh-glow);
+}
+.fk-body.ist-ablage {
+  outline: 2px dashed color-mix(in srgb, var(--fk-accent-text) 55%, transparent); outline-offset: -10px;
+  background: color-mix(in srgb, var(--fk-accent-tint) 40%, transparent);
+}
+
+/* Einfüge-Linie beim Ziehen am PC (die anderen Kacheln bleiben stehen). Sie
+   liegt über der gezogenen Kachel (z-index 20), denn die hängt am Mauszeiger
+   und damit fast immer genau über der Lücke. */
+.ed-linie {
+  position: absolute; left: 0; top: 0; z-index: 21; border-radius: 2px; pointer-events: none;
+  background: var(--fk-accent-text); box-shadow: 0 0 14px var(--fk-accent-glow);
+  transition: transform 140ms var(--fk-ease-out);
+}
+.ed-kachel.is-dragging.ist-pc-zug { transform: scale(.8) rotate(-2.5deg); opacity: .92; }
 .selbar > button:disabled { opacity: .4; cursor: not-allowed; }
 .selbar > button:disabled:active { background: var(--fk-surface-2); }
 .selbar > button:focus-visible { outline: 3px solid var(--fk-focus); outline-offset: 2px; }
@@ -507,6 +536,62 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .ed-ordnen-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ed-aenderungen { gap: 8px; flex-wrap: wrap; }
 .ausgabe-format { gap: 12px; min-height: 56px; padding: 0 16px; }
+
+/* ===== Seiten-Editor am PC (ab 1024 px, Referenz 21b): volle Breite =====
+   Alle anderen Schritte bleiben eine zentrierte Spalte (max. 480 px).
+   --rand: Inhalt höchstens 1216 px breit (1280 px mit Rand), sonst 32 px Rand. */
+@media (min-width: 1024px) {
+  .wizard.ist-breit { --rand: max(32px, calc((100% - 1216px) / 2)); max-width: none; }
+
+  /* Kopfzeile: Zurück · Titel, darunter "Schritt 2 von 3" mit kurzem Balken · "Abbrechen" */
+  .ist-breit .fk-top {
+    display: grid; grid-template-columns: 44px auto 120px minmax(0, 1fr) auto;
+    align-items: center; column-gap: 12px; row-gap: 2px;
+    min-height: 76px; padding: 12px var(--rand); border-bottom: 1px solid var(--fk-line);
+  }
+  .ist-breit .fk-top-row, .ist-breit .fk-top-title { display: contents; }
+  .ist-breit .fk-top-row > :first-child { grid-column: 1; grid-row: 1 / 3; }
+  .ist-breit .fk-top-title b {
+    grid-column: 2 / 5; grid-row: 1; justify-self: start;
+    font-size: var(--fk-fs-h); line-height: 1.25; letter-spacing: -.02em;
+  }
+  .ist-breit .fk-top-title span { grid-column: 2; grid-row: 2; }
+  .ist-breit .fk-progress { grid-column: 3; grid-row: 2; margin: 0; }
+  .ist-breit .fk-top-x { display: none; }
+  .ist-breit .fk-top-abbrechen { display: inline-flex; color: var(--fk-text-2); }
+  .ist-breit :is(.fk-top-abbrechen, .fk-top-rechts) { grid-column: 5; grid-row: 1 / 3; }
+
+  .ist-breit .fk-body {
+    padding: 24px var(--rand) 32px;
+    scrollbar-width: thin; scrollbar-color: var(--fk-line-strong) transparent; /* am PC sichtbar */
+  }
+
+  /* Werkzeugleiste: Legende links, "Auswählen" + Vorschaugröße rechts */
+  .ist-breit .ed { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px 20px; }
+  .ist-breit .ed-legende { grid-column: 1; grid-row: 1; gap: 8px 18px; }
+  .ist-breit .ed > .toolbar { grid-column: 2; grid-row: 1; }
+  .ist-breit .ed-zahl { display: none; } /* steht unten in der Fußleiste */
+
+  /* Raster mit 4–5 Spalten; "Große Vorschau" mit 2–3 Spalten */
+  .ist-breit .ed-raster { grid-column: 1 / -1; grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr)); gap: 22px; }
+  .ist-breit .ed-raster.ist-eine-spalte { grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr)); }
+  .ist-breit .ed-einfuegen,
+  .ist-breit .ist-eine-spalte .ed-einfuegen { left: -13px; right: auto; top: 10px; bottom: 10px; width: 4px; height: auto; }
+  .ist-breit .ist-eine-spalte .ed-einfuegen-text { top: 10px; left: 0; }
+  .ist-breit .tile-add { min-height: 240px; }
+
+  /* Fußleiste: "8 Seiten aus 5 Dateien" links, "Weiter" rechts */
+  .ist-breit .fk-dock {
+    flex-direction: row; align-items: center; gap: 16px; min-height: 84px;
+    padding: 14px var(--rand); border-top: 1px solid var(--fk-line);
+    background: color-mix(in srgb, var(--fk-bg) 86%, transparent);
+  }
+  .ist-breit .ed-fuss { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ist-breit .fk-dock > .btn-primary { width: auto; min-width: 220px; margin-left: auto; }
+  .ist-breit .selbar { margin-left: auto; grid-template-columns: repeat(3, 156px); }
+  .ist-breit .selbar > button { height: 52px; flex-direction: row; gap: 8px; }
+  .ist-breit .ed-dock-hinweis { flex: 1; min-height: 52px; justify-content: flex-start; text-align: left; }
+}
 
 /* ===== Vollbild (Seite vergrößert ansehen) ===== */
 .vollbild {
@@ -557,7 +642,7 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
   .start-preview, .dz-inner { transition: none; }
   .verarb-seite, .verarb-leiste .sd.now, .bar-after { animation: none; }
   .verarb-strahl { display: none; }
-  .seite, .vollbild-spur { transition: none; }
+  .seite, .vollbild-spur, .ed-linie { transition: none; }
   .gs-kreis { animation: fk-fade 200ms ease both; }
   .gs-haken { animation: none; stroke-dashoffset: 0; }
   .gs-ring, .gs-funke { display: none; }
