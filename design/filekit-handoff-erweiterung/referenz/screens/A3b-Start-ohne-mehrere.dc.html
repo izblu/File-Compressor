@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Start mit mehreren Ergebnissen – Aktion wählen</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+<link rel="stylesheet" href="./filekit-ergaenzung.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.strip{scrollbar-width:none}.strip::-webkit-scrollbar{display:none}
+.rbar{position:absolute;left:12%;height:3.4%;border-radius:1px;background:#000;z-index:1}
+</style>
+</helmet>
+<div class="fk-app" style="padding: 60px 24px 30px">
+<header class="fk-row" style="gap: 10px">
+<svg width="32" height="32" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="ai1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b78ff"></stop><stop offset="1" stop-color="#2257e0"></stop></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#ai1)"></rect><rect x="11" y="15" width="29" height="22" rx="4" fill="#fff"></rect><circle cx="18" cy="21.5" r="2.7" fill="#2a63ec"></circle><path d="M13 35 L20 25.5 L25 32 L28.5 28 L33 35 Z" fill="#2a63ec"></path><path d="M31 26h12l7 7v17a3 3 0 0 1-3 3H31a3 3 0 0 1-3-3V29a3 3 0 0 1 3-3z" fill="#fff" stroke="#2a63ec" stroke-width="2.5"></path><path d="M33.5 38h12M33.5 42.5h12M33.5 47h8" stroke="#2a63ec" stroke-width="2" stroke-linecap="round"></path></svg>
+<span style="font-size: 17px; font-weight: 750; letter-spacing: -0.01em">FileKit</span>
+</header>
+
+<sc-if value="{{single}}" hint-placeholder-val="{{ true }}">
+<section class="preview in-morph" aria-label="Vorschau von {{name}}" style="margin-top: 24px; height: 392px; box-sizing: border-box; padding-top: 64px; padding-bottom: 52px">
+<div style="position: absolute; top: 16px; left: 16px; right: 60px; z-index: 2; display: flex; flex-direction: column"><div class="fk-row" style="gap: 10px; flex-wrap: nowrap; align-items: baseline; min-width: 0"><span class="tag">PDF</span><p class="t-h" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0">{{name}}</p><p class="t-body t-muted" style="margin: 0; white-space: nowrap; flex: none">{{size}}</p></div></div>
+<span class="preview-halo in-halo" aria-hidden="true"></span>
+<div class="preview-page in-page" style="width: 204px; height: 272px">
+<div class="doc">
+<div class="fk-row" style="justify-content: space-between"><span class="ttl">VERTRAG</span><span style="width: 18px; height: 18px; border-radius: 4px; background: #dbe5fb"></span></div>
+<div class="ln h" style="width: 66%; margin-top: 8px"></div>
+<div class="ln" style="width: 100%"></div><div class="ln" style="width: 94%"></div><div class="ln" style="width: 97%"></div><div class="ln" style="width: 58%"></div>
+<div class="gap"></div><div class="ln d" style="width: 22%"></div>
+<div class="ln" style="width: 100%"></div><div class="ln" style="width: 91%"></div><div class="ln" style="width: 96%"></div><div class="ln" style="width: 72%"></div>
+<div class="gap"></div><div class="ln d" style="width: 22%"></div>
+<div class="ln" style="width: 98%"></div><div class="ln" style="width: 88%"></div>
+<div class="sig"><i></i><i></i></div>
+</div>
+<sc-if value="{{bars}}" hint-placeholder-val="{{ false }}"><span class="rbar" style="top: 29%; width: 44%"></span><span class="rbar" style="top: 34%; width: 72%"></span><span class="rbar" style="top: 52.5%; width: 50%"></span></sc-if>
+</div>
+<span class="pill in-up d4" style="left: 16px; bottom: 16px; z-index: 3">Seite 1 von 12</span>
+<a href="S1a-Start-leer.dc.html" class="icon-btn glass" aria-label="Datei entfernen" style="position: absolute; top: 12px; right: 12px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</section>
+</sc-if>
+
+<sc-if value="{{multi}}" hint-placeholder-val="{{ false }}">
+<section class="preview in-morph" aria-label="Gewählte Dateien" style="margin: 24px -24px 0; height: 392px; border-radius: 0; border-left: 0; border-right: 0; align-items: stretch; justify-content: flex-start; box-sizing: border-box; padding-top: 76px">
+<div style="position: absolute; top: 16px; left: 24px; right: 24px; z-index: 2; display: flex; flex-direction: column; gap: 2px"><p class="t-h" style="margin: 0">{{total}}</p><p class="t-body t-muted" style="margin: 0">3 PDFs</p></div>
+<span class="preview-halo in-halo" aria-hidden="true"></span>
+<ul class="strip" style="position: relative; list-style: none; margin: 0; padding: 16px 24px; width: 100%; display: flex; align-items: center; gap: 16px; overflow-x: auto">
+<sc-for list="{{files}}" as="f" hint-placeholder-count="3">
+<li class="fk-stack in-page" style="flex: none; width: 156px; gap: 10px">
+<div class="fk-stack" style="gap: 2px"><span class="t-s" style="color: var(--fk-text)">{{f.name}}</span><span class="t-xs t-muted">{{f.size}}</span></div>
+<div class="preview-page" style="position: relative; width: 156px; height: 220px">
+<div class="doc"><div class="ln h" style="width: 54%"></div><div class="ln" style="width: 100%"></div><div class="ln" style="width: 92%"></div><div class="ln" style="width: 97%"></div><div class="ln" style="width: 66%"></div><div class="gap"></div><div class="ln" style="width: 100%"></div><div class="ln" style="width: 88%"></div><div class="ln" style="width: 40%"></div></div>
+<button type="button" class="icon-btn glass" aria-label="{{f.name}} entfernen" style="position: absolute; top: -10px; right: -10px; background: rgba(13,20,36,.92)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+<span class="pill" style="left: 8px; bottom: 8px; height: 24px; background: rgba(6,10,19,.78); color: #fff">1 Seite</span>
+</div>
+</li>
+</sc-for>
+</ul>
+</section>
+</sc-if>
+
+<div class="fk-stack in-up d3" style="margin-top: 16px; gap: 4px">
+<p class="result-hint" role="status"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M8 12.5l2.8 2.8L16 10"></path></svg>{{hint}}</p>
+<button type="button" class="btn-link" style="align-self: flex-start; margin-top: 4px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Weitere Dateien hinzufügen</button>
+</div>
+
+<sc-if value="{{suggest}}" hint-placeholder-val="{{ true }}">
+<div class="split in-dock" role="group" aria-label="Aktion" style="margin-top: auto">
+<a href="07-Staerke-Qualitaet.dc.html" class="split-main"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke-dasharray="2.2 2.4" opacity=".6"></path><path d="M7 12.5h3.5l2 2V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4.5a2 2 0 0 1 2-2zM18.5 5.5 13.5 10.5M13.5 6.5v4h4"></path></svg>Verkleinern</a>
+<span class="split-div" aria-hidden="true"></span>
+<a href="{{menu}}" class="split-more" aria-label="Weitere Aktionen"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></a>
+</div>
+</sc-if>
+<sc-if value="{{choose}}" hint-placeholder-val="{{ false }}">
+<a href="{{menu}}" class="btn btn-primary btn-block in-dock" style="margin-top: auto; height: 58px">Aktion wählen<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></a>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"v":{"editor":"enum","options":["a2-einzeln","a2-mehrere","a3-einzeln","a3-mehrere"],"default":"a3-mehrere"},"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const v = this.props.v ?? 'a3-mehrere';
+    const multi = v.indexOf('mehrere') >= 0;
+    const suggest = v.indexOf('a2') === 0;
+    const files = v === 'a2-mehrere'
+      ? [{ name: 'Scan_Seite1.pdf', size: '3,2 MB' }, { name: 'Scan_Seite2.pdf', size: '2,9 MB' }, { name: 'Scan_Seite3.pdf', size: '3,0 MB' }]
+      : [{ name: 'Vertrag_Seite3.pdf', size: '0,4 MB' }, { name: 'Vertrag_Seite4.pdf', size: '0,3 MB' }, { name: 'Vertrag_Seite7.pdf', size: '0,5 MB' }];
+    return {
+      single: !multi, multi,
+      suggest, choose: !suggest,
+      name: v === 'a2-einzeln' ? 'Vertrag_geschwärzt.pdf' : 'Vertrag_klein.pdf',
+      size: v === 'a2-einzeln' ? '2,4 MB' : '1,9 MB',
+      bars: v === 'a2-einzeln',
+      files,
+      total: v === 'a2-mehrere' ? '3 Dateien · 9,1 MB' : '3 Dateien · 1,2 MB',
+      hint: multi ? '3 Ergebnisse · schon gespeichert' : 'Dein Ergebnis · schon gespeichert',
+      menu: { 'a2-einzeln': 'A2c-Aktionen-Ergebnis.dc.html', 'a2-mehrere': 'A2d-Aktionen-Ergebnisse.dc.html', 'a3-einzeln': 'A3d-Aktionen-ohne.dc.html', 'a3-mehrere': 'A3c-Aktionen-ohne-mehrere.dc.html' }[v]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 // Zusammenführen farbig markiert nach Ursprungsdatei (immer mit Dateinummer).
 //   · Ziehen zum Umordnen: Touch nach Long-Press (250 ms), Maus nach 4 px;
 //     Tastatur: Leertaste hebt an, Pfeiltasten verschieben, Leertaste legt ab.
-//   · Antippen (oder ⋯) öffnet das Seitenmenü: Vergrößert ansehen · Drehen ·
+//   · Antippen (oder ⋯) öffnet das Seitenmenü: Seite groß ansehen · Drehen ·
 //     An den Anfang · Ans Ende · Löschen.
 //   · Mehrfachauswahl über "Auswählen" oder Long-Press ohne Bewegung > 500 ms:
 //     Verschieben (danach Ziel antippen) · Drehen · Löschen.
@@ -611,7 +611,7 @@ export function editorSchritt(ctx) {
     const trenner = el("div", "sep");
     trenner.setAttribute("aria-hidden", "true");
     nav.append(
-      zeile("lupe", "Vergrößert ansehen", () => {
+      zeile("lupe", "Seite groß ansehen", () => {
         sheet.schliessen();
         zeigeVollbild({
           seiten: o.seiten, start: o.seiten.indexOf(s), ausloeser: k,

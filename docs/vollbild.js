@@ -1,4 +1,4 @@
-// vollbild.js – Seite vergrößert ansehen (HANDOFF Screen 13): schwarzer
+// vollbild.js – Seite groß ansehen (HANDOFF Screen 13): schwarzer
 // Hintergrund, Seite so groß wie möglich (so gedreht, wie sie gespeichert
 // wird), "Seite 3 von 5" + Markierung der Ursprungsdatei. Blättern per Wischen
 // (Schwelle 40 px), Pfeil-Buttons, Pfeiltasten; Punkte zeigen die Position.

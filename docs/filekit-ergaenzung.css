@@ -1,0 +1,98 @@
+/* ==========================================================================
+   FileKit · Ergänzung „Schwärzen & Weiterbearbeiten“
+   Wird NACH filekit.css eingebunden. Verändert keine bestehende Regel –
+   ergänzt nur neue Tokens, Bausteine und Animationen (Präfix --fk-).
+   ========================================================================== */
+
+:root {
+  /* — Schwärzen — */
+  --fk-redact: #000000;                       /* Stelle, deckend – genau so wird gespeichert */
+  --fk-redact-sel: rgba(0, 0, 0, .5);         /* gewählte Stelle: halb durchsichtig zum Nachjustieren */
+  --fk-redact-ring: var(--fk-accent);         /* 2-px-Rahmen der gewählten Stelle (auf weißem Papier) */
+  --fk-redact-draw: rgba(0, 0, 0, .38);       /* Rahmen, der gerade aufgezogen wird */
+  --fk-handle: #ffffff;                       /* Eck-Griff, hell … */
+  --fk-handle-edge: #0a1122;                  /* … mit dunklem Rand: sichtbar auf Weiß und auf Schwarz */
+  --fk-paper-shadow: 0 0 0 1px rgba(255, 255, 255, .12), 0 24px 50px -16px rgba(0, 0, 0, .75);
+  --fk-d-snap: 160ms;                         /* Stelle rastet ein */
+  --fk-d-stagger: 60ms;                       /* Versatz „Treffer schwärzen“ */
+}
+
+/* ===== Icon-Button deaktiviert (Rückgängig/Wiederholen ohne Schritt) ===== */
+.icon-btn:disabled, .icon-btn.is-disabled { color: var(--fk-faint); background: transparent; cursor: not-allowed; transform: none; }
+
+/* ===== Werkzeugleiste in der Daumen-Zone (Schwärzen-Editor) ===== */
+.tbar { display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0 4px; border-radius: var(--fk-r-l); background: var(--fk-surface-2); box-shadow: inset 0 0 0 1px var(--fk-line); }
+.tsep { width: 1px; height: 24px; flex: none; background: var(--fk-line-strong); }
+.pgbtn { height: 44px; min-width: 60px; padding: 0 6px; border: 0; border-radius: 12px; background: transparent; color: var(--fk-text); display: flex; align-items: center; justify-content: center; gap: 5px; font: inherit; font-size: var(--fk-fs-s); font-weight: 750; font-variant-numeric: tabular-nums; cursor: pointer; }
+.pgbtn:hover { background: var(--fk-surface-3); }
+.pgbtn svg { color: var(--fk-muted); }
+
+/* ===== Seite als Zeichenfläche ===== */
+.canvas-vp { position: relative; flex: none; overflow: hidden; border-radius: 4px; background: var(--fk-paper); box-shadow: var(--fk-paper-shadow); }
+.pagewrap { position: absolute; left: 0; top: 0; transform-origin: 0 0; background: var(--fk-paper); touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; transition: transform var(--fk-d-base) var(--fk-ease-io); }
+
+/* ===== Stelle ===== */
+.stelle { position: absolute; padding: 0; margin: 0; border: 0; border-radius: 1.5px; background: var(--fk-redact); cursor: grab; animation: fk-st-snap var(--fk-d-snap) var(--fk-ease-spring) both; transition: background-color var(--fk-d-snap) ease, box-shadow var(--fk-d-snap) ease; }
+.stelle.is-sel { background: var(--fk-redact-sel); box-shadow: 0 0 0 2px var(--fk-redact-ring); }
+.stelle.is-out { animation: fk-st-out var(--fk-d-snap) ease both; pointer-events: none; }
+.stelle:focus-visible { outline: 3px solid var(--fk-focus); outline-offset: 3px; }
+.draw { position: absolute; border-radius: 1.5px; background: var(--fk-redact-draw); box-shadow: 0 0 0 2px var(--fk-redact-ring); pointer-events: none; }
+.sel-ui { position: absolute; z-index: 3; pointer-events: none; }
+.hdl { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--fk-handle); box-shadow: 0 0 0 1.5px var(--fk-handle-edge), 0 1px 4px rgba(0, 0, 0, .5); pointer-events: auto; touch-action: none; }
+.hdl::before { content: ""; position: absolute; left: -16px; top: -16px; width: 44px; height: 44px; border-radius: 50%; }   /* 44-px-Tippfläche */
+.hdl.tl { left: 0; top: 0; cursor: nwse-resize; } .hdl.tr { left: 100%; top: 0; cursor: nesw-resize; }
+.hdl.bl { left: 0; top: 100%; cursor: nesw-resize; } .hdl.br { left: 100%; top: 100%; cursor: nwse-resize; }
+.del { position: absolute; right: -22px; bottom: calc(100% + 10px); width: 44px; height: 44px; padding: 0; border: 0; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: var(--fk-surface-2); color: var(--fk-text); box-shadow: 0 0 0 1px rgba(255, 255, 255, .14), 0 8px 18px -6px rgba(0, 0, 0, .7); pointer-events: auto; cursor: pointer; animation: fk-pop 220ms var(--fk-ease-spring) both; }
+.del.below { bottom: auto; top: calc(100% + 10px); }   /* oben kein Platz → unten */
+.del.edge { right: 0; }                                 /* rechts kein Platz → nach innen */
+
+/* Hinweis-Karte auf der Seite (nur solange keine Stelle) */
+.hint-ov { position: absolute; left: 50%; top: 50%; z-index: 2; width: 76%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 16px 14px; border-radius: var(--fk-r-l); background: rgba(10, 17, 34, .88); color: var(--fk-text); font-family: var(--fk-font); font-size: var(--fk-fs-s); line-height: 1.4; font-weight: 600; text-align: center; box-shadow: 0 16px 36px -12px rgba(0, 0, 0, .6); pointer-events: none; }
+.hint-ov small { font-size: var(--fk-fs-xs); font-weight: 600; color: var(--fk-muted); }
+
+/* Schwebende Knöpfe über der Seite (gezoomt) */
+.float-btn { position: absolute; z-index: 4; height: 40px; padding: 0 14px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: var(--fk-r-full); background: rgba(18, 27, 46, .92); color: var(--fk-text); font: inherit; font-size: var(--fk-fs-s); font-weight: 750; box-shadow: 0 0 0 1px var(--fk-line-strong), 0 10px 24px -8px rgba(0, 0, 0, .7); cursor: pointer; }
+.float-btn::before { content: ""; position: absolute; inset: -2px; }   /* Tippfläche ≥ 44 px */
+
+/* ===== Text suchen: Treffer ===== */
+.cbox { width: 24px; height: 24px; flex: none; border-radius: 7px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--fk-line-strong); color: transparent; transition: all var(--fk-d-fast) var(--fk-ease-out); }
+.is-checked .cbox { background: var(--fk-accent); border-color: var(--fk-accent); color: #fff; }
+.hit { width: 100%; min-height: 56px; padding: 6px 10px; display: flex; align-items: center; gap: 12px; border: 0; border-radius: var(--fk-r-m); background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.hit:active { background: var(--fk-surface-3); }
+.hit.is-done { cursor: default; }
+.hit-pg { width: 54px; flex: none; font-size: var(--fk-fs-xs); font-weight: 700; color: var(--fk-muted); }
+.snip { flex: 1; min-width: 0; padding: 5px 9px; border-radius: 8px; background: var(--fk-paper); color: #1e293b; font-family: "Times New Roman", Georgia, serif; font-size: 15px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.snip mark { background: var(--fk-redact); color: rgba(255, 255, 255, .78); border-radius: 2px; padding: 0 1px; }   /* zeigt: das wird schwarz */
+.is-done .snip { opacity: .55; }
+
+/* ===== Prüfbericht ===== */
+.report { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.report li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.45; font-weight: 600; color: var(--fk-text-2); }
+.report li svg { flex: none; margin-top: 1px; color: var(--fk-success-text); }
+
+/* ===== Tipp-Zeile & Ergebnis-Hinweis ===== */
+.note-tip { background: var(--fk-accent-tint); border-color: rgba(121, 162, 255, .3); }
+.note-tip > svg { color: var(--fk-accent-text); }
+.result-hint { display: inline-flex; align-items: center; gap: 8px; font-size: var(--fk-fs-s); font-weight: 700; color: var(--fk-text-2); }
+.result-hint svg { color: var(--fk-success-text); flex: none; }
+
+/* ===== Seitenübersicht mit Stellen ===== */
+.thumb { position: relative; display: block; width: 100%; aspect-ratio: 1 / 1.414; padding: 0; border: 0; border-radius: 5px; background: var(--fk-paper); box-shadow: 0 6px 14px -6px rgba(0, 0, 0, .7); overflow: hidden; cursor: pointer; }
+.thumb.is-current { box-shadow: 0 0 0 2px var(--fk-accent-text), 0 0 0 6px rgba(121, 162, 255, .18); }
+.thumb i { position: absolute; display: block; height: 4.5%; border-radius: 1px; background: var(--fk-redact); }
+.thumb-badge { position: absolute; right: 5px; bottom: 5px; height: 22px; min-width: 22px; padding: 0 7px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border-radius: 11px; background: rgba(6, 10, 19, .86); color: #fff; font-family: var(--fk-font); font-size: var(--fk-fs-xs); font-weight: 800; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ===== Animationen ===== */
+@keyframes fk-st-snap { from { transform: scale(1.06); opacity: .55; } }
+@keyframes fk-st-out { to { transform: scale(.96); opacity: 0; } }
+/* A5: Datei-Karte (Gespeichert ✓) → große Vorschau (Startscreen mit Ergebnis) */
+.in-morph { animation: fk-morph var(--fk-d-slow) var(--fk-ease-out) both; transform-origin: 50% 100%; }
+@keyframes fk-morph { from { transform: translateY(var(--fk-morph-y, 180px)) scale(.4); opacity: .7; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .stelle, .stelle.is-out, .del, .in-morph { animation: fk-fade 200ms ease both !important; }
+  .stelle.is-out { animation: none !important; opacity: 0; }
+  .pagewrap { transition: none !important; }
+}

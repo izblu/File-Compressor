@@ -593,7 +593,7 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
   .ist-breit .ed-dock-hinweis { flex: 1; min-height: 52px; justify-content: flex-start; text-align: left; }
 }
 
-/* ===== Vollbild (Seite vergrößert ansehen) ===== */
+/* ===== Vollbild (Seite groß ansehen) ===== */
 .vollbild {
   position: fixed; inset: 0; z-index: 13; display: flex; flex-direction: column;
   background: black; color: var(--fk-text); animation: fk-fade var(--fk-d-fast) ease both;
@@ -617,7 +617,8 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .vollbild-punkte { gap: 6px; }
 .vollbild-punkt { width: 7px; height: 7px; border-radius: 4px; background: rgba(255, 255, 255, .28); transition: width 300ms var(--fk-ease-out), background-color 300ms ease; }
 .vollbild-punkt.ist-an { width: 20px; background: var(--fk-paper); }
-.vollbild .icon-btn:disabled { opacity: .35; cursor: default; }
+/* Eigener Look statt des allgemeinen .icon-btn:disabled aus filekit-ergaenzung.css (Glas bleibt, nur blasser) */
+.vollbild .icon-btn:disabled { opacity: .35; cursor: default; color: var(--fk-text-2); background: var(--fk-glass); }
 
 /* ===== Dialog (Rückfrage) – über dem ganzen Fenster ===== */
 .dialog { position: fixed; max-width: 432px; margin-inline: auto; }

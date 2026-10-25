@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>PC – Stellen schwärzen</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+<link rel="stylesheet" href="./filekit-ergaenzung.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.wrap{width:100%;max-width:1440px;margin:0 auto;padding-left:32px;padding-right:32px;box-sizing:border-box}
+.pg{position:absolute;inset:0;padding:7% 8% 6%;display:flex;flex-direction:column;gap:.6em;color:#1e293b;font-family:'Times New Roman',Georgia,serif;line-height:1.38;overflow:hidden}
+.pg-top{display:flex;justify-content:flex-end;column-gap:.3em;font-family:system-ui,sans-serif;font-size:.8em;color:#94a3b8}
+.pg-h{display:flex;flex-wrap:wrap;column-gap:.3em;font-weight:700;font-size:1.14em;margin-top:.35em}
+.pg-p,.pg-l{display:flex;flex-wrap:wrap;column-gap:.3em}
+.pg-l{margin-top:-.35em}
+.pg-sig{margin-top:auto;display:flex;justify-content:space-between;font-family:system-ui,sans-serif;font-size:.8em;color:#64748b}
+.pg-sig span{width:38%;border-top:1px solid #94a3b8;padding-top:.3em}
+.side{list-style:none;margin:0;padding:4px 0;display:flex;flex-direction:column;gap:14px;align-items:center}
+.panel{padding:18px;border-radius:var(--fk-r-xl);background:var(--fk-surface-1);box-shadow:inset 0 0 0 1px var(--fk-line);display:flex;flex-direction:column;gap:12px}
+.stl{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 4px 0 12px;border-radius:12px;background:var(--fk-surface-2)}
+</style>
+</helmet>
+<div class="fk-page" style="display: flex; flex-direction: column; min-height: 960px">
+<header style="border-bottom: 1px solid var(--fk-line)">
+<div class="wrap fk-row" style="gap: 12px; min-height: 76px; flex-wrap: wrap">
+<a href="S1d-PC-Start.dc.html" class="icon-btn" aria-label="Zurück"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+<div class="fk-stack" style="gap: 2px; flex: 1; min-width: 200px">
+<h1 class="t-h">Stellen schwärzen</h1>
+<div class="fk-row" style="gap: 10px"><span class="t-xs t-muted">Schritt 2 von 3</span><span class="fk-progress" style="margin: 0; width: 120px" aria-hidden="true"><i style="width: 66.6%"></i></span></div>
+</div>
+<a href="20c-Abbrechen.dc.html" class="btn btn-ghost btn-sm" style="color: var(--fk-text-2)">Abbrechen</a>
+</div>
+</header>
+<main class="wrap" style="flex: 1; display: flex; flex-wrap: wrap; gap: 24px; padding-top: 20px; padding-bottom: 24px; align-items: flex-start">
+<nav aria-label="Seiten" style="flex: 0 0 140px; max-height: 790px; overflow-y: auto; scrollbar-width: none">
+<p class="t-micro t-muted" style="margin-bottom: 10px; text-align: center">Seiten</p>
+<ul class="side"><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 1"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 1</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 2, 4 Stellen" aria-current="page"><span class="thumb is-current" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span><i style="left: 12%; top: 30%; width: 40%"></i><i style="left: 12%; top: 42%; width: 48%"></i><i style="left: 12%; top: 54%; width: 56%"></i><i style="left: 12%; top: 66%; width: 64%"></i><span class="thumb-badge">4</span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 2</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 3"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 3</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 4"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 4</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 5, 1 Stellen"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span><i style="left: 12%; top: 30%; width: 40%"></i><span class="thumb-badge">1</span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 5</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 6"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 6</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 7, 2 Stellen"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span><i style="left: 12%; top: 30%; width: 40%"></i><i style="left: 12%; top: 42%; width: 48%"></i><span class="thumb-badge">2</span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 7</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 8"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 8</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 9"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 9</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 10"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 10</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 11"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 11</span></a></li><li><a href="#" class="fk-stack" style="align-items: center; gap: 6px; text-decoration: none" aria-label="Seite 12"><span class="thumb" style="width: 104px"><span style="position: absolute; left: 12%; top: 12%; width: 60%; height: 2.4%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 20%; width: 76%; height: 2%; background: #e1e6ee"></span><span style="position: absolute; left: 12%; top: 26%; width: 70%; height: 2%; background: #e1e6ee"></span></span><span class="t-xs" style="color: var(--fk-text-2)">Seite 12</span></a></li></ul>
+</nav>
+<section aria-label="Seite bearbeiten" class="fk-stack" style="flex: 999 1 520px; min-width: 0; align-items: center; gap: 12px">
+<div class="tbar" role="toolbar" aria-label="Werkzeuge" style="justify-content: center; gap: 4px; padding: 0 8px">
+<button type="button" class="icon-btn" aria-label="Rückgängig (Strg+Z)" title="Rückgängig (Strg+Z)" disabled="{{noUndo}}" onClick="{{undo}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg></button>
+<button type="button" class="icon-btn" aria-label="Wiederholen (Strg+Y)" title="Wiederholen (Strg+Y)" disabled="{{noRedo}}" onClick="{{redo}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14l5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg></button>
+<span class="tsep" aria-hidden="true"></span>
+<button type="button" class="icon-btn" aria-label="Herauszoomen (−)" title="Herauszoomen (−)" onClick="{{zoomOut}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-3.5-3.5M8 11h6"></path></svg></button>
+<button type="button" class="icon-btn" aria-label="Hineinzoomen (+)" title="Hineinzoomen (+)" onClick="{{zoomIn}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-3.5-3.5M11 8v6M8 11h6"></path></svg></button>
+<button type="button" class="icon-btn" aria-label="Seite einpassen" title="Seite einpassen" onClick="{{fit}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"></path></svg></button>
+<span class="tsep" aria-hidden="true"></span>
+<button type="button" class="icon-btn" aria-label="Weitere Optionen"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></button>
+</div>
+<div class="canvas-vp" style="width: {{vw}}px; height: {{vh}}px">
+<div class="pagewrap" ref="{{setPage}}" onPointerDown="{{down}}" onPointerMove="{{move}}" onPointerUp="{{up}}" onPointerCancel="{{up}}" style="width: {{vw}}px; height: {{vh}}px; font-size: {{fs}}px; transform: translate({{zx}}px, {{zy}}px) scale({{z}})">
+<sc-if value="{{isDoc}}" hint-placeholder-val="{{ true }}">
+<div class="pg {{paper}}">
+<sc-for list="{{blocks}}" as="b" hint-placeholder-count="12"><div class="pg-{{b.k}}"><sc-for list="{{b.w}}" as="w" hint-placeholder-count="6"><span data-w="{{w.id}}">{{w.t}}</span></sc-for></div></sc-for>
+<div class="pg-sig"><span>Vermieter</span><span>Mieter</span></div>
+</div>
+</sc-if>
+<sc-if value="{{isOther}}" hint-placeholder-val="{{ false }}">
+<div class="doc" style="padding: 9% 8%; gap: 7px"><div class="ln h" style="width: 48%"></div><div class="ln"></div><div class="ln" style="width: 94%"></div><div class="ln" style="width: 97%"></div><div class="ln" style="width: 62%"></div><div class="gap"></div><div class="ln d" style="width: 30%"></div><div class="ln"></div><div class="ln" style="width: 90%"></div><div class="ln" style="width: 96%"></div><div class="ln" style="width: 70%"></div><div class="gap"></div><div class="ln"></div><div class="ln" style="width: 84%"></div></div>
+</sc-if>
+<sc-if value="{{isPhoto}}" hint-placeholder-val="{{ false }}">
+<div class="photo"><div class="sheet-ph">
+<sc-for list="{{letter}}" as="b" hint-placeholder-count="8"><div class="pg-{{b.k}}"><sc-for list="{{b.w}}" as="w" hint-placeholder-count="6"><span>{{w.t}}</span></sc-for></div></sc-for>
+</div></div>
+</sc-if>
+<sc-for list="{{stellen}}" as="s" hint-placeholder-count="0"><button type="button" class="stelle {{s.cls}}" data-s="{{s.i}}" aria-label="Geschwärzte Stelle {{s.n}} von {{pageCount}}{{where}}" style="left: {{s.l}}%; top: {{s.t}}%; width: {{s.w}}%; height: {{s.h}}%; animation-delay: {{s.d}}ms" onKeyDown="{{s.key}}" onFocus="{{s.focus}}"></button></sc-for>
+<sc-if value="{{hasDraw}}" hint-placeholder-val="{{ false }}"><span class="draw" style="left: {{dr.l}}%; top: {{dr.t}}%; width: {{dr.w}}%; height: {{dr.h}}%"></span></sc-if>
+<sc-if value="{{hasFinger}}" hint-placeholder-val="{{ false }}"><span class="finger" aria-hidden="true" style="left: {{fg.l}}%; top: {{fg.t}}%"></span></sc-if>
+<sc-if value="{{hasSel}}" hint-placeholder-val="{{ false }}">
+<div class="sel-ui" style="left: {{sl.l}}%; top: {{sl.t}}%; width: {{sl.w}}%; height: {{sl.h}}%">
+<span class="hdl tl" data-h="tl"></span><span class="hdl tr" data-h="tr"></span><span class="hdl bl" data-h="bl"></span><span class="hdl br" data-h="br"></span>
+<button type="button" class="del {{delCls}}" data-del="1" aria-label="Stelle löschen" onClick="{{delSel}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg></button>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{empty}}" hint-placeholder-val="{{ true }}"><div class="hint-ov in-fade"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--fk-accent-text)"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5zM14 3v5h5M8.5 17.5h7"></path><rect x="8" y="11" width="8" height="3" rx=".8" fill="currentColor"></rect></svg><span>{{hint}}</span><sc-if value="{{isScan}}" hint-placeholder-val="{{ false }}"><small>In diesem PDF ist kein Text hinterlegt – die Suche ist daher nicht verfügbar.</small></sc-if></div></sc-if>
+<sc-if value="{{zoomedNever}}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{zoomHint}}" hint-placeholder-val="{{ false }}"><div class="coach zoom-coach" role="status" style="animation-delay: 200ms"><p style="font-size: 14px; font-weight: 750">Mit zwei Fingern verschieben</p></div></sc-if>
+<button type="button" class="float-btn" style="left: 50%; bottom: 14px; transform: translateX(-50%)" onClick="{{fit}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"></path></svg>Seite einpassen</button>
+</sc-if>
+</div>
+<p class="sr-only" aria-live="polite">{{live}}</p>
+</section>
+<aside class="fk-stack" style="flex: 1 1 320px; max-width: 380px; gap: 16px">
+<section class="panel" aria-labelledby="pc-su">
+<h2 id="pc-su" class="t-l">Text suchen</h2>
+<div class="field-box"><span style="display: flex; align-items: center; padding-left: 14px; color: var(--fk-muted)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-3.5-3.5"></path></svg></span><input type="search" aria-label="Suchbegriff" value="Mustermann" placeholder="z. B. einen Namen oder eine Nummer" style="padding-left: 10px"></div>
+<div class="fk-row" style="gap: 4px"><p class="t-s t-num" role="status" style="flex: 1; color: var(--fk-text)">7 Treffer auf 4 Seiten</p><button type="button" class="btn-link" style="padding: 0 8px; margin: 0">Alle</button><button type="button" class="btn-link" style="padding: 0 8px; margin: 0">Keine</button></div>
+<p class="note" style="padding: 8px 12px; font-size: 13px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--fk-success-text)"><path d="M5 12.5l4.5 4.5L19 7"></path></svg>2 Treffer sind schon geschwärzt</p>
+<div class="fk-stack" role="group" aria-label="Treffer" style="gap: 2px; margin: 0 -8px; max-height: 300px; overflow-y: auto"><button type="button" class="hit is-checked" role="checkbox" aria-checked="true"><span class="cbox" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span class="hit-pg">Seite 1</span><span class="snip">… Erika <mark>Mustermann</mark> (Vermieterin) …</span></button><button type="button" class="hit is-checked" role="checkbox" aria-checked="true"><span class="cbox" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span class="hit-pg">Seite 1</span><span class="snip">… Max <mark>Mustermann</mark> (Mieter) …</span></button><button type="button" class="hit is-done" role="checkbox" aria-checked="true" aria-disabled="true"><span class="cbox" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span class="hit-pg">Seite 2</span><span class="snip">… Max <mark>Mustermann</mark></span></button><button type="button" class="hit is-done" role="checkbox" aria-checked="true" aria-disabled="true"><span class="cbox" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span class="hit-pg">Seite 2</span><span class="snip">… Max <mark>Mustermann</mark>, Musterweg …</span></button><button type="button" class="hit is-checked" role="checkbox" aria-checked="true"><span class="cbox" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span class="hit-pg">Seite 2</span><span class="snip">E-Mail: max.<mark>mustermann</mark>@example.de</span></button><button type="button" class="hit is-checked" role="checkbox" aria-checked="true"><span class="cbox" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span class="hit-pg">Seite 5</span><span class="snip">… Herrn <mark>Mustermann</mark> am …</span></button><button type="button" class="hit is-checked" role="checkbox" aria-checked="true"><span class="cbox" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></span><span class="hit-pg">Seite 9</span><span class="snip">… Max <mark>Mustermann</mark></span></button></div>
+<a href="S6-Nach-Suche.dc.html" class="btn btn-primary btn-sm btn-block">5 Treffer schwärzen</a>
+</section>
+<section class="panel" aria-labelledby="pc-st">
+<h2 id="pc-st" class="t-l">Stellen auf dieser Seite</h2>
+<ul class="fk-stack" style="list-style: none; margin: 0; padding: 0; gap: 6px">
+<sc-for list="{{stellen}}" as="s" hint-placeholder-count="4"><li class="stl"><span class="t-s" style="flex: 1; color: var(--fk-text)">Stelle {{s.n}} <span class="t-muted" style="font-weight: 500">· {{s.pos}}</span></span><button type="button" class="btn btn-ghost btn-sm" style="color: var(--fk-danger-text)" aria-label="Stelle {{s.n}} löschen" onClick="{{s.remove}}">Löschen</button></li></sc-for>
+</ul>
+</section>
+</aside>
+</main>
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+<div class="toast" role="status" style="position: fixed; left: 50%; right: auto; width: 360px; margin-left: -180px; bottom: 104px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: #475569"><path d="{{toastIcon}}"></path></svg><span>{{toast}}</span><button type="button" class="btn-link" onClick="{{undo}}">Rückgängig</button></div>
+</sc-if>
+<footer style="position: sticky; bottom: 0; border-top: 1px solid var(--fk-line); background: rgba(6,10,19,.88); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px)">
+<div class="wrap fk-row" style="gap: 16px; min-height: 84px; flex-wrap: wrap">
+<p class="t-body t-muted t-num" style="flex: 1">{{countLabel}} auf {{pagesWith}} Seiten</p>
+<a href="S9-Verarbeiten.dc.html" class="btn btn-primary" style="min-width: 220px">Weiter</a>
+</div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"art":{"editor":"enum","options":["pdf","scan","bild"],"default":"pdf"},"start":{"editor":"enum","options":["leer","mitStellen","ziehen","zoom","nachSuche"],"default":"mitStellen"},"$preview":{"width":1280,"height":960}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const art = (props && props.art) || 'pdf';
+    this.state = { pg: art === 'bild' ? 1 : 2, pages: {}, sel: null, out: null, draw: null, finger: null, hist: [], fut: [], toast: '', live: '', z: 1, zx: 0, zy: 0, zoomHint: false };
+    this.pageEl = null;
+    this.drag = null;
+    this.seeded = false;
+  }
+  art() { return this.props.art ?? 'pdf'; }
+  start() { return this.props.start ?? 'mitStellen'; }
+  componentDidMount() {
+    if (this.start() === 'leer') return;
+    const go = () => this.seed();
+    this.t1 = setTimeout(go, 150);
+    this.t2 = setTimeout(go, 700);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => setTimeout(go, 40));
+  }
+  componentWillUnmount() { clearTimeout(this.t1); clearTimeout(this.t2); clearTimeout(this.tt); clearTimeout(this.to); }
+  box(rs) {
+    if (!this.pageEl || !rs.length) return null;
+    const R = this.pageEl.getBoundingClientRect();
+    if (!R.width) return null;
+    let l = 1e9, t = 1e9, r = -1e9, b = -1e9;
+    rs.forEach((q) => { l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); b = Math.max(b, q.bottom); });
+    const px = 0.6, py = 0.3;
+    return { x: (l - R.left) / R.width * 100 - px, y: (t - R.top) / R.height * 100 - py, w: (r - l) / R.width * 100 + 2 * px, h: (b - t) / R.height * 100 + 2 * py };
+  }
+  rectOf(ids) {
+    if (!this.pageEl) return null;
+    const rs = [];
+    ids.forEach((id) => { const el = this.pageEl.querySelector('[data-w="' + id + '"]'); if (el) rs.push(el.getBoundingClientRect()); });
+    return rs.length === ids.length ? this.box(rs) : null;
+  }
+  subRects(query) {
+    if (!this.pageEl) return [];
+    const out = [];
+    const q = query.toLowerCase();
+    this.pageEl.querySelectorAll('[data-w]').forEach((el) => {
+      const node = el.firstChild;
+      if (!node || node.nodeType !== 3) return;
+      const txt = node.textContent.toLowerCase();
+      let i = txt.indexOf(q);
+      while (i >= 0) {
+        const rg = document.createRange();
+        rg.setStart(node, i); rg.setEnd(node, i + q.length);
+        const b = this.box([rg.getBoundingClientRect()]);
+        if (b) out.push(b);
+        i = txt.indexOf(q, i + q.length);
+      }
+    });
+    return out;
+  }
+  seed() {
+    if (this.seeded) return;
+    const s = this.start();
+    if (this.art() === 'bild') {
+      this.seeded = true;
+      if (s !== 'leer') this.setState({ pages: { 1: [{ x: 23, y: 21, w: 40, h: 3.2 }, { x: 22, y: 31.5, w: 34, h: 3 }] }, sel: s === 'mitStellen' ? 0 : null });
+      return;
+    }
+    const groups = [['k1', 'k2'], ['i1', 'i2', 'i3', 'i4', 'i5', 'i6'], ['m1', 'm2'], ['t1', 't2']];
+    if (s === 'nachSuche') {
+      const hits = this.subRects('mustermann');
+      if (hits.length < 3) return;
+      this.seeded = true;
+      const pages = { 1: [{ x: 31, y: 18.2, w: 15, h: 2.6 }, { x: 62, y: 18.2, w: 15, h: 2.6 }], 2: hits.map((h) => ({ ...h, d: 1 })), 5: [{ x: 40, y: 34, w: 16, h: 2.6 }], 9: [{ x: 22, y: 81, w: 18, h: 2.6 }] };
+      this.setState({ pages, hist: [{}], toast: '7 Stellen geschwärzt', live: '7 Stellen geschwärzt.' });
+      this.tt = setTimeout(() => this.setState({ toast: '' }), 5000);
+      return;
+    }
+    const st = groups.map((g) => this.rectOf(g)).filter(Boolean);
+    if (st.length < groups.length) return;
+    this.seeded = true;
+    const pages = { 2: s === 'zoom' ? st.slice(0, 1) : st, 5: [{ x: 10, y: 30, w: 50, h: 3 }], 7: [{ x: 10, y: 20, w: 35, h: 3 }, { x: 10, y: 52, w: 60, h: 3 }] };
+    if (s === 'mitStellen') { this.setState({ pages, sel: 1 }); return; }
+    if (s === 'ziehen') {
+      const e = st[3];
+      const dr = { x: e.x, y: e.y, w: e.w * 0.62, h: e.h };
+      this.setState({ pages: { ...pages, 2: st.slice(0, 3) }, draw: dr, finger: { x: dr.x + dr.w, y: dr.y + dr.h } });
+      return;
+    }
+    if (s === 'zoom') { this.setState({ pages, z: 2, zx: -24, zy: -210, zoomHint: true }); }
+  }
+  cur() { return this.state.pages[this.state.pg] || []; }
+  setCur(st, extra) { this.setState({ pages: { ...this.state.pages, [this.state.pg]: st }, ...(extra || {}) }); }
+  commit(prevPages, st, extra) {
+    this.setState({ pages: { ...this.state.pages, [this.state.pg]: st }, hist: [...this.state.hist, prevPages].slice(-50), fut: [], ...(extra || {}) });
+  }
+  pt(e) {
+    const R = this.pageEl.getBoundingClientRect();
+    return { x: (e.clientX - R.left) / R.width * 100, y: (e.clientY - R.top) / R.height * 100 };
+  }
+  down(e) {
+    if (!this.pageEl) return;
+    const t = e.target;
+    if (!t.closest || t.closest('[data-del]')) return;
+    const p = this.pt(e);
+    const st = this.cur();
+    try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+    if (this.state.finger) this.setState({ finger: null, draw: null });
+    const h = t.closest('[data-h]');
+    if (h && this.state.sel != null) { this.drag = { mode: 'r', c: h.getAttribute('data-h'), p0: p, o: { ...st[this.state.sel] }, prev: this.state.pages, moved: false }; return; }
+    const s = t.closest('[data-s]');
+    if (s) {
+      const i = +s.getAttribute('data-s');
+      this.drag = { mode: 'm', i, p0: p, o: { ...st[i] }, prev: this.state.pages, moved: false };
+      if (this.state.sel !== i) this.setState({ sel: i, toast: '' });
+      return;
+    }
+    const w = this.art() === 'pdf' ? t.closest('[data-w]') : null;
+    this.drag = { mode: 'n', p0: p, word: w ? w.getAttribute('data-w') : null, moved: false };
+  }
+  move(e) {
+    const d = this.drag;
+    if (!d || !this.pageEl) return;
+    const p = this.pt(e);
+    const dx = p.x - d.p0.x, dy = p.y - d.p0.y;
+    if (!d.moved && Math.hypot(dx, dy * 1.414) < 1.6 / this.state.z) return;
+    d.moved = true;
+    const cl = (v, a, b) => Math.max(a, Math.min(b, v));
+    if (d.mode === 'n') {
+      const x = cl(Math.min(p.x, d.p0.x), 0, 100), y = cl(Math.min(p.y, d.p0.y), 0, 100);
+      this.setState({ draw: { x, y, w: Math.min(Math.abs(dx), 100 - x), h: Math.min(Math.abs(dy), 100 - y) }, sel: null, toast: '' });
+      return;
+    }
+    const st = this.cur().slice();
+    const o = d.o;
+    if (d.mode === 'm') { st[d.i] = { ...o, x: cl(o.x + dx, 0, 100 - o.w), y: cl(o.y + dy, 0, 100 - o.h) }; this.setCur(st); return; }
+    let x1 = o.x, y1 = o.y, x2 = o.x + o.w, y2 = o.y + o.h;
+    if (d.c.indexOf('l') >= 0) x1 = cl(o.x + dx, 0, x2 - 1);
+    if (d.c.indexOf('r') >= 0) x2 = cl(x2 + dx, x1 + 1, 100);
+    if (d.c.indexOf('t') >= 0) y1 = cl(o.y + dy, 0, y2 - 0.6);
+    if (d.c.indexOf('b') >= 0) y2 = cl(y2 + dy, y1 + 0.6, 100);
+    st[this.state.sel] = { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+    this.setCur(st);
+  }
+  announce(n) { const where = this.art() === 'bild' ? ' auf dem Bild' : ' auf Seite ' + this.state.pg; return 'Stelle hinzugefügt. ' + n + (n === 1 ? ' Stelle' : ' Stellen') + where + '.'; }
+  up() {
+    const d = this.drag;
+    this.drag = null;
+    if (!d) return;
+    if (d.mode === 'n') {
+      const dr = this.state.draw;
+      if (d.moved && dr && dr.w > 1 && dr.h > 0.6) {
+        const prev = this.cur();
+        const st = [...prev, { x: dr.x, y: dr.y, w: dr.w, h: dr.h }];
+        this.commit(this.state.pages, st, { draw: null, sel: st.length - 1, live: this.announce(st.length) });
+        return;
+      }
+      this.setState({ draw: null });
+      if (!d.moved) {
+        if (this.state.sel != null) { this.setState({ sel: null }); return; }
+        if (d.word) {
+          const r = this.rectOf([d.word]);
+          if (r) { const prev = this.cur(); this.commit(this.state.pages, [...prev, r], { sel: null, live: this.announce(prev.length + 1) }); }
+        }
+      }
+      return;
+    }
+    if (d.moved) this.setState({ hist: [...this.state.hist, d.prev].slice(-50), fut: [] });
+  }
+  del(i) {
+    if (this.state.out != null) return;
+    this.setState({ out: i, sel: null });
+    clearTimeout(this.to);
+    this.to = setTimeout(() => {
+      const prev = this.cur();
+      this.commit(this.state.pages, prev.filter((_, k) => k !== i), { out: null, toast: 'Stelle gelöscht', live: 'Stelle gelöscht.' });
+      clearTimeout(this.tt);
+      this.tt = setTimeout(() => this.setState({ toast: '' }), 5000);
+    }, 160);
+  }
+  undo() {
+    const h = this.state.hist;
+    if (!h.length) return;
+    const last = h[h.length - 1];
+    this.setState({ pages: last, hist: h.slice(0, -1), fut: [...this.state.fut, this.state.pages], sel: null, toast: '', live: 'Rückgängig gemacht.' });
+  }
+  redo() {
+    const f = this.state.fut;
+    if (!f.length) return;
+    const nx = f[f.length - 1];
+    this.setState({ pages: nx, fut: f.slice(0, -1), hist: [...this.state.hist, this.state.pages], sel: null, live: 'Wiederholt.' });
+  }
+  key(i, e) {
+    const st = this.cur().slice();
+    const o = st[i];
+    if (!o) return;
+    const k = e.key, s = e.shiftKey;
+    if (k === 'Delete' || k === 'Backspace') { e.preventDefault(); this.del(i); return; }
+    let n = null;
+    if (k === 'ArrowLeft') n = s ? { ...o, w: Math.max(1, o.w - 1) } : { ...o, x: Math.max(0, o.x - 1) };
+    if (k === 'ArrowRight') n = s ? { ...o, w: Math.min(100 - o.x, o.w + 1) } : { ...o, x: Math.min(100 - o.w, o.x + 1) };
+    if (k === 'ArrowUp') n = s ? { ...o, h: Math.max(0.6, o.h - 0.7) } : { ...o, y: Math.max(0, o.y - 0.7) };
+    if (k === 'ArrowDown') n = s ? { ...o, h: Math.min(100 - o.y, o.h + 0.7) } : { ...o, y: Math.min(100 - o.h, o.y + 0.7) };
+    if (k === 'Escape') { this.setState({ sel: null }); return; }
+    if (n) { e.preventDefault(); st[i] = n; this.commit(this.state.pages, st); }
+  }
+  go(d) { const pg = Math.max(1, Math.min(12, this.state.pg + d)); this.setState({ pg, sel: null, draw: null, finger: null, live: 'Seite ' + pg + ' von 12.' }); }
+  renderVals() {
+    const art = this.art();
+    let c = 0;
+    const B = (k, text, ids) => ({ k, w: text.split(' ').map((t, j) => ({ t, id: (ids && ids[j]) || ('w' + (c++)) })) });
+    const blocks = [
+      B('top', 'Mietvertrag · Seite 2'),
+      B('h', '§ 3 Miete und Zahlung'),
+      B('p', 'Die monatliche Miete beträgt 1.250,00 € und ist bis zum dritten Werktag eines Monats auf folgendes Konto zu überweisen:'),
+      B('l', 'Kontoinhaber: Max Mustermann', [null, 'k1', 'k2']),
+      B('l', 'IBAN: DE12 3456 7890 1234 5678 90', [null, 'i1', 'i2', 'i3', 'i4', 'i5', 'i6']),
+      B('l', 'BIC: GENODEF1MUS'),
+      B('h', '§ 4 Kontakt'),
+      B('p', 'Mieter: Max Mustermann, Musterweg 7, 12345 Musterstadt', [null, 'm1', 'm2']),
+      B('l', 'Telefon: 0170 1234567', [null, 't1', 't2']),
+      B('l', 'E-Mail: max.mustermann@example.de', [null, 'e1']),
+      B('h', '§ 5 Kaution'),
+      B('p', 'Die Kaution beträgt drei Monatsmieten und wird auf ein separates Kautionskonto eingezahlt. Sie ist nach Ende des Mietverhältnisses mit Zinsen zurückzuzahlen.')
+    ];
+    const letter = [
+      B('h', 'Stadtwerke Musterstadt'),
+      B('l', 'Herrn Max Mustermann'),
+      B('l', 'Musterweg 7, 12345 Musterstadt'),
+      B('l', 'Kundennummer: 4711 0815 2209'),
+      B('h', 'Ihre Jahresabrechnung'),
+      B('p', 'Sehr geehrter Herr Mustermann, anbei erhalten Sie Ihre Abrechnung für den Zeitraum vom 01.01. bis 31.12. Der Betrag wird von Ihrem Konto abgebucht.'),
+      B('l', 'Zählernummer: 1ESY 1160 4471'),
+      B('p', 'Mit freundlichen Grüßen, Ihr Kundenservice')
+    ];
+    const st = this.cur();
+    const sel = this.state.sel;
+    const f = (v) => v.toFixed(2);
+    const all = Object.keys(this.state.pages).reduce((a, k) => a + this.state.pages[k].length, 0);
+    const pg = this.state.pg;
+    const stellen = st.map((s, i) => ({
+      i, n: i + 1, l: f(s.x), t: f(s.y), w: f(s.w), h: f(s.h), d: s.d ? i * 60 : 0,
+      cls: i === sel ? 'is-sel' : (i === this.state.out ? 'is-out' : ''),
+      key: (e) => this.key(i, e),
+      remove: () => this.del(i),
+      pos: s.y < 33 ? 'oben' : (s.y < 66 ? 'Mitte' : 'unten'),
+      focus: () => { if (this.state.sel !== i) this.setState({ sel: i }); }
+    }));
+    const S = sel != null ? st[sel] : null;
+    const dr = this.state.draw;
+    const fg = this.state.finger;
+    const z0 = { l: 0, t: 0, w: 0, h: 0 };
+    const isBild = art === 'bild';
+    const vw = 480, vh = 679;
+    return {
+      blocks, letter, stellen, pg,
+      vw, vh, fs: 11.9,
+      zoomIn: () => { const z = Math.min(3, this.state.z + 0.5); this.setState({ z, zx: -vw * (z - 1) / 2, zy: -vh * (z - 1) / 4 }); },
+      zoomOut: () => { const z = Math.max(1, this.state.z - 0.5); this.setState({ z, zx: -vw * (z - 1) / 2, zy: -vh * (z - 1) / 4 }); },
+      pagesWith: Object.keys(this.state.pages).filter((k) => this.state.pages[k].length).length,
+      z: this.state.z, zx: this.state.zx, zy: this.state.zy,
+      zoomed: this.state.z > 1, zoomHint: this.state.zoomHint,
+      fit: () => this.setState({ z: 1, zx: 0, zy: 0, zoomHint: false }),
+      isDoc: !isBild && pg === 2, isOther: !isBild && pg !== 2, isPhoto: isBild,
+      paper: art === 'scan' ? 'scan' : '',
+      isScan: art === 'scan', paged: !isBild, canSearch: art === 'pdf',
+      searchHref: this.start() === 'leer' ? 'S5a-Suchen.dc.html' : 'S5d-Suchen-schon.dc.html',
+      hint: art === 'pdf' ? 'Ziehe mit der Maus über eine Stelle, um sie zu schwärzen. Einzelne Wörter kannst du auch anklicken.' : 'Ziehe mit dem Finger über eine Stelle, um sie zu schwärzen.',
+      where: isBild ? ' auf dem Bild' : ' auf Seite ' + pg,
+      pageCount: st.length,
+      countLabel: all === 1 ? '1 Stelle' : all + ' Stellen',
+      empty: all === 0, has: all > 0,
+      hasDraw: !!dr, dr: dr ? { l: f(dr.x), t: f(dr.y), w: f(dr.w), h: f(dr.h) } : z0,
+      hasFinger: !!fg, fg: fg ? { l: f(fg.x), t: f(fg.y) } : { l: 0, t: 0 },
+      hasSel: !!S, sl: S ? { l: f(S.x), t: f(S.y), w: f(S.w), h: f(S.h) } : z0,
+      delCls: S ? ((S.y < 12 ? 'below ' : '') + (S.x + S.w > 92 ? 'edge' : '')) : '',
+      delSel: () => { if (this.state.sel != null) this.del(this.state.sel); },
+      noUndo: this.state.hist.length === 0, noRedo: this.state.fut.length === 0,
+      undo: () => this.undo(), redo: () => this.redo(),
+      isFirst: pg === 1, isLast: pg === 12,
+      prev: () => this.go(-1), next: () => this.go(1),
+      hasToast: !!this.state.toast, toast: this.state.toast,
+      toastIcon: this.state.toast === 'Stelle gelöscht' ? 'M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3' : 'M5 12.5l4.5 4.5L19 7',
+      live: this.state.live,
+      setPage: (el) => { this.pageEl = el; },
+      down: (e) => this.down(e), move: (e) => this.move(e), up: (e) => this.up(e)
+    };
+  }
+}
+</script>
+</body>
+</html>

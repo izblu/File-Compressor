@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Gespeichert – mit Tipp</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+<link rel="stylesheet" href="./filekit-ergaenzung.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.ok{animation:fk-pop-in 460ms cubic-bezier(.34,1.45,.64,1) both}
+.ok-check{stroke-dasharray:40;animation:fk-draw 380ms cubic-bezier(.2,.8,.2,1) 280ms both;--len:40}
+.ok-burst{animation:fk-burst 760ms cubic-bezier(.2,.8,.2,1) 200ms both}
+.spark{position:absolute;left:50%;top:50%;width:0;height:0}
+.spark i{position:absolute;left:-3px;top:-3px;width:6px;height:6px;border-radius:3px;background:#79a2ff;animation:spark 720ms cubic-bezier(.2,.8,.2,1) 260ms both}
+.spark:nth-child(even) i{background:#4ade80;width:5px;height:5px}
+@keyframes spark{0%{transform:translateY(0) scale(.4);opacity:0}30%{opacity:1}100%{transform:translateY(-80px) scale(1);opacity:0}}
+.mthumb{position:relative;width:36px;height:50px;flex:none;border-radius:4px;overflow:hidden;background:#fff;box-shadow:0 6px 14px -6px rgba(0,0,0,.8)}
+.mthumb i{position:absolute;left:14%;height:6%;border-radius:1px;background:#000}
+@media (prefers-reduced-motion: reduce){.ok{animation:fk-fade 200ms ease both}.ok-check{animation:none;stroke-dashoffset:0}.ok-burst,.spark{display:none}}
+</style>
+</helmet>
+<div class="fk-app">
+<main class="fk-stack" style="flex: 1; align-items: center; justify-content: center; gap: 22px; padding: 56px 24px 0">
+<div style="position: relative; width: 112px; height: 112px; display: flex; align-items: center; justify-content: center">
+<span aria-hidden="true" style="position: absolute; inset: -50px; border-radius: 50%; background: radial-gradient(closest-side, rgba(59,116,255,.35), transparent)"></span>
+<span class="ok-burst" aria-hidden="true" style="position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px #79a2ff"></span>
+<span class="spark" aria-hidden="true" style="transform: rotate(0deg)"><i></i></span><span class="spark" aria-hidden="true" style="transform: rotate(45deg)"><i></i></span><span class="spark" aria-hidden="true" style="transform: rotate(90deg)"><i></i></span><span class="spark" aria-hidden="true" style="transform: rotate(135deg)"><i></i></span><span class="spark" aria-hidden="true" style="transform: rotate(180deg)"><i></i></span><span class="spark" aria-hidden="true" style="transform: rotate(225deg)"><i></i></span><span class="spark" aria-hidden="true" style="transform: rotate(270deg)"><i></i></span><span class="spark" aria-hidden="true" style="transform: rotate(315deg)"><i></i></span>
+<svg class="ok" width="96" height="96" viewBox="0 0 112 112" role="img" aria-label="Erfolgreich" style="position: relative; filter: drop-shadow(0 16px 30px rgba(47,107,240,.55))"><circle cx="56" cy="56" r="56" fill="#2f6bf0"></circle><circle cx="56" cy="56" r="55" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"></circle><path class="ok-check" d="M37 57.5l12.5 12.5L76 43.5" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+<div class="fk-stack in-up d5" role="status" style="align-items: center; gap: 8px; text-align: center">
+<h1 class="t-display">{{headline}}</h1>
+<p class="t-body t-muted">{{sub}}</p>
+</div>
+<div class="card fk-stack in-up d6" style="width: 100%; padding: 6px 0">
+<sc-for list="{{files}}" as="f" hint-placeholder-count="1">
+<div class="fk-row" style="padding: 8px 16px 8px 12px; gap: 12px">
+<div class="mthumb" aria-hidden="true"><div class="doc" style="padding: 6px 5px; gap: 2px; border-radius: 4px"><div class="ln d" style="height: 2px; width: 60%"></div><div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px; width: 80%"></div><div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px; width: 70%"></div></div><sc-if value="{{f.bars}}" hint-placeholder-val="{{ false }}"><i style="top: 36%; width: 56%"></i><i style="top: 54%; width: 70%"></i></sc-if></div>
+<div class="fk-stack" style="flex: 1; min-width: 0; gap: 2px"><span class="t-l" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{f.name}}</span><span class="t-s t-muted t-num">{{f.meta}}</span></div>
+<sc-if value="{{f.badge}}" hint-placeholder-val="{{ false }}"><span class="badge badge-success t-num">−77 %</span></sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{hasTip}}" hint-placeholder-val="{{ false }}"><p class="note note-tip in-up d6" style="width: 100%"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"></path></svg><span>{{tip}}</span></p></sc-if>
+</main>
+<footer class="fk-dock in-dock" style="gap: 6px; animation-delay: 520ms">
+<sc-if value="{{working}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary btn-block is-working" aria-busy="true"><span class="spinner" aria-hidden="true" style="border-color: rgba(255,255,255,.2); border-top-color: #eef2fb"></span>Wird geöffnet …</button><a href="{{next}}" ref="{{setNext}}" tabindex="-1" aria-hidden="true" style="display: none">weiter</a></sc-if>
+<sc-if value="{{idle}}" hint-placeholder-val="{{ true }}"><a href="{{next}}" class="btn btn-secondary btn-block">{{again}}</a></sc-if>
+<a href="S1a-Start-leer.dc.html" class="btn btn-primary btn-block">Noch eine Datei bearbeiten</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"v":{"editor":"enum","options":["tipp","ohne","mehrere","schwaerzen","oeffnet"],"default":"tipp"},"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    if ((this.props.v ?? 'tipp') === 'oeffnet') this.t = setTimeout(() => { if (this.nextEl) this.nextEl.click(); }, 1100);
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  renderVals() {
+    const v = this.props.v ?? 'tipp';
+    const D = {
+      tipp: { files: [{ name: 'Zusammengeführt.pdf', meta: '5 Seiten · 6,8 MB' }], tip: 'Tipp: Die Datei ist 6,8 MB groß – du kannst sie gleich verkleinern, z. B. für Online-Formulare.', next: 'A2a-Start-Ergebnis.dc.html' },
+      ohne: { files: [{ name: 'Vertrag_klein.pdf', meta: '12 Seiten · 1,9 MB', badge: true }], tip: '', next: 'A3a-Start-ohne.dc.html' },
+      mehrere: { files: [{ name: 'Vertrag_Seite3.pdf', meta: '1 Seite · 0,4 MB' }, { name: 'Vertrag_Seite4.pdf', meta: '1 Seite · 0,3 MB' }, { name: 'Vertrag_Seite7.pdf', meta: '1 Seite · 0,5 MB' }], tip: '', next: 'A3b-Start-ohne-mehrere.dc.html', many: true },
+      schwaerzen: { files: [{ name: 'Vertrag_geschwärzt.pdf', meta: '2,4 MB · 12 Stellen geschwärzt', bars: true }], tip: 'Tipp: Die Datei ist größer geworden (0,2 MB → 2,4 MB) – du kannst sie gleich verkleinern.', next: 'A1e-Gespeichert-oeffnet.dc.html' },
+      oeffnet: { files: [{ name: 'Vertrag_geschwärzt.pdf', meta: '2,4 MB · 12 Stellen geschwärzt', bars: true }], tip: 'Tipp: Die Datei ist größer geworden (0,2 MB → 2,4 MB) – du kannst sie gleich verkleinern.', next: 'A2a-Start-Ergebnis.dc.html' }
+    }[v];
+    return {
+      headline: 'Gespeichert',
+      sub: D.many ? '3 Dateien gespeichert – sie liegen jetzt auf deinem Gerät.' : 'Die Datei liegt jetzt auf deinem Gerät.',
+      files: D.files.map((f) => ({ bars: false, badge: false, ...f })),
+      hasTip: !!D.tip, tip: D.tip,
+      again: D.many ? 'Diese 3 Dateien weiterbearbeiten' : 'Diese Datei weiterbearbeiten',
+      next: D.next,
+      working: v === 'oeffnet', idle: v !== 'oeffnet',
+      setNext: (el) => { this.nextEl = el; }
+    };
+  }
+}
+</script>
+</body>
+</html>

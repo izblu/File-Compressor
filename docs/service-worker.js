@@ -4,7 +4,7 @@
 // Cache gelegt; danach werden Anfragen bevorzugt aus dem Cache beantwortet.
 // So startet die App auch ohne Internet.
 
-const CACHE = "filekit-v10";
+const CACHE = "filekit-v11";
 
 // Die zur App gehörenden Dateien. Bei Änderungen die Versionsnummer oben
 // erhöhen (z. B. v6), damit Browser die neue Fassung laden.
@@ -14,6 +14,7 @@ const CACHE = "filekit-v10";
 const DATEIEN = [
   "index.html",
   "filekit.css",
+  "filekit-ergaenzung.css",
   "styles.css",
   "fonts/manrope-latin-wght-normal.woff2",
   "app.js",

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Wird geschwärzt</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.pr-arc{transition:stroke-dashoffset 420ms cubic-bezier(.2,.8,.2,1)}
+.pr-page{animation:fk-squeeze 900ms cubic-bezier(.65,0,.35,1) infinite}
+.pr-beam{position:absolute;left:0;right:0;height:40%;background:linear-gradient(to bottom,transparent,rgba(121,162,255,.35),transparent);animation:beam 900ms cubic-bezier(.65,0,.35,1) infinite}
+@keyframes beam{from{top:-40%}to{top:100%}}
+.sd{height:6px;flex:1;border-radius:3px;background:var(--fk-line-strong);transition:background-color 300ms ease}
+.sd.done{background:var(--fk-accent-text)}
+.sd.now{background:var(--fk-accent-text);animation:sdPulse 900ms ease-in-out infinite}
+@keyframes sdPulse{50%{opacity:.35}}
+@media (prefers-reduced-motion: reduce){.pr-page,.pr-beam,.sd.now{animation:none}.pr-beam{display:none}}
+</style>
+</helmet>
+<div class="fk-app">
+<header class="fk-top">
+<div class="fk-top-row">
+<span aria-hidden="true"></span>
+<div class="fk-top-title"><b>Stellen schwärzen</b><span>Schritt 2 von 3</span></div>
+<span aria-hidden="true"></span>
+</div>
+<div class="fk-progress" aria-hidden="true"><i style="width: 66.6%"></i></div>
+</header>
+<main class="fk-body fk-stack in-fade" style="align-items: center; justify-content: center; gap: 28px; padding-bottom: 40px">
+<div style="position: relative; width: 236px; height: 236px; display: flex; align-items: center; justify-content: center">
+<span aria-hidden="true" style="position: absolute; inset: -30px; border-radius: 50%; background: radial-gradient(closest-side, var(--fk-accent-glow), transparent); opacity: .7"></span>
+<svg width="236" height="236" viewBox="0 0 236 236" aria-hidden="true" style="position: absolute; inset: 0; transform: rotate(-90deg)">
+<circle cx="118" cy="118" r="108" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="6"></circle>
+<circle class="pr-arc" cx="118" cy="118" r="108" fill="none" stroke="#79a2ff" stroke-width="6" stroke-linecap="round" stroke-dasharray="678.6" style="stroke-dashoffset: {{off}}; filter: drop-shadow(0 0 6px rgba(121,162,255,.7))"></circle>
+</svg>
+<div class="pr-page" style="position: relative; width: 104px; height: 142px; border-radius: 6px; overflow: hidden; box-shadow: 0 20px 40px -14px rgba(0,0,0,.8), 0 0 40px -8px rgba(59,116,255,.6)">
+<span aria-hidden="true" style="position: absolute; left: 30%; top: 40%; width: 46%; height: 4%; background: #000; z-index: 1"></span><span aria-hidden="true" style="position: absolute; left: 10%; top: 49%; width: 70%; height: 4%; background: #000; z-index: 1"></span><div class="doc" style="padding: 12px 10px; gap: 4px">
+<span class="ttl" style="font-size: 7px">VERTRAG</span>
+<div class="ln h" style="width: 64%; margin-top: 4px; height: 4px"></div>
+<div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px; width: 92%"></div><div class="ln" style="height: 2px; width: 96%"></div><div class="ln" style="height: 2px; width: 60%"></div>
+<div class="gap" style="height: 3px"></div>
+<div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px; width: 90%"></div><div class="ln" style="height: 2px; width: 70%"></div>
+</div>
+<span class="pr-beam" aria-hidden="true"></span>
+</div>
+</div>
+<div class="fk-stack" role="status" aria-live="polite" style="align-items: center; gap: 6px; text-align: center">
+<p class="t-title">Wird geschwärzt …</p>
+<p class="t-body t-muted t-num">Seite {{page}} von 12 · {{pct}} %</p>
+</div>
+<div class="fk-row" aria-hidden="true" style="gap: 4px; width: 100%; max-width: 260px">
+<sc-for list="{{segs}}" as="s" hint-placeholder-count="12"><span class="sd {{s.cls}}"></span></sc-for>
+</div>
+</main>
+<footer class="fk-dock">
+<a href="S3a-Stellen.dc.html" class="btn btn-secondary btn-block">Abbrechen</a>
+<a href="S10a-Speichern-PDF.dc.html" ref="{{setNext}}" tabindex="-1" aria-hidden="true" style="display: none">Weiter</a>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":375,"height":812}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { page: 3 };
+    this.nextEl = null;
+  }
+  componentDidMount() {
+    this.run();
+  }
+  run() {
+    this.setState({ page: 1 });
+    clearInterval(this.timer);
+    this.timer = setInterval(() => {
+      const p = this.state.page + 1;
+      if (p > 12) {
+        clearInterval(this.timer);
+        this.done = setTimeout(() => {
+          if (this.nextEl) this.nextEl.click();
+          this.done = setTimeout(() => this.run(), 1600);
+        }, 500);
+        return;
+      }
+      this.setState({ page: p });
+    }, 420);
+  }
+  componentWillUnmount() {
+    clearInterval(this.timer);
+    clearTimeout(this.done);
+  }
+  renderVals() {
+    const page = this.state.page;
+    const pct = Math.round((page / 12) * 100);
+    const segs = [];
+    for (let i = 1; i <= 12; i++) segs.push({ cls: i < page ? 'done' : i === page ? (page === 12 ? 'done' : 'now') : '' });
+    return {
+      page, pct, segs,
+      off: (678.6 * (1 - pct / 100)).toFixed(1),
+      setNext: (el) => { this.nextEl = el; }
+    };
+  }
+}
+</script>
+</body>
+</html>

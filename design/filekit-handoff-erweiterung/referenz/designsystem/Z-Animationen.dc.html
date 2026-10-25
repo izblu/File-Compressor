@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Animationen – Ergänzung</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./filekit.css">
+<link rel="stylesheet" href="./filekit-ergaenzung.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&amp;display=swap">
+<style>
+body{margin:0;background:#060a13}
+a{color:#79a2ff}a:hover{color:#9bbaff}
+.sec{display:flex;flex-direction:column;gap:16px}
+.sec > h2{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fk-muted)}
+.demo{position:relative;height:330px;border-radius:24px;background:var(--fk-bg);box-shadow:inset 0 0 0 1px var(--fk-line);overflow:hidden}
+.paperd{position:absolute;left:24px;right:24px;top:24px;bottom:24px;border-radius:6px;background:#fff;color:#1e293b;font-family:'Times New Roman',serif;font-size:13px;line-height:1.55;padding:20px 18px;overflow:hidden}
+.paperd .ln{height:4px;border-radius:2px;background:#e1e6ee;margin:9px 0}
+.fadeaway{animation:fadeaway 200ms ease 60ms both}
+@keyframes fadeaway{to{opacity:0}}
+.zoomd{transform-origin:20% 30%;animation:zoomd 2600ms cubic-bezier(.65,0,.35,1) both}
+@keyframes zoomd{0%,12%{transform:none}24%,70%{transform:scale(2)}82%,100%{transform:none}}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--fk-muted);text-align:left;padding:0 12px 10px 0;border-bottom:1px solid var(--fk-line-strong)}
+td{padding:9px 12px 9px 0;border-bottom:1px solid var(--fk-line);vertical-align:top;color:var(--fk-text-2);line-height:1.4;font-weight:500}
+td:first-child{color:var(--fk-text);font-weight:700}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--fk-text)}
+td.k{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:var(--fk-accent-text);white-space:nowrap}
+@media (prefers-reduced-motion: reduce){.fadeaway{animation:fk-fade 200ms ease reverse both}.zoomd{animation:none}}
+</style>
+</helmet>
+<div class="fk-page" style="width: 1280px; min-height: 1100px; box-sizing: border-box; padding: 56px 72px; display: flex; flex-direction: column; gap: 32px">
+<header class="fk-stack" style="gap: 8px">
+<p class="t-micro t-accent">FileKit · Ergänzung „Schwärzen &amp; Weiterbearbeiten“</p>
+<h1 style="font-size: 40px; line-height: 1.05; font-weight: 750; letter-spacing: -0.035em">Animationen</h1>
+</header>
+<section class="sec">
+<h2>Live ansehen</h2>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+<div class="fk-stack" style="gap: 10px">
+<div class="demo">
+<sc-if value="{{a}}" hint-placeholder-val="{{ true }}">
+<div class="preview in-morph" style="position: absolute; left: 14px; right: 14px; top: 16px; height: 190px"><span class="preview-halo in-halo" style="width: 200px; height: 200px; margin: -100px 0 0 -100px"></span><div class="preview-page in-page" style="width: 92px; height: 124px"><div class="doc" style="padding: 10px 8px; gap: 3px"><span class="ttl" style="font-size: 6px">VERTRAG</span><div class="ln" style="height: 2px"></div><div class="ln" style="height: 2px; width: 80%"></div></div><span style="position: absolute; left: 14%; top: 34%; width: 60%; height: 4%; background: #000"></span></div></div>
+<p class="result-hint in-up d3" style="position: absolute; left: 18px; top: 218px; font-size: 12px">Dein Ergebnis · schon gespeichert</p>
+<div class="split in-dock" style="position: absolute; left: 14px; right: 14px; bottom: 14px; height: 46px; border-radius: 14px"><span class="split-main" style="font-size: 14px">Verkleinern</span><span class="split-div"></span><span class="split-more" style="width: 46px"></span></div>
+<div class="fadeaway" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; background: var(--fk-bg)"><svg width="56" height="56" viewBox="0 0 112 112" aria-hidden="true"><circle cx="56" cy="56" r="56" fill="#2f6bf0"></circle><path d="M37 57.5l12.5 12.5L76 43.5" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"></path></svg><b class="t-l">Gespeichert</b></div>
+</sc-if>
+</div>
+<div class="fk-row" style="justify-content: space-between"><span class="t-s">A5 · Gespeichert → Start mit Ergebnis</span><button type="button" class="btn-link" style="height: 36px" onClick="{{playA}}">Abspielen</button></div>
+</div>
+<div class="fk-stack" style="gap: 10px">
+<div class="demo"><sc-if value="{{b}}" hint-placeholder-val="{{ true }}"><div class="paperd">
+<p style="margin: 0">Kontoinhaber: <span style="position: relative">Max <span style="position: relative">Mustermann<span class="stelle" style="left: -2px; top: 0; right: -2px; bottom: 0; animation-delay: 300ms"></span></span></span></p>
+<p style="margin: 0">Mieter: Max <span style="position: relative">Mustermann<span class="stelle" style="left: -2px; top: 0; right: -2px; bottom: 0; animation-delay: 360ms"></span></span>, Musterweg 7</p>
+<p style="margin: 0">E-Mail: max.<span style="position: relative">mustermann<span class="stelle" style="left: -1px; top: 0; right: -1px; bottom: 0; animation-delay: 420ms"></span></span>@example.de</p>
+<div class="ln" style="width: 90%"></div><div class="ln" style="width: 70%"></div>
+<div class="toast" style="left: 0; right: 0; bottom: 0; height: 44px; font-size: 13px; animation-delay: 600ms">7 Stellen geschwärzt</div>
+</div></sc-if></div>
+<div class="fk-row" style="justify-content: space-between"><span class="t-s">Treffer schwärzen · versetzt</span><button type="button" class="btn-link" style="height: 36px" onClick="{{playB}}">Abspielen</button></div>
+</div>
+<div class="fk-stack" style="gap: 10px">
+<div class="demo"><sc-if value="{{c}}" hint-placeholder-val="{{ true }}"><div class="paperd">
+<p style="margin: 0">IBAN: <span style="position: relative">DE12 3456 7890<span class="stelle" style="left: -2px; top: 0; right: -2px; bottom: 0"></span></span></p>
+<div class="ln" style="width: 80%"></div>
+<p style="margin: 0">Telefon: <span style="position: relative">0170 1234567<span class="stelle is-out" style="left: -2px; top: 0; right: -2px; bottom: 0; animation-delay: 900ms"></span></span></p>
+<div class="ln" style="width: 90%"></div><div class="ln" style="width: 60%"></div>
+<div class="toast" style="left: 0; right: 0; bottom: 0; height: 44px; font-size: 13px; animation-delay: 1080ms">Stelle gelöscht</div>
+</div></sc-if></div>
+<div class="fk-row" style="justify-content: space-between"><span class="t-s">Einrasten · Löschen</span><button type="button" class="btn-link" style="height: 36px" onClick="{{playC}}">Abspielen</button></div>
+</div>
+<div class="fk-stack" style="gap: 10px">
+<div class="demo"><sc-if value="{{d}}" hint-placeholder-val="{{ true }}"><div class="paperd" style="padding: 0"><div class="zoomd" style="position: absolute; inset: 0; padding: 20px 18px">
+<p style="margin: 0">IBAN: <span style="position: relative">DE12 3456 7890<span class="stelle" style="left: -2px; top: 0; right: -2px; bottom: 0; animation: none"></span></span></p>
+<div class="ln" style="width: 80%"></div><div class="ln" style="width: 92%"></div><div class="ln" style="width: 60%"></div><div class="ln" style="width: 84%"></div>
+</div></div></sc-if></div>
+<div class="fk-row" style="justify-content: space-between"><span class="t-s">Zoom · Seite einpassen</span><button type="button" class="btn-link" style="height: 36px" onClick="{{playD}}">Abspielen</button></div>
+</div>
+</div>
+</section>
+<section class="sec">
+<h2>Übersicht · Dauer &amp; Kurve (passend zu HANDOFF Kap. 8)</h2>
+<table>
+<thead><tr><th>Moment</th><th>Dauer (ms)</th><th>Kurve</th><th>Was passiert</th><th>Bewegung reduzieren</th></tr></thead>
+<tbody>
+<tr><td>Neue Stelle aufziehen</td><td class="n">folgt dem Finger</td><td class="k">–</td><td>Rahmen mit 38 % Schwarz und 2-px-Akzent-Rahmen wächst unter dem Finger.</td><td>gleich</td></tr>
+<tr><td>Stelle rastet ein</td><td class="n">160</td><td class="k">spring</td><td>Beim Loslassen: Scale 1,06 → 1, Deckkraft 0,55 → 1, danach deckend schwarz.</td><td>sofort</td></tr>
+<tr><td>Stelle wählen / abwählen</td><td class="n">160</td><td class="k">ease</td><td>Schwarz 100 % ↔ 50 %, Akzent-Rahmen ein/aus; Papierkorb ploppt auf (220, spring).</td><td>Überblendung</td></tr>
+<tr><td>Treffer schwärzen</td><td class="n">160 je Stelle, +60 versetzt</td><td class="k">spring</td><td>Neue Stellen erscheinen nacheinander; danach Toast „7 Stellen geschwärzt · Rückgängig“ (420, sheet).</td><td>alle sofort</td></tr>
+<tr><td>Stelle löschen</td><td class="n">160</td><td class="k">ease</td><td>Blendet aus (Scale 0,96), dann Toast „Stelle gelöscht · Rückgängig“.</td><td>sofort weg</td></tr>
+<tr><td>Zoom / Seite einpassen</td><td class="n">320</td><td class="k">io</td><td>transform: scale + translate der Seite; Knopf „Seite einpassen“ erscheint (200, fade).</td><td>sofort</td></tr>
+<tr><td>Seite blättern</td><td class="n">200</td><td class="k">ease</td><td>Überblendung zur nächsten Seite – bewusst ohne Wischen.</td><td>sofort</td></tr>
+<tr><td>A5 · Gespeichert ✓ → Start mit Ergebnis</td><td class="n">200 · 520 · +180 · 560 (+260)</td><td class="k">ease · ease-out · sheet</td><td>Gespeichert-Screen blendet aus; die Datei-Karte wächst aus ihrer Position zur großen Vorschau (translateY 180 → 0, Scale 0,4 → 1); Hinweis „Dein Ergebnis · schon gespeichert“ folgt, geteilter Button bzw. „Aktion wählen“ gleitet ein.</td><td>Überblendung 200</td></tr>
+<tr><td>„Wird geöffnet …“</td><td class="n">800 Schleife</td><td class="k">linear</td><td>Spinner im Knopf, bis der Startscreen bereit ist.</td><td>ohne Drehung</td></tr>
+</tbody>
+</table>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1100}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { a: true, b: true, c: true, d: true };
+  }
+  replay(k) {
+    this.setState({ [k]: false });
+    setTimeout(() => this.setState({ [k]: true }), 40);
+  }
+  renderVals() {
+    return {
+      a: this.state.a, b: this.state.b, c: this.state.c, d: this.state.d,
+      playA: () => this.replay('a'), playB: () => this.replay('b'), playC: () => this.replay('c'), playD: () => this.replay('d')
+    };
+  }
+}
+</script>
+</body>
+</html>
