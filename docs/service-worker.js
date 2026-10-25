@@ -4,7 +4,7 @@
 // Cache gelegt; danach werden Anfragen bevorzugt aus dem Cache beantwortet.
 // So startet die App auch ohne Internet.
 
-const CACHE = "filekit-v13";
+const CACHE = "filekit-v14";
 
 // Die zur App gehörenden Dateien. Bei Änderungen die Versionsnummer oben
 // erhöhen (z. B. v6), damit Browser die neue Fassung laden.
@@ -29,6 +29,7 @@ const DATEIEN = [
   "flow-schwaerzen.js",
   "editor.js",
   "schwaerzen-editor.js",
+  "textstellen.js",
   "vollbild.js",
   "intake.js",
   "ui.js",

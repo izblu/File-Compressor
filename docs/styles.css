@@ -649,6 +649,31 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .thumb > img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; animation: fk-fade var(--fk-d-fast) ease both; }
 .thumb:focus-visible { outline: 3px solid var(--fk-focus); outline-offset: 3px; }
 
+/* Text suchen und schwärzen (S5): hohes Sheet, die Trefferliste scrollt in sich,
+   der Knopf bleibt sichtbar – auch über der Bildschirmtastatur (--tastatur und
+   --sichtbar setzt schwaerzen-editor.js aus dem visualViewport). */
+.sheet.sw-suche {
+  bottom: var(--tastatur, 0px); display: flex; flex-direction: column; gap: 12px; overflow: hidden;
+  height: min(720px, calc(100dvh - 96px), calc(var(--sichtbar, 100dvh) - 24px)); max-height: none;
+}
+.sw-suche .sheet-handle { margin-bottom: 0; }
+.sw-suche .sheet-head { padding-bottom: 0; }
+.sw-suche-inhalt { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.sw-suche-feld { padding: 0 8px; }
+.sw-suche-lupe { display: flex; align-items: center; padding-left: 14px; color: var(--fk-muted); }
+.sw-suche-feld input { padding-left: 10px; }
+.sw-suche-bereich { flex: 1; min-height: 0; gap: 10px; padding: 0 8px; }
+.sw-suche-kopf { gap: 4px; }
+.sw-suche-status { flex: 1; }
+.sw-suche-kopf .btn-link { padding: 0 10px; margin: 0; }
+.sw-suche-schon { padding: 10px 12px; font-size: 13px; }
+.sw-suche-schon > svg { color: var(--fk-success-text); }
+.sw-treffer { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; display: flex; flex-direction: column; gap: 2px; margin: 0 -4px; }
+.sw-treffer::-webkit-scrollbar { display: none; }
+.hit.is-done .cbox { opacity: .55; } /* schon geschwärzt: abgehakt, aber blass */
+.hit:focus-visible { outline: 3px solid var(--fk-focus); outline-offset: -3px; }
+.sw-suche-fuss { padding: 4px 8px 0; }
+
 /* ===== Vollbild (Seite groß ansehen) ===== */
 .vollbild {
   position: fixed; inset: 0; z-index: 13; display: flex; flex-direction: column;

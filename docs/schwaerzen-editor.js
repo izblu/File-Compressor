@@ -3,6 +3,10 @@
 //   · Ein Finger (Maus) zieht eine neue Stelle auf. Antippen wählt eine Stelle,
 //     Ziehen verschiebt sie, die Eck-Griffe ändern die Größe, der Papierkorb
 //     löscht (Toast "Rückgängig", keine Rückfrage). Antippen daneben wählt nur ab.
+//   · PDF mit Text: Ein Wort antippen legt eine Stelle genau über das Wort (nicht
+//     gewählt). Die Lupe öffnet "Text suchen und schwärzen" (S5): Die gewählten
+//     Treffer werden in einem Schritt zu Stellen (S6). Ohne Textebene (Scan, S2b)
+//     und bei Bildern gibt es beides nicht. Wortrahmen und Suche: textstellen.js.
 //   · Zwei Finger zoomen (1×–4×) und verschieben, "Seite einpassen" führt
 //     zurück auf 1×. Ohne zwei Finger: Hineinzoomen/Herauszoomen im ⋯-Menü,
 //     Strg + Mausrad oder + / −.
@@ -29,6 +33,7 @@ import { icon } from "./icons.js";
 import { hauptKnopf } from "./wizard.js";
 import { oeffneSheet, sheetIstOffen, zeigeToast, ansage, wenigBewegung } from "./ui.js";
 import { seitenBild } from "./thumbs.js";
+import { hatText, textBekannt, bereiteVor, woerterAuf, suche, sucheMoeglich } from "./textstellen.js";
 
 const maus = window.matchMedia("(hover: hover) and (pointer: fine)"); // "Maus" statt "Finger"
 const ZIEH_SCHWELLE = 5;    // px – ab hier zieht der Finger eine Stelle auf bzw. verschiebt sie
@@ -41,6 +46,8 @@ const MAX_SCHRITTE = 50;    // so weit reicht Rückgängig
 const SCHRITT_X = 1;        // % der Breite je Pfeiltaste
 const SCHRITT_Y = 0.7;      // % der Höhe je Pfeiltaste
 const ZOOM_HINWEIS_KEY = "fk-hinweis-zoom";
+const WORT_TOLERANZ = { finger: 12, maus: 3 }; // px – so weit daneben trifft ein Tipp noch das Wort
+const SUCH_PAUSE = 200;     // ms – die Suche läuft, wenn das Tippen so lange ruht
 
 let naechsteId = 1;
 
@@ -58,6 +65,12 @@ export function stellenSumme(stellen, bild) {
 }
 
 const klemme = (v, min, max) => Math.max(min, Math.min(max, v));
+
+// Liegt das Rechteck r ganz unter der Stelle s? (kleine Toleranz für Rundungen)
+function deckt(s, r) {
+  const t = 0.02;
+  return s.x <= r.x + t && s.y <= r.y + t && s.x + s.w >= r.x + r.w - t && s.y + s.h >= r.y + r.h - t;
+}
 
 // Lesereihenfolge: oben → unten, in derselben Zeile links → rechts.
 function lesefolge(a, b) {
@@ -122,6 +135,8 @@ export function stellenSchritt(ctx) {
   const finger = new Map();   // pointerId → { x, y } aller Finger auf der Bühne
   const knoepfe = new Map();  // id → <button class="stelle">
   let auswahlUi = null;       // { id, box, weg } – Rahmen mit Griffen und Papierkorb
+  let mitText = bild ? false : textBekannt(d); // Textebene: true / false / undefined = wird noch geprüft
+  let versetzt = null;        // Set neuer Stellen, die nacheinander erscheinen (nach "Treffer schwärzen")
 
   const liste = (seite = o.seite) => o.stellen[seite] || [];
   const anzahl = () => anzahlIn(o.stellen);
@@ -143,9 +158,21 @@ export function stellenSchritt(ctx) {
   rahmen.hidden = true;
   blatt.append(seitenBildEl, rahmen);
 
+  // Hinweis-Karte: Mit Textebene lassen sich auch Wörter antippen; beim Scan
+  // erklärt eine Zusatzzeile, warum die Suche fehlt (S2a / S2b / S2c).
   const hinweisKarte = el("div", "hint-ov in-fade");
-  hinweisKarte.append(icon("schwaerzen", 26, 1.8),
-    el("span", null, `Ziehe mit ${maus.matches ? "der Maus" : "dem Finger"} über eine Stelle, um sie zu schwärzen.`));
+  const hinweisText = el("span");
+  const hinweisZusatz = el("small", null, "In diesem PDF ist kein Text hinterlegt – die Suche ist daher nicht verfügbar.");
+  hinweisKarte.append(icon("schwaerzen", 26, 1.8), hinweisText, hinweisZusatz);
+
+  function setzeHinweis() {
+    const ziehen = `Ziehe mit ${maus.matches ? "der Maus" : "dem Finger"} über eine Stelle, um sie zu schwärzen.`;
+    hinweisText.textContent = mitText
+      ? `${ziehen} Einzelne Wörter kannst du auch ${maus.matches ? "anklicken" : "antippen"}.`
+      : ziehen;
+    hinweisZusatz.hidden = bild || mitText !== false;
+  }
+  setzeHinweis();
 
   const einpassen = el("button", "float-btn sw-einpassen");
   einpassen.type = "button";
@@ -161,7 +188,7 @@ export function stellenSchritt(ctx) {
   vp.append(blatt, hinweisKarte, einpassen, zoomHinweis);
   buehne.append(vp);
 
-  // Werkzeugleiste: Rückgängig · Wiederholen │ ‹ · "2/12" · › │ ⋯
+  // Werkzeugleiste: Rückgängig · Wiederholen │ ‹ · "2/12" · › │ Text suchen · ⋯
   const leiste = el("div", "tbar");
   leiste.setAttribute("role", "toolbar");
   leiste.setAttribute("aria-label", "Werkzeuge");
@@ -175,11 +202,16 @@ export function stellenSchritt(ctx) {
   const seitenZahl = el("span");
   seitenK.append(icon("seiten-raster", 16, 2), seitenZahl);
   seitenK.addEventListener("click", oeffneSeiten);
+  const suchenK = werkzeug("suchen", "Text suchen", oeffneSuche, 1.9);
+  suchenK.setAttribute("aria-haspopup", "dialog");
+  suchenK.hidden = !mitText; // erst sichtbar, wenn feststeht, dass es Text gibt
   const mehrK = werkzeug("mehr", "Weitere Optionen", oeffneOptionen, 3);
   mehrK.setAttribute("aria-haspopup", "dialog");
   leiste.append(rueckK, vorK);
   if (mehrseitig) leiste.append(trenner("tsep"), vorigeK, seitenK, naechsteK);
-  leiste.append(trenner("tsep"), mehrK);
+  leiste.append(trenner("tsep"));
+  if (!bild) leiste.append(suchenK);
+  leiste.append(mehrK);
 
   box.append(buehne, leiste);
 
@@ -207,6 +239,7 @@ export function stellenSchritt(ctx) {
       seitenBild(d, nr, "gross").then((b) => {
         if (meine !== ladeNr || !b) return;
         setzeSeitenBild(b.url, b.verhaeltnis);
+        if (mitText) bereiteVor(d, nr, true); // Wörter fürs Antippen
         if (nr < n) seitenBild(d, nr + 1, "gross"); // nächste Seite schon vorbereiten
       });
     }
@@ -263,9 +296,11 @@ export function stellenSchritt(ctx) {
 
   // Stellen der gezeigten Seite in Lesereihenfolge (= Tab-Reihenfolge) zeigen.
   // Vorhandene Knöpfe bleiben stehen, neue rasten ein – außer ruhig = true
-  // (die Seite wird gerade erst gezeigt).
+  // (die Seite wird gerade erst gezeigt). Stellen aus "Treffer schwärzen"
+  // erscheinen nacheinander (+60 ms je Stelle, bei "Bewegung reduzieren" alle sofort).
   function zeichneStellen(ruhig = false) {
     const sortiert = [...liste()].sort(lesefolge);
+    let folge = 0;
     const bleibt = new Set(sortiert.map((s) => s.id));
     for (const [id, k] of knoepfe) {
       if (bleibt.has(id)) continue;
@@ -278,7 +313,14 @@ export function stellenSchritt(ctx) {
       let k = knoepfe.get(s.id);
       if (!k) {
         k = baueStelle(s.id);
-        if (ruhig) k.style.animation = "none";
+        if (versetzt && versetzt.has(s.id)) {
+          if (!wenigBewegung()) {
+            k.style.animationDelay = `calc(var(--fk-d-stagger) * ${folge++})`;
+            k.addEventListener("animationend", () => { k.style.animationDelay = ""; }, { once: true });
+          }
+        } else if (ruhig) {
+          k.style.animation = "none";
+        }
         knoepfe.set(s.id, k);
       }
       setzeLage(k, s);
@@ -291,6 +333,7 @@ export function stellenSchritt(ctx) {
     if (fokus && fokus.isConnected && fokus !== document.activeElement && blatt.contains(fokus)) {
       fokus.focus({ preventScroll: true });
     }
+    versetzt = null;
     zeigeAuswahl();
   }
 
@@ -661,6 +704,7 @@ export function stellenSchritt(ctx) {
       rahmen.hidden = true;
       if (z.bewegt && z.r && z.r.w >= MIN_B && z.r.h >= MIN_H) fuegeHinzu([z.r], { waehlen: true });
       else if (!z.bewegt && gewaehlt != null) waehle(null); // daneben getippt: nur abwählen
+      else if (!z.bewegt && mitText) tippeWort(z.p0, e.pointerType === "mouse");
       aktualisiere();
     } else if (z.bewegt) {
       merke(z.vorher);
@@ -672,6 +716,36 @@ export function stellenSchritt(ctx) {
   buehne.addEventListener("pointercancel", (e) => loslassen(e, true));
   buehne.addEventListener("contextmenu", (e) => e.preventDefault());
   buehne.addEventListener("gesturestart", (e) => e.preventDefault()); // Safari: kein Zoom der ganzen Seite
+
+  // Wort antippen (nur PDF mit Text): Stelle genau über das Wort (Rahmen aus
+  // textstellen.js), nicht gewählt – man kann gleich das nächste antippen. Ein
+  // Finger trifft selten genau: Liegt der Tipp knapp daneben, zählt das nächste Wort.
+  async function tippeWort(p, mitMaus) {
+    const meine = ladeNr;
+    const seite = o.seite;
+    const woerter = await woerterAuf(d, seite);
+    if (!woerter || ctx.signal.aborted || meine !== ladeNr) return;
+    const r = blatt.getBoundingClientRect();
+    const pxX = r.width / 100;  // Bildschirm-Pixel je Prozent (mit Zoom)
+    const pxY = r.height / 100;
+    let bestes = null;
+    let abstand = Infinity;
+    for (const w of woerter) {
+      const dx = Math.max(w.x - p.x, 0, p.x - (w.x + w.w)) * pxX;
+      const dy = Math.max(w.y - p.y, 0, p.y - (w.y + w.h)) * pxY;
+      // Im Rahmen (auch bei sich überlappenden): das Wort, dessen Mitte am nächsten liegt.
+      const a = dx || dy
+        ? Math.hypot(dx, dy)
+        : Math.hypot((w.x + w.w / 2 - p.x) * pxX, (w.y + w.h / 2 - p.y) * pxY) - 1e6;
+      if (a < abstand) {
+        abstand = a;
+        bestes = w;
+      }
+    }
+    if (!bestes || abstand > (mitMaus ? WORT_TOLERANZ.maus : WORT_TOLERANZ.finger)) return;
+    if (liste(seite).some((s) => deckt(s, bestes))) return; // schon geschwärzt (z. B. doppelt getippt)
+    fuegeHinzu([bestes]);
+  }
 
   // Laufendes Ziehen abbrechen: Aufziehen verwerfen, Verschieben zurücknehmen.
   function brichZugAb() {
@@ -774,6 +848,225 @@ export function stellenSchritt(ctx) {
     if (gewaehlt != null) { waehle(null); return true; }
     return false;
   });
+
+  // --- Text suchen und schwärzen (S5, S6) ---
+
+  // Bottom Sheet mit Feld "Suchbegriff", Treffern zum An- und Abhaken und dem
+  // Knopf "7 Treffer schwärzen". Sucht beim Tippen (nach 200 ms Pause) in allen
+  // Seiten. Treffer, die schon ganz unter einer Stelle liegen, sind blass und
+  // nicht wählbar.
+  function oeffneSuche() {
+    if (!mitText) return;
+    for (let nr = 1; nr <= n; nr++) bereiteVor(d, nr); // alle Seiten lesen, während getippt wird
+
+    const feld = el("div", "field sw-suche-feld");
+    const label = el("label", null, "Suchbegriff");
+    label.htmlFor = "sw-suchbegriff";
+    const feldBox = el("div", "field-box");
+    const lupe = el("span", "sw-suche-lupe");
+    lupe.append(icon("suchen", 18, 2));
+    const eingabe = el("input");
+    eingabe.id = "sw-suchbegriff";
+    eingabe.type = "search";
+    eingabe.placeholder = "z. B. einen Namen oder eine Nummer";
+    eingabe.autocomplete = "off";
+    eingabe.spellcheck = false;
+    eingabe.enterKeyHint = "search";
+    feldBox.append(lupe, eingabe);
+    feld.append(label, feldBox);
+
+    // Zusammenfassung ("7 Treffer auf 4 Seiten" / "Kein Treffer") mit Alle · Keine
+    const kopfZeile = el("div", "fk-row sw-suche-kopf");
+    const zusammenfassung = el("p", "t-l t-num sw-suche-status");
+    zusammenfassung.setAttribute("role", "status");
+    const alleK = el("button", "btn-link", "Alle");
+    const keineK = el("button", "btn-link", "Keine");
+    alleK.type = keineK.type = "button";
+    kopfZeile.append(zusammenfassung, alleK, keineK);
+    const erklaerung = el("p", "t-s t-muted");
+    const schonHinweis = el("p", "note sw-suche-schon");
+    const schonText = el("span");
+    schonHinweis.append(icon("haken", 18, 2.2), schonText);
+    const trefferListe = el("div", "sw-treffer");
+    trefferListe.setAttribute("role", "group");
+    trefferListe.setAttribute("aria-label", "Treffer");
+    const bereich = el("div", "fk-stack sw-suche-bereich");
+    bereich.append(kopfZeile, erklaerung, schonHinweis, trefferListe);
+
+    const losK = el("button", "btn btn-primary btn-block");
+    losK.type = "button";
+    const fuss = el("div", "sw-suche-fuss");
+    fuss.append(losK);
+    const suchInhalt = el("div", "sw-suche-inhalt");
+    suchInhalt.append(feld, bereich, fuss);
+
+    let treffer = [];  // [{ seite, rechtecke, vorher, gesucht, nachher, schon, an, knopf }]
+    let lauf = 0;      // Ergebnisse einer überholten Suche verwerfen
+    let pause = 0;
+    let offen = true;
+    const leerText = `${n > 1 ? `Durchsucht alle ${n} Seiten.` : "Durchsucht die ganze Seite."} Geschwärzt werden nur die gesuchten Zeichen.`;
+    const neue = () => treffer.filter((t) => !t.schon && t.an);
+
+    function setzeHaken(t) {
+      const an = t.schon || t.an;
+      t.knopf.classList.toggle("is-checked", an);
+      t.knopf.setAttribute("aria-checked", String(an));
+    }
+
+    function aktualisiereKnopf() {
+      const zahl = neue().length;
+      losK.disabled = zahl === 0;
+      losK.textContent = zahl ? `${zahl} Treffer schwärzen` : "Treffer schwärzen";
+    }
+
+    function trefferKnopf(t) {
+      const k = el("button", t.schon ? "hit is-done" : "hit");
+      k.type = "button";
+      k.setAttribute("role", "checkbox");
+      const kasten = el("span", "cbox");
+      kasten.setAttribute("aria-hidden", "true");
+      kasten.append(icon("haken", 14, 3.2));
+      const ausschnitt = el("span", "snip");
+      ausschnitt.append(t.vorher, el("mark", null, t.gesucht), t.nachher); // <mark> zeigt, was schwarz wird
+      k.append(kasten, el("span", "hit-pg", `Seite ${t.seite}`), ausschnitt);
+      t.knopf = k;
+      if (t.schon) {
+        k.setAttribute("aria-disabled", "true");
+      } else {
+        k.addEventListener("click", () => {
+          t.an = !t.an;
+          setzeHaken(t);
+          aktualisiereKnopf();
+        });
+      }
+      setzeHaken(t);
+      return k;
+    }
+
+    // zustand: "leer" (noch kein Begriff), "sucht" (Seiten werden noch gelesen) oder "fertig"
+    function zeige(zustand, text = "") {
+      const mitTreffern = zustand === "fertig" && treffer.length > 0;
+      const seiten = new Set(treffer.map((t) => t.seite)).size;
+      zusammenfassung.textContent = zustand !== "fertig" ? ""
+        : mitTreffern ? `${treffer.length} Treffer auf ${seitenText(seiten)}` : "Kein Treffer";
+      alleK.hidden = keineK.hidden = !mitTreffern;
+      erklaerung.textContent = zustand === "leer" ? leerText
+        : zustand === "sucht" ? text
+        : mitTreffern ? "" : "Prüfe die Schreibweise oder suche nach einem Teil des Wortes.";
+      erklaerung.hidden = !erklaerung.textContent;
+      const schon = mitTreffern ? treffer.filter((t) => t.schon).length : 0;
+      schonText.textContent = schon === 1 ? "1 Treffer ist schon geschwärzt" : `${schon} Treffer sind schon geschwärzt`;
+      schonHinweis.hidden = !schon;
+      trefferListe.replaceChildren(...(mitTreffern ? treffer.map(trefferKnopf) : []));
+      trefferListe.hidden = !mitTreffern;
+      trefferListe.scrollTop = 0;
+      aktualisiereKnopf();
+    }
+
+    async function sucheJetzt() {
+      clearTimeout(pause);
+      const meine = ++lauf;
+      const begriff = eingabe.value;
+      if (!sucheMoeglich(begriff)) {
+        treffer = [];
+        zeige("leer");
+        return;
+      }
+      const ergebnis = await suche(d, begriff, {
+        abgebrochen: () => meine !== lauf || !offen,
+        beiSeite: (nr, anzahl) => {
+          if (meine === lauf && nr < anzahl) {
+            treffer = [];
+            zeige("sucht", `Durchsucht Seite ${nr + 1} von ${anzahl} …`);
+          }
+        },
+      });
+      if (!ergebnis || meine !== lauf || !offen) return;
+      treffer = ergebnis.map((t) => ({
+        ...t, an: true, schon: t.rechtecke.every((r) => liste(t.seite).some((s) => deckt(s, r))),
+      }));
+      zeige("fertig");
+    }
+
+    eingabe.addEventListener("input", () => {
+      clearTimeout(pause);
+      pause = setTimeout(sucheJetzt, SUCH_PAUSE);
+    });
+    eingabe.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      sucheJetzt();
+      eingabe.blur(); // Tastatur am Handy schließen, damit Treffer und Knopf zu sehen sind
+    });
+    const alleSetzen = (an) => {
+      for (const t of treffer) {
+        if (t.schon) continue;
+        t.an = an;
+        setzeHaken(t);
+      }
+      aktualisiereKnopf();
+    };
+    alleK.addEventListener("click", () => alleSetzen(true));
+    keineK.addEventListener("click", () => alleSetzen(false));
+    losK.addEventListener("click", () => {
+      const auswahl = neue();
+      if (!auswahl.length) return;
+      sheet.schliessen();
+      schwaerzeTreffer(auswahl);
+    });
+
+    // Bildschirmtastatur: Das Sheet rückt über sie, damit Treffer und Knopf sichtbar bleiben.
+    const vv = window.visualViewport;
+    const passeAn = () => {
+      if (!vv) return;
+      const tastatur = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      sheet.sheet.style.setProperty("--tastatur", `${Math.round(tastatur)}px`);
+      sheet.sheet.style.setProperty("--sichtbar", `${Math.round(vv.height)}px`);
+    };
+
+    const sheet = oeffneSheet({
+      titel: "Text suchen und schwärzen", inhalt: suchInhalt, ausloeser: suchenK, klasse: "sw-suche",
+      beiSchliessen: () => {
+        offen = false;
+        clearTimeout(pause);
+        vv?.removeEventListener("resize", passeAn);
+        vv?.removeEventListener("scroll", passeAn);
+      },
+    });
+    passeAn();
+    vv?.addEventListener("resize", passeAn);
+    vv?.addEventListener("scroll", passeAn);
+    zeige("leer");
+    eingabe.focus();
+  }
+
+  // "N Treffer schwärzen" (S6): ein Rückgängig-Schritt für alle Treffer, auch über
+  // mehrere Seiten. Danach die Seite mit dem ersten Treffer zeigen; die neuen
+  // Stellen erscheinen nacheinander, Toast "7 Stellen geschwärzt · Rückgängig".
+  function schwaerzeTreffer(auswahl) {
+    const erste = auswahl[0].seite;
+    merke(o.stellen, erste);
+    const neu = { ...o.stellen };
+    versetzt = new Set();
+    for (const t of auswahl) {
+      const dazu = t.rechtecke.map((r) => ({ id: naechsteId++, x: r.x, y: r.y, w: r.w, h: r.h }));
+      for (const s of dazu) versetzt.add(s.id);
+      neu[t.seite] = [...(neu[t.seite] || []), ...dazu];
+    }
+    const zahl = versetzt.size;
+    o.stellen = neu;
+    if (erste !== o.seite) {
+      brichZugAb();
+      o.seite = erste;
+      zeigeSeite(true);
+    } else {
+      gewaehlt = null;
+    }
+    nachAenderung();
+    const text = `${stellenText(zahl)} geschwärzt`;
+    toast = zeigeToast(text, { iconName: "haken", aktion: "Rückgängig", beiAktion: rueckgaengig });
+    ansage(`${text}.`);
+  }
 
   // --- Seitenübersicht (S7) ---
 
@@ -898,6 +1191,19 @@ export function stellenSchritt(ctx) {
     wendeZoomAn();
   });
   groesse.observe(vp);
+
+  // Hat das PDF eine Textebene? Erst dann gibt es Lupe und Antippen (sonst S2b).
+  if (mitText === undefined) {
+    hatText(d).then((ja) => {
+      if (ctx.signal.aborted) return;
+      mitText = ja;
+      setzeHinweis();
+      if (!ja) return;
+      suchenK.hidden = false;
+      spieleAb(suchenK, "in-fade");
+      bereiteVor(d, o.seite, true);
+    });
+  }
 
   ctx.signal.addEventListener("abort", () => {
     document.removeEventListener("keydown", globaleTaste);

@@ -3,7 +3,8 @@
 // Verarbeiten "Wird geschwärzt …" → Schritt 3 "Speichern" mit Prüfbericht.
 // Nur für eine einzelne Datei (1 PDF oder 1 Bild).
 //
-// Stand: Der Editor ist gebaut. Verarbeiten und Speichern folgen in einem
+// Stand: Der Editor ist gebaut, mit Textebene (Wort antippen, Text suchen,
+// Scan-Erkennung – siehe textstellen.js). Verarbeiten und Speichern folgen in einem
 // eigenen Abschnitt (Nachtrag Kap. 12, Schritt 6) – bis dahin ist Schritt 3
 // ein Platzhalter, damit sich Weiter und Zurück schon prüfen lassen.
 

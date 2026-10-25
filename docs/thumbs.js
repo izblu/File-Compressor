@@ -29,10 +29,16 @@ function cacheFuer(eintrag) {
   return c;
 }
 
+// Das mit pdf.js geöffnete PDF – einmal je Datei, auch für textstellen.js.
+export function pdfDokument(eintrag) {
+  const c = cacheFuer(eintrag);
+  if (!c.doc) c.doc = oeffnePdfjs(eintrag.file);
+  return c.doc;
+}
+
 async function rendere(eintrag, c, seite, groesse) {
   if (c.weg) return null; // Datei wurde inzwischen entfernt
-  if (!c.doc) c.doc = oeffnePdfjs(eintrag.file);
-  const doc = await c.doc;
+  const doc = await pdfDokument(eintrag);
   const { canvas, breite, hoehe } = await rendereSeite(await doc.getPage(seite), KANTE[groesse]);
   const blob = await canvasZuBlob(canvas, "image/jpeg", 0.82);
   canvas.width = canvas.height = 0;

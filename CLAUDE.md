@@ -46,8 +46,11 @@ Notizen für Claude, damit die Zusammenarbeit über Sessions hinweg gleich bleib
   (Aufziehen, Auswahl, Griffe, Papierkorb + Toast, Rückgängig/Wiederholen über alle Seiten, Tastatur, Ansagen, Zoom,
   S7, S8 mit Zoom-Einträgen), `flow-schwaerzen.js` (Schritt 3 „Speichern“ ist noch ein Platzhalter). Der Toast liegt
   wie in der Referenz über der Werkzeugleiste – vom Nutzer so bestätigt.
-  **Nächster Schritt:** Schwärzen, Abschnitt Textebene (Nachtrag Kap. 12, Schritt 5): Wort antippen, Text suchen
-  (S5a–S5d, S6), Scan-Erkennung (S2b). **Danach:** Verarbeiten + Speichern (Schritt 6). Schwärzen gibt dann
+  Schwärzen, Abschnitt Textebene (Nachtrag Kap. 12, Schritt 5) gebaut, im Browser geprüft, vom Nutzer
+  abgenommen und committet (25.10.2026): neues Modul `textstellen.js` (exakte Wortrahmen aus der
+  Zeichenliste, Ersatzweg mit größerem Rand, Suche), Wort antippen, Lupe → Sheet „Text suchen und schwärzen“
+  (S5a–S5d), S6 (versetzt, Toast, ein Rückgängig-Schritt), Scan-Erkennung (S2b). Testserver `web-direkt-8030`.
+  **Nächster Schritt:** Verarbeiten + Speichern (Schritt 6). Schwärzen gibt dann
   `herkunft` und Miniaturen **aus dem Ergebnis** an `zeigeGespeichert` (nie aus dem Original).
 
 ## Begriffe in der App (verbindlich)

@@ -40,14 +40,15 @@ export function schliesseOverlay(sofort = true) {
 // Öffnet ein Bottom Sheet mit Kopf (Titel, Unterzeile, Schließen) und Inhalt.
 // Schließt über ×, Abdunklung, Esc oder nach unten wischen; danach geht der
 // Fokus zurück zum Auslöser. kopfBild = Element links im Kopf (z. B. Seiten-
-// Miniatur), unterzeile = Text oder Element(e), beiSchliessen() beim Schließen.
-export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser, kopfBild, kleinerTitel = false, beiSchliessen }) {
+// Miniatur), unterzeile = Text oder Element(e), beiSchliessen() beim Schließen,
+// klasse = zusätzliche Klasse am Sheet (eigenes Layout).
+export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser, kopfBild, kleinerTitel = false, beiSchliessen, klasse }) {
   if (offen) offen.schliessen(true);
 
   const scrim = el("div", "scrim");
   scrim.setAttribute("aria-hidden", "true");
 
-  const sheet = el("div", "sheet");
+  const sheet = el("div", klasse ? `sheet ${klasse}` : "sheet");
   sheet.setAttribute("role", "dialog");
   sheet.setAttribute("aria-modal", "true");
   sheet.setAttribute("aria-labelledby", "sheetTitel");
@@ -148,7 +149,7 @@ export function oeffneSheet({ titel, unterzeile, inhalt, ausloeser, kopfBild, kl
 
   offen = { scrim, sheet, ausloeser, schliessen };
   sheet.focus();
-  return { schliessen };
+  return { schliessen, sheet };
 }
 
 // --- Dialog (Rückfrage, z. B. "Bearbeitung abbrechen?") ---
