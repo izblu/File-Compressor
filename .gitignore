@@ -1,0 +1,4 @@
+# Nur lokal (nicht auf GitHub): Arbeitsnotizen für Claude und die
+# Testserver-Einstellungen der Vorschau (enthalten Pfade dieses PCs).
+/CLAUDE.md
+/.claude/launch.json
