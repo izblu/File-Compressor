@@ -166,7 +166,9 @@ function kontext() {
     signal: z.lauf.signal,
     weiter,
     zurueck: () => history.back(),   // wie der Zurück-Pfeil
-    geaendert() { z.dirty = true; }, // etwas bearbeitet → Abbrechen fragt nach
+    // etwas bearbeitet → Abbrechen fragt nach; geaendert(false), wenn nichts
+    // Bearbeitetes mehr übrig ist (z. B. alle Stellen rückgängig gemacht).
+    geaendert(an = true) { z.dirty = an; },
     zeigeZwischen,
     schliesseZwischen,
     zeigeFertig,

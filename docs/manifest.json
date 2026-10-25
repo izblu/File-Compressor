@@ -1,7 +1,7 @@
 {
   "name": "FileKit",
   "short_name": "FileKit",
-  "description": "PDFs und Bilder verkleinern, zusammenführen, trennen, ordnen und umwandeln – direkt auf deinem Gerät. Nichts verlässt dein Gerät.",
+  "description": "PDFs und Bilder verkleinern, zusammenführen, trennen, ordnen, umwandeln und schwärzen – direkt auf deinem Gerät. Nichts verlässt dein Gerät.",
   "lang": "de",
   "start_url": ".",
   "scope": ".",

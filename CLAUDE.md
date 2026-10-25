@@ -41,9 +41,14 @@ Notizen für Claude, damit die Zusammenarbeit über Sessions hinweg gleich bleib
 - Reihenfolge: 1) CSS + Icons → 2) Teil A „Weiterbearbeiten“ → 3) Schwärzen in Abschnitten (Menüeintrag erst mit
   dem Editor). Nach jedem Abschnitt dem Nutzer das Ergebnis zeigen.
 - **Stand:** 1) committet (665ae70). 2) Teil A „Weiterbearbeiten“ gebaut, im Browser geprüft und vom Nutzer
-  abgenommen (25.10.2026). **Nächster Schritt:** 3) Schwärzen, erster Abschnitt = Editor (Nachtrag Kap. 12, Schritt 4)
-  samt Menüeintrag „Schwärzen“. Schwärzen gibt dann `herkunft` und Miniaturen **aus dem Ergebnis** an
-  `zeigeGespeichert` (nie aus dem Original).
+  abgenommen (25.10.2026, c3f4805). 3) Schwärzen, erster Abschnitt gebaut, im Browser geprüft, vom Nutzer
+  abgenommen und committet (25.10.2026): Menüeintrag + Startscreen 3 + 3, Editor `schwaerzen-editor.js`
+  (Aufziehen, Auswahl, Griffe, Papierkorb + Toast, Rückgängig/Wiederholen über alle Seiten, Tastatur, Ansagen, Zoom,
+  S7, S8 mit Zoom-Einträgen), `flow-schwaerzen.js` (Schritt 3 „Speichern“ ist noch ein Platzhalter). Der Toast liegt
+  wie in der Referenz über der Werkzeugleiste – vom Nutzer so bestätigt.
+  **Nächster Schritt:** Schwärzen, Abschnitt Textebene (Nachtrag Kap. 12, Schritt 5): Wort antippen, Text suchen
+  (S5a–S5d, S6), Scan-Erkennung (S2b). **Danach:** Verarbeiten + Speichern (Schritt 6). Schwärzen gibt dann
+  `herkunft` und Miniaturen **aus dem Ergebnis** an `zeigeGespeichert` (nie aus dem Original).
 
 ## Begriffe in der App (verbindlich)
 - **Wählen / Hinzufügen** = Datei in die App holen · **Verarbeiten** = App arbeitet ·

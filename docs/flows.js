@@ -5,6 +5,7 @@ import { verkleinernSchritte } from "./flow-verkleinern.js";
 import { umwandelnSchritte } from "./flow-umwandeln.js";
 import { trennenSchritte } from "./flow-trennen.js";
 import { seitenSchritte } from "./flow-ordnen.js";
+import { schwaerzenSchritte } from "./flow-schwaerzen.js";
 
 const SCHRITTE = {
   verkleinern: verkleinernSchritte,
@@ -12,6 +13,7 @@ const SCHRITTE = {
   trennen: trennenSchritte,
   ordnen: seitenSchritte,
   umwandeln: umwandelnSchritte,
+  schwaerzen: schwaerzenSchritte,
 };
 
 // Liefert die Schritte für den Wizard: [{ titel, baue(ctx) }].

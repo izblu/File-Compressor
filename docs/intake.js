@@ -145,6 +145,7 @@ export const AKTIONEN = [
   { id: "trennen",         titel: "Trennen",        icon: "trennen" },
   { id: "ordnen",          titel: "Seiten ordnen",  icon: "seiten-ordnen" },
   { id: "umwandeln",       titel: "Umwandeln",      icon: "umwandeln" },
+  { id: "schwaerzen",      titel: "Schwärzen",      icon: "schwaerzen" },
 ];
 
 // --- Vorschlag nach dem Weiterbearbeiten (Nachtrag 6.3) ---
@@ -199,6 +200,10 @@ export function aktionenFuer(dateien, herkunft = null) {
       : nurBilder
         ? { text: einzeln ? umwandelnText(dateien[0].format) : "Alle Bilder in ein anderes Format umwandeln." }
         : { grund: "Nur für Bilder oder ein einzelnes PDF" },
+    // Nie Vorschlag – Schwärzen ist eine bewusste Handlung (Nachtrag 6.1).
+    schwaerzen: einzeln
+      ? { text: "Namen, Nummern oder andere Stellen unkenntlich machen." }
+      : { grund: "Nur für eine einzelne Datei" },
   };
 
   let vorschlag = einzeln ? "verkleinern" : "zusammenfuehren";

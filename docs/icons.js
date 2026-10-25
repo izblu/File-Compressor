@@ -20,6 +20,8 @@ const PFADE = {
   // Haken im Kreis: "Dein Ergebnis · schon gespeichert" (Nachtrag A2).
   "erledigt": '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M8 12.5l2.8 2.8L16 10"/>',
   "fehler": '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M15 9l-6 6M9 9l6 6"/>',
+  // Blatt mit gefüllter Fläche: "Ganze Seite schwärzen" (Nachtrag S8).
+  "ganze-seite": '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5zM14 3v5h5"/><rect x="7.5" y="10" width="9" height="8.5" rx="1" fill="currentColor"/>',
   "geraet": '<path d="M8.5 2h7A2.5 2.5 0 0 1 18 4.5v15a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 6 19.5v-15A2.5 2.5 0 0 1 8.5 2zM10.5 18h3"/>',
   "geraet-pc": '<path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 20h8M12 16v4"/>',
   "haken": '<path d="M5 12.5l4.5 4.5L19 7"/>',

@@ -7,8 +7,8 @@
 import { oeffnePdfjs, rendereSeite, canvasZuBlob } from "./pdf.js";
 
 // Längste Kante in Pixeln: "klein" = scharf bei 2 Spalten, "gross" = lesbar
-// bei 1 Spalte und im Vollbild.
-const KANTE = { klein: 440, gross: 1200 };
+// bei 1 Spalte und im Vollbild, "zoom" = scharf beim Hineinzoomen (Schwärzen).
+const KANTE = { klein: 440, gross: 1200, zoom: 2600 };
 
 const cache = new WeakMap(); // eintrag → { doc, bilder: Map<"seite:groesse", Promise<{ url, verhaeltnis } | null>> }
 let kette = Promise.resolve();
