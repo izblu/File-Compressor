@@ -609,7 +609,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
       if (ausListe) ((naechste && zeilen.get(naechste.id)?.knopf) || stellenTitel).focus({ preventScroll: true });
       else if (ziel) ziel.focus({ preventScroll: true });
       else if (!blatt.contains(document.activeElement) || document.activeElement === document.body) blatt.focus({ preventScroll: true });
-      toast = zeigeToast("Stelle gelöscht", { iconName: "loeschen", aktion: "Rückgängig", beiAktion: rueckgaengig });
+      toast = zeigeToast("Stelle gelöscht", { iconName: "loeschen", aktion: "Rückgängig", beiAktion: rueckgaengig, stumm: true });
       ansage("Stelle gelöscht.");
     };
     if (wenigBewegung()) {
@@ -628,7 +628,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     gewaehlt = null;
     nachAenderung();
     const text = zahl === 1 ? "Stelle gelöscht" : `${zahl} Stellen gelöscht`;
-    toast = zeigeToast(text, { iconName: "loeschen", aktion: "Rückgängig", beiAktion: rueckgaengig });
+    toast = zeigeToast(text, { iconName: "loeschen", aktion: "Rückgängig", beiAktion: rueckgaengig, stumm: true });
     ansage(`${text}.`);
   }
 
@@ -1288,7 +1288,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     }
     nachAenderung();
     const text = `${stellenText(zahl)} geschwärzt`;
-    toast = zeigeToast(text, { iconName: "haken", aktion: "Rückgängig", beiAktion: rueckgaengig });
+    toast = zeigeToast(text, { iconName: "haken", aktion: "Rückgängig", beiAktion: rueckgaengig, stumm: true });
     ansage(`${text}.`);
   }
 

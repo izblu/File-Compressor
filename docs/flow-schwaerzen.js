@@ -149,7 +149,9 @@ function ergebnisKarte(d, r) {
   karte.setAttribute("aria-label", "Ergebnis");
   const kopf = el("div", "fk-row ergebnis-kopf");
   const text = el("div", "fk-stack ergebnis-text sw-ergebnis-text");
-  const titel = el("p", "t-s t-2 ergebnis-titel", `${d.file.name} · ${bild ? "Bild" : seitenText(e.seiten)}`);
+  // S10b: "Brief.jpg · Foto" – ein PNG ist meist kein Foto, sondern ein Bild (Grafik, Screenshot).
+  const art = endungNachVerkleinern(d) === "png" ? "Bild" : "Foto";
+  const titel = el("p", "t-s t-2 ergebnis-titel", `${d.file.name} · ${bild ? art : seitenText(e.seiten)}`);
   titel.title = d.file.name;
   const groesse = el("p", "t-s t-muted t-num");
   const pfeil = el("span", null, " → ");

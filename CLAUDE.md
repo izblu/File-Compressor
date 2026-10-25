@@ -67,7 +67,20 @@ Notizen für Claude, damit die Zusammenarbeit über Sessions hinweg gleich bleib
   fokussieren hebt die Stelle hervor, „Löschen“). Fußleiste „7 Stellen auf 3 Seiten“ + „Weiter“. Mauszeiger laut 9.2
   (auch während des Ziehens). ⋯-Menü am PC ohne Zoom-Einträge. A4 (PC-Start mit Ergebnis) war schon fertig.
   Service Worker v16.
-  **Nächster Schritt:** Schlussprüfung (Schritt 8).
+  Schlussprüfung (Nachtrag Kap. 12, Schritt 8) durchgeführt (25.10.2026, auf Wunsch des Nutzers committet): Ergebnis-PDF
+  außerhalb der App geprüft (PyMuPDF + Xpdf `pdftotext`) – nur Bilder, kein Text, Katalog nur `/Pages`, kein
+  `/Info`, keine Kommentare/Formulare/Anhänge/Lesezeichen/XMP/JavaScript, Stellen in den Pixeln schwarz; JPG ohne
+  EXIF/XMP/IPTC/Kommentar (nur Chromes sRGB-Profil), PNG ohne Text-/eXIf-Abschnitte, Transparenz bleibt.
+  375 px und 1280 px (S12, A4), Tastatur, Ansagen, Bewegung reduzieren, Offline und Begriffe bestanden.
+  Behoben: Spinner dreht sich bei „Bewegung reduzieren“ nicht mehr (`styles.css`), Toasts im Schwärzen-Editor
+  werden nicht doppelt vorgelesen (`zeigeToast({ stumm })`, die wörtlichen Ansagen bleiben), S10b zeigt
+  „Brief.jpg · Foto“ (PNG: „· Bild“). Service Worker v17.
+  Danach vom Nutzer entschieden und umgesetzt (25.10.2026): pdf.js, der pdf.js-Worker und pdf-lib stehen jetzt in
+  der Vorab-Liste des Service Workers (vorher erst bei Bedarf gecacht → fehlten nach jedem Update offline);
+  eine fokussierte, aber nicht gewählte Stelle zeigt den Akzent-Ring statt des blassen Fokusrahmens
+  (`styles.css` überschreibt nur die Farbe, `filekit-ergaenzung.css` bleibt unverändert). Mit echten Tasten im
+  Browser-Pane geprüft (Tab, Esc, Pfeil, Entf, Strg+Z). Nicht prüfbar: echter Screenreader, echter Flugmodus.
+  **Nächster Schritt:** Push + Merge nach `main` (entscheidet der Nutzer).
 
 ## Begriffe in der App (verbindlich)
 - **Wählen / Hinzufügen** = Datei in die App holen · **Verarbeiten** = App arbeitet ·

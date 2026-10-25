@@ -630,6 +630,10 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .sw .pagewrap:focus { outline: none; } /* bekommt den Fokus nur, wenn die fokussierte Stelle gelöscht wird */
 .sw-bild { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; -webkit-touch-callout: none; animation: fk-fade var(--fk-d-fast) ease both; }
 .pagewrap.ist-ziehen, .pagewrap.ist-ziehen .stelle { cursor: grabbing; }
+/* Fokus auf einer nicht gewählten Stelle (z. B. nach Esc): Der helle Fokusrahmen
+   aus filekit-ergaenzung.css ist auf weißem Papier kaum zu sehen – Akzent-Ring wie
+   beim Wählen (4,7 : 1 auf Weiß). Form und Abstand bleiben. */
+.stelle:focus-visible:not(.is-sel) { outline-color: var(--fk-redact-ring); }
 /* Die Seite wird per transform gezoomt – Griffe und Papierkorb halten ihre Größe
    (Gegen-Skalierung um ihren Ankerpunkt an der Stelle). */
 .pagewrap .hdl { scale: calc(1 / var(--z, 1)); }
@@ -792,4 +796,5 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
   .gs-kreis { animation: fk-fade 200ms ease both; }
   .gs-haken { animation: none; stroke-dashoffset: 0; }
   .gs-ring, .gs-funke { display: none; }
+  .spinner { animation: none; } /* „Wird geöffnet …“ ohne Drehung (Nachtrag Kap. 8) */
 }

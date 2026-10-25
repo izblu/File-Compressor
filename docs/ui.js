@@ -257,11 +257,14 @@ export function oeffneVollflaeche({ element, ausloeser, beiSchliessen }) {
 let toastWeg = null; // schließt den gerade sichtbaren Toast
 
 // Rückgabe: { schliessen } – z. B. wenn "Rückgängig" nicht mehr passt.
-export function zeigeToast(text, { aktion, beiAktion, iconName } = {}) {
+// stumm = der Aufrufer sagt selbst an (ansage) – der Toast wird nicht noch
+// einmal vorgelesen.
+export function zeigeToast(text, { aktion, beiAktion, iconName, stumm = false } = {}) {
   const box = document.getElementById("toasts");
   if (toastWeg) toastWeg(true);
 
   const toast = el("div", "toast");
+  if (stumm) toast.setAttribute("aria-live", "off");
   if (iconName) toast.append(icon(iconName, 18, 2));
   toast.append(el("span", "toast-text", text));
   if (aktion) {

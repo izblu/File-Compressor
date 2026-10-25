@@ -4,13 +4,13 @@
 // Cache gelegt; danach werden Anfragen bevorzugt aus dem Cache beantwortet.
 // So startet die App auch ohne Internet.
 
-const CACHE = "filekit-v16";
+const CACHE = "filekit-v17";
 
 // Die zur App gehörenden Dateien. Bei Änderungen die Versionsnummer oben
 // erhöhen (z. B. v6), damit Browser die neue Fassung laden.
-// Die großen Bibliotheken (lib/pdfjs/* ~1,4 MB, lib/pdf-lib.min.js ~0,5 MB)
-// werden NICHT vorab geladen, sondern erst bei Bedarf zur Laufzeit gecacht
-// (siehe fetch-Handler unten).
+// Auch die großen Bibliotheken (lib/pdfjs/* ~1,4 MB, lib/pdf-lib.min.js ~0,5 MB)
+// kommen vorab in den Cache: Würden sie erst bei Bedarf gecacht, fehlten sie nach
+// jedem Update offline, bis einmal online ein PDF geöffnet wurde.
 const DATEIEN = [
   "index.html",
   "filekit.css",
@@ -45,6 +45,9 @@ const DATEIEN = [
   "merge.js",
   "image.js",
   "pdf.js",
+  "lib/pdfjs/pdf.min.mjs",
+  "lib/pdfjs/pdf.worker.min.mjs",
+  "lib/pdf-lib.min.js",
   "manifest.json",
   "icons/app-icon-klein.svg",
   "icons/apple-touch-icon.png",
@@ -73,8 +76,7 @@ self.addEventListener("activate", (e) => {
 
 // Jede Anfrage: zuerst im Cache nachsehen, sonst aus dem Netz holen.
 // Erfolgreiche Antworten aus dem eigenen Ursprung werden zur Laufzeit
-// mitgecacht – so landet z. B. die pdf.js-Bibliothek (~1,4 MB) nach dem ersten
-// Laden im Cache und ist danach offline verfügbar.
+// mitgecacht (z. B. die Startadresse "/", die nicht in der Liste oben steht).
 // Wenn alles fehlschlägt (offline + nicht im Cache), bei Seitenaufrufen
 // ersatzweise index.html liefern.
 self.addEventListener("fetch", (e) => {
