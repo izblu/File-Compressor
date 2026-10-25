@@ -50,8 +50,15 @@ Notizen für Claude, damit die Zusammenarbeit über Sessions hinweg gleich bleib
   abgenommen und committet (25.10.2026): neues Modul `textstellen.js` (exakte Wortrahmen aus der
   Zeichenliste, Ersatzweg mit größerem Rand, Suche), Wort antippen, Lupe → Sheet „Text suchen und schwärzen“
   (S5a–S5d), S6 (versetzt, Toast, ein Rückgängig-Schritt), Scan-Erkennung (S2b). Testserver `web-direkt-8030`.
-  **Nächster Schritt:** Verarbeiten + Speichern (Schritt 6). Schwärzen gibt dann
-  `herkunft` und Miniaturen **aus dem Ergebnis** an `zeigeGespeichert` (nie aus dem Original).
+  Schwärzen, Abschnitt Verarbeiten + Speichern (Nachtrag Kap. 12, Schritt 6) gebaut und im Browser geprüft
+  und auf Wunsch des Nutzers committet (25.10.2026): neues Modul `redact.js` (Seiten mit 2000 px rendern,
+  Stellen in die Pixel malen – Grenzen nach außen gerundet –, JPEG 0,85, reines Bild-PDF über `bauePdf`; Bilder:
+  PNG bleibt PNG, sonst JPG 0,92, EXIF/XMP/IPTC-Abschnitte werden zusätzlich entfernt, Fotos > 16 MP verkleinert;
+  Selbstprüfung mit pdf.js: Seitenzahl, kein Text, keine Kommentare/Formulare/Metadaten/Anhänge/Lesezeichen –
+  sonst Fehlermeldung statt Speichern). S9 (Miniatur = gerade geschwärzte Seite, Abbrechen → Editor),
+  S10a–S10c, A1d (Miniatur, Größe und `herkunft` aus dem Ergebnis). Während des Verarbeitens ist der Editor
+  gesperrt (`inert`). Service Worker v15.
+  **Nächster Schritt:** PC-Layout S12 (Schritt 7), danach Schlussprüfung (Schritt 8).
 
 ## Begriffe in der App (verbindlich)
 - **Wählen / Hinzufügen** = Datei in die App holen · **Verarbeiten** = App arbeitet ·

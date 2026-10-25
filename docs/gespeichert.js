@@ -40,12 +40,13 @@ function erfolgsZeichen() {
 // info/badge gelten für alle Dateien (Text) oder je Datei (Liste).
 const jeDatei = (wert, i) => (Array.isArray(wert) ? wert[i] : wert);
 
-// Inhalt einer Zeile: Name, darunter "5 Seiten · 6,8 MB", rechts ggf. "−77 %".
-function dateiText(datei, info, badge) {
+// Inhalt einer Zeile: Name, darunter "5 Seiten · 6,8 MB" bzw. "2,4 MB ·
+// 12 Stellen geschwärzt", rechts ggf. "−77 %".
+function dateiText(datei, info, badge, zusatz) {
   const text = el("div", "fk-stack gs-karte-text");
   const name = el("span", "t-l gs-name", datei.name);
   name.title = datei.name;
-  const zeile = [info, humanSize(datei.groesse)].filter(Boolean).join(" · ");
+  const zeile = [info, humanSize(datei.groesse), zusatz].filter(Boolean).join(" · ");
   text.append(name, el("span", "t-s t-muted t-num", zeile));
   return badge ? [text, el("span", "badge badge-success t-num", badge)] : [text];
 }
@@ -53,12 +54,13 @@ function dateiText(datei, info, badge) {
 // Datei-Karte: eine Datei bzw. eine Zeile je Datei (A1c). Die Liste zeigt
 // immer alle Dateien; wird es zu viel, scrollt sie in sich (styles.css, .gs),
 // damit Tipp und Knöpfe sichtbar bleiben.
-function dateiKarte({ gespeichert, bilder, info, badge }) {
+function dateiKarte({ gespeichert, bilder, info, badge, zusatz }) {
   const bild = (i) => bilder[Math.min(i, bilder.length - 1)];
+  const zeile = (i) => dateiText(gespeichert[i], jeDatei(info, i), jeDatei(badge, i), jeDatei(zusatz, i));
 
   if (gespeichert.length === 1) {
     const karte = el("div", "card fk-row gs-karte in-up d6");
-    karte.append(seitenMini(bild(0), "gs-mini"), ...dateiText(gespeichert[0], jeDatei(info, 0), jeDatei(badge, 0)));
+    karte.append(seitenMini(bild(0), "gs-mini"), ...zeile(0));
     return karte;
   }
 
@@ -66,9 +68,9 @@ function dateiKarte({ gespeichert, bilder, info, badge }) {
   // Scrollbar → auch per Tastatur erreichbar.
   karte.tabIndex = 0;
   karte.setAttribute("aria-label", "Gespeicherte Dateien");
-  gespeichert.forEach((d, i) => {
+  gespeichert.forEach((_, i) => {
     const li = el("li", "fk-row gs-zeile");
-    li.append(seitenMini(bild(i), "gs-mini"), ...dateiText(d, jeDatei(info, i), jeDatei(badge, i)));
+    li.append(seitenMini(bild(i), "gs-mini"), ...zeile(i));
     karte.append(li);
   });
   return karte;
@@ -93,8 +95,9 @@ const OEFFNEN_FEHLER = (mehrere) =>
 // bilder:      Seiten für die Miniaturen, je Datei [{ eintrag, nr, drehung }]
 // info:        Zusatz vor der Größe, z. B. "5 Seiten" – Text oder Liste je Datei (optional)
 // badge:       Ersparnis "−77 %" – Text oder Liste je Datei (optional, Verkleinern)
+// zusatz:      Text nach der Größe, z. B. "12 Stellen geschwärzt" – Text oder Liste je Datei (optional)
 // herkunft:    { aktion, vorher } – vorher = Bytes der Eingabe; Grundlage für Tipp und Vorschlag
-export function zeigeGespeichert(ctx, { gespeichert, bilder, info, badge, herkunft }) {
+export function zeigeGespeichert(ctx, { gespeichert, bilder, info, badge, zusatz, herkunft }) {
   if (ctx.signal.aborted) return; // inzwischen woanders hin gegangen
   const mehrere = gespeichert.length > 1;
   herkunft ??= { aktion: ctx.aktion, vorher: Infinity };
@@ -107,7 +110,7 @@ export function zeigeGespeichert(ctx, { gespeichert, bilder, info, badge, herkun
     ? `${gespeichert.length} Dateien gespeichert – sie liegen jetzt auf deinem Gerät.`
     : "Die Datei liegt jetzt auf deinem Gerät."));
 
-  const karte = dateiKarte({ gespeichert, bilder, info, badge });
+  const karte = dateiKarte({ gespeichert, bilder, info, badge, zusatz });
   const screen = el("div", "fk-stack gs");
   screen.append(erfolgsZeichen(), text, karte);
 

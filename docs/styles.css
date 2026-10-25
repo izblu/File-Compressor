@@ -674,6 +674,12 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .hit:focus-visible { outline: 3px solid var(--fk-focus); outline-offset: -3px; }
 .sw-suche-fuss { padding: 4px 8px 0; }
 
+/* Schwärzen – Speichern (S10): Ergebnis-Karte (Miniatur aus dem Ergebnis) und Format-Zeile */
+.sw-ergebnis-text { gap: 4px; }
+.sw-ergebnis-mini .seite { border-radius: 5px; }
+.sw-format { gap: 12px; min-height: 56px; padding: 0 16px; }
+.sw-format-name { flex: 1; }
+
 /* ===== Vollbild (Seite groß ansehen) ===== */
 .vollbild {
   position: fixed; inset: 0; z-index: 13; display: flex; flex-direction: column;

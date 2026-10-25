@@ -112,7 +112,9 @@ function merkeZoomHinweis() {
 
 // --- Schritt 2: Stellen schwärzen ---
 
-export function stellenSchritt(ctx) {
+// beiWeiter(knopf) = was "Weiter" tut (Schwärzen: erst verarbeiten, siehe
+// flow-schwaerzen.js); ohne geht es direkt zum nächsten Schritt.
+export function stellenSchritt(ctx, { beiWeiter } = {}) {
   const o = ctx.optionen;
   const d = ctx.dateien[0];
   const bild = d.art === "bild";
@@ -216,7 +218,21 @@ export function stellenSchritt(ctx) {
   box.append(buehne, leiste);
 
   // Dock: "Weiter" – deaktiviert, solange es keine Stelle gibt, sonst "Weiter · 7 Stellen".
-  const weiterKnopf = hauptKnopf("Weiter", () => ctx.weiter());
+  // Während beiWeiter läuft, ist die Seite gesperrt (auch Tasten und der Toast mit
+  // "Rückgängig"): Verarbeitet wird genau der Stand beim Tipp.
+  const weiterKnopf = hauptKnopf("Weiter", async () => {
+    if (!beiWeiter) return ctx.weiter();
+    if (box.inert) return;
+    brichZugAb();
+    toast?.schliessen();
+    toast = null;
+    box.inert = true;
+    try {
+      await beiWeiter(weiterKnopf);
+    } finally {
+      box.inert = false;
+    }
+  });
   const weiterZahl = el("span", "sw-weiter-zahl");
   weiterKnopf.append(weiterZahl);
 
@@ -814,7 +830,7 @@ export function stellenSchritt(ctx) {
   }
 
   function globaleTaste(e) {
-    if (sheetIstOffen() || !box.isConnected) return;
+    if (sheetIstOffen() || !box.isConnected || box.inert) return;
     if (e.target.closest && e.target.closest("input, textarea, select, [contenteditable]")) return;
     const strg = e.ctrlKey || e.metaKey;
     const k = e.key.toLowerCase();

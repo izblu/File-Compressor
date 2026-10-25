@@ -116,8 +116,9 @@ const pt = (n) => String(Math.round(n * 100) / 100);
 // Jede Seite: { breite, hoehe (Punkt), pxBreite, pxHoehe, jpeg }. Die Seite
 // behält ihre Originalgröße, das Bild wird darauf gezogen.
 // Bewusst von Hand geschrieben – ein "ein JPEG je Seite"-PDF ist sehr einfach
-// und spart eine weitere Bibliothek.
-function bauePdf(seiten) {
+// und spart eine weitere Bibliothek. Außer den Bildern steht nichts darin: kein
+// Text, keine Metadaten, keine Kommentare (darauf baut auch redact.js).
+export function bauePdf(seiten) {
   const enc = new TextEncoder();
   const teile = [];
   let laenge = 0;

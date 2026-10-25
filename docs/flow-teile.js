@@ -361,16 +361,18 @@ function meldeFehler(text) {
 
 // Führt job({ signal, melde }) aus. Der Haupt-Button zeigt sofort "arbeitet";
 // dauert es länger als 400 ms, erscheint der Verarbeiten-Screen (Abbrechen
-// bzw. Zurück → wieder der Schritt, die Arbeit hört auf).
+// bzw. Zurück → wieder der Schritt, die Arbeit hört auf). eintrag = Bild im
+// Screen ({ vorschau, verhaeltnis }, sonst die erste Datei); fehlerText = Text
+// oder fehlerText(fehler) → Text.
 // Mit ziel (aus save.js/speicherZiel) wird das Ergebnis gleich gespeichert;
 // dateien(ergebnis) liefert dafür [{ blob, name }].
 // Rückgabe: das Ergebnis des job – mit ziel die gespeicherten Dateien
 // [{ name, groesse, blob }] – oder null bei Abbruch oder Fehler (dann mit Toast).
 // Ein noch sichtbarer Verarbeiten-Screen wird danach vom nächsten Schritt bzw.
 // vom "Gespeichert"-Screen abgelöst.
-export async function mitVerarbeitung(ctx, { knopf, titel, text, einheiten, fehlerText, job, ziel, dateien }) {
+export async function mitVerarbeitung(ctx, { knopf, titel, text, einheiten, eintrag, fehlerText, job, ziel, dateien }) {
   const { signal } = ctx;
-  const screen = verarbeitenScreen({ text, einheiten, eintrag: ctx.dateien[0] });
+  const screen = verarbeitenScreen({ text, einheiten, eintrag: eintrag || ctx.dateien[0] });
   const zuruecksetzen = arbeitet(knopf, text);
   let gezeigtUm = 0;
 
@@ -399,7 +401,7 @@ export async function mitVerarbeitung(ctx, { knopf, titel, text, einheiten, fehl
       ergebnis = await job({ signal, melde: screen.setze });
     } catch (e) {
       if (!signal.aborted) console.error(e);
-      return nichts(fehlerText);
+      return nichts(typeof fehlerText === "function" ? fehlerText(e) : fehlerText);
     }
     clearTimeout(timer);
     if (signal.aborted) return nichts();
