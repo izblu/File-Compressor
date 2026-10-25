@@ -35,7 +35,7 @@ const PRUEF_FEHLER = "Die Prüfung des Ergebnisses hat einen Fehler gefunden –
 
 export function schwaerzenSchritte() {
   return [
-    { titel: "Stellen schwärzen", baue: (ctx) => stellenSchritt(ctx, { beiWeiter: (knopf) => verarbeite(ctx, knopf) }) },
+    { titel: "Stellen schwärzen", baue: (ctx) => stellenSchritt(ctx, { beiWeiter: (knopf) => verarbeite(ctx, knopf) }), breit: true },
     { titel: "Speichern", baue: speichernSchritt },
   ];
 }

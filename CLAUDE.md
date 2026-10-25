@@ -58,7 +58,16 @@ Notizen für Claude, damit die Zusammenarbeit über Sessions hinweg gleich bleib
   sonst Fehlermeldung statt Speichern). S9 (Miniatur = gerade geschwärzte Seite, Abbrechen → Editor),
   S10a–S10c, A1d (Miniatur, Größe und `herkunft` aus dem Ergebnis). Während des Verarbeitens ist der Editor
   gesperrt (`inert`). Service Worker v15.
-  **Nächster Schritt:** PC-Layout S12 (Schritt 7), danach Schlussprüfung (Schritt 8).
+  Schwärzen, PC-Layout S12 (Nachtrag Kap. 12, Schritt 7) gebaut, im Browser geprüft (bei 1024 und 1280 px;
+  375 px unverändert) und auf Wunsch des Nutzers committet (25.10.2026): Schritt `breit: true`, `schwaerzen-editor.js` setzt ab
+  1024 px `.ist-pc` und ordnet dieselben Elemente um – links Spalte „Seiten“ (Miniaturen mit Balken + Badge, Klick
+  springt, ↑/↓ wechseln, nur eine Miniatur im Tab-Ablauf), Mitte Werkzeugleiste (Rückgängig · Wiederholen │
+  Herauszoomen · Hineinzoomen · Seite einpassen │ ⋯) über der Seite, rechts „Text suchen“ fest sichtbar (bleibt nach
+  dem Schwärzen stehen, Treffer folgen Rückgängig/Wiederholen) und „Stellen auf dieser Seite“ (Zeile überfahren/
+  fokussieren hebt die Stelle hervor, „Löschen“). Fußleiste „7 Stellen auf 3 Seiten“ + „Weiter“. Mauszeiger laut 9.2
+  (auch während des Ziehens). ⋯-Menü am PC ohne Zoom-Einträge. A4 (PC-Start mit Ergebnis) war schon fertig.
+  Service Worker v16.
+  **Nächster Schritt:** Schlussprüfung (Schritt 8).
 
 ## Begriffe in der App (verbindlich)
 - **Wählen / Hinzufügen** = Datei in die App holen · **Verarbeiten** = App arbeitet ·

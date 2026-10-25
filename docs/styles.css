@@ -496,7 +496,7 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .ed-ende-sub { color: var(--fk-text-2); }
 .ed-dock-hinweis { min-height: 56px; display: flex; align-items: center; justify-content: center; text-align: center; text-wrap: balance; }
 /* Fußleisten-Text gibt es nur am PC; "oder hierher ziehen" nur mit Maus */
-.ed-fuss, .ed-neu-oder, .fk-top-abbrechen { display: none; }
+.ed-fuss, .sw-fuss, .ed-neu-oder, .fk-top-abbrechen { display: none; }
 @media (hover: hover) and (pointer: fine) {
   .ed-neu-oder { display: block; font-weight: 600; }
   .ed-raster:not(.ist-ziel) .ed-kachel:not(.is-selected):hover { border-color: var(--fk-line-strong); }
@@ -561,6 +561,7 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .ausgabe-format { gap: 12px; min-height: 56px; padding: 0 16px; }
 
 /* ===== Seiten-Editor am PC (ab 1024 px, Referenz 21b): volle Breite =====
+   Gilt auch für den Schwärzen-Editor (S12, siehe unten).
    Alle anderen Schritte bleiben eine zentrierte Spalte (max. 480 px).
    --rand: Inhalt höchstens 1216 px breit (1280 px mit Rand), sonst 32 px Rand. */
 @media (min-width: 1024px) {
@@ -609,7 +610,8 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
     padding: 14px var(--rand); border-top: 1px solid var(--fk-line);
     background: color-mix(in srgb, var(--fk-bg) 86%, transparent);
   }
-  .ist-breit .ed-fuss { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ist-breit :is(.ed-fuss, .sw-fuss) { display: block; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ist-breit .sw-weiter-zahl { display: none; } /* "Weiter" ohne Zahl – sie steht links in der Fußleiste */
   .ist-breit .fk-dock > .btn-primary { width: auto; min-width: 220px; margin-left: auto; }
   .ist-breit .selbar { margin-left: auto; grid-template-columns: repeat(3, 156px); }
   .ist-breit .selbar > button { height: 52px; flex-direction: row; gap: 8px; }
@@ -679,6 +681,62 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .sw-ergebnis-mini .seite { border-radius: 5px; }
 .sw-format { gap: 12px; min-height: 56px; padding: 0 16px; }
 .sw-format-name { flex: 1; }
+
+/* Mauszeiger während einer Geste (Nachtrag 9.2): Die Bühne hält den Zeiger
+   fest, schwaerzen-editor.js setzt data-zeiger, solange gezogen wird. */
+.sw-buehne[data-zeiger="kreuz"], .sw-buehne[data-zeiger="kreuz"] * { cursor: crosshair !important; }
+.sw-buehne[data-zeiger="greift"], .sw-buehne[data-zeiger="greift"] * { cursor: grabbing !important; }
+.sw-buehne[data-zeiger="nwse"], .sw-buehne[data-zeiger="nwse"] * { cursor: nwse-resize !important; }
+.sw-buehne[data-zeiger="nesw"], .sw-buehne[data-zeiger="nesw"] * { cursor: nesw-resize !important; }
+
+/* ===== Schwärzen-Editor am PC (S12, ab 1024 px) =====
+   schwaerzen-editor.js setzt .ist-pc (gleiche Grenze wie die Media Query):
+   links "Seiten", in der Mitte Werkzeugleiste + Seite (so groß wie möglich),
+   rechts "Text suchen" und "Stellen auf dieser Seite". Die Spalten rollen in
+   sich, die Seite selbst nie. */
+@media (min-width: 1024px) {
+  .ist-breit .wizard-body:has(> .sw) { padding: 20px var(--rand) 20px; }
+}
+.sw.ist-pc {
+  display: grid; grid-template-columns: 128px minmax(0, 1fr) minmax(300px, 360px);
+  grid-template-rows: minmax(0, 1fr); gap: 24px;
+}
+.sw.ist-pc.ohne-seiten { grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); }
+.sw-seitenleiste, .sw-seitenteil {
+  position: relative; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-color: var(--fk-line-strong) transparent;
+}
+.sw-seitenleiste { padding: 4px 0 12px; }
+.sw-seitenleiste-titel { margin-bottom: 10px; text-align: center; }
+.sw-seitenliste { list-style: none; margin: 0; padding: 4px 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.sw-seitenliste .thumb { width: 104px; }
+.sw-mitte { min-width: 0; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.sw-mitte > .tbar { flex: none; justify-content: center; gap: 4px; padding: 0 8px; }
+.sw-mitte > .sw-buehne { align-self: stretch; }
+.sw-seitenteil { display: flex; flex-direction: column; gap: 16px; padding-bottom: 4px; }
+.sw-panel {
+  flex: none; padding: 18px; display: flex; flex-direction: column; gap: 12px;
+  border-radius: var(--fk-r-xl); background: var(--fk-surface-1); box-shadow: inset 0 0 0 1px var(--fk-line);
+}
+.sw-panel .sw-suche-inhalt { gap: 12px; }
+.sw-panel :is(.sw-suche-feld, .sw-suche-bereich, .sw-suche-fuss) { padding: 0; }
+.sw-panel .sw-suche-status { font-size: var(--fk-fs-s); }
+.sw-panel .sw-treffer { flex: none; max-height: 300px; margin: 0 -8px; scrollbar-width: thin; scrollbar-color: var(--fk-line-strong) transparent; }
+.sw-stellen { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.sw-zeile {
+  display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 4px 0 12px;
+  border-radius: 12px; background: var(--fk-surface-2); transition: box-shadow var(--fk-d-fast) ease;
+}
+.sw-zeile:is(:hover, :focus-within) { box-shadow: inset 0 0 0 1px var(--fk-line-strong); }
+.sw-zeile-text { flex: 1; min-width: 0; color: var(--fk-text); font-weight: 700; }
+.sw-zeile-text .t-muted { font-weight: 500; }
+.sw-zeile .sw-zeile-weg { color: var(--fk-danger-text); }
+.sw-panel h2:focus { outline: none; } /* Fokus nur nach "Treffer schwärzen" bzw. wenn die letzte Stelle der Liste gelöscht wurde */
+/* Zeile in "Stellen auf dieser Seite" überfahren/fokussiert: die Stelle leuchtet auf */
+.stelle.ist-hervor { box-shadow: 0 0 0 2px var(--fk-redact-ring), 0 0 0 6px rgba(47, 107, 240, .3); }
+@media (hover: hover) and (pointer: fine) {
+  .sw-panel .hit:not(.is-done):hover { background: var(--fk-surface-2); }
+}
 
 /* ===== Vollbild (Seite groß ansehen) ===== */
 .vollbild {

@@ -5,8 +5,8 @@
 // Zustand: { aktion, dateien, schritte, schritt, optionen, dirty, zwischen, lauf }.
 // Jeder Schritt einer Aktion ist ein Objekt { titel, baue(ctx), breit? }; baue
 // liefert { inhalt, dock } (je ein Element oder eine Liste von Elementen).
-// breit = am PC über die volle Fensterbreite (nur der Seiten-Editor); alle
-// anderen Schritte stehen in einer zentrierten Spalte.
+// breit = am PC über die volle Fensterbreite (Seiten-Editor und
+// Schwärzen-Editor); alle anderen Schritte stehen in einer zentrierten Spalte.
 //
 // Verlauf: Jeder Schritt hat einen eigenen History-Eintrag. So ist
 // Browser-Zurück (Android-Geste) dasselbe wie der Zurück-Pfeil.
@@ -62,7 +62,7 @@ function baueRahmen() {
   abbrechen.type = "button";
   abbrechen.setAttribute("aria-label", "Abbrechen");
   abbrechen.append(icon("schliessen", 20, 2));
-  // Am PC in der breiten Ansicht (Seiten-Editor) steht "Abbrechen" als Text da.
+  // Am PC in der breiten Ansicht (Seiten- und Schwärzen-Editor) steht "Abbrechen" als Text da.
   const abbrechenText = el("button", "btn btn-ghost btn-sm fk-top-abbrechen", "Abbrechen");
   abbrechenText.type = "button";
   reihe.append(zurueck, titelBox, abbrechen, abbrechenText);
@@ -137,7 +137,7 @@ function zeigeSchritt(index, richtung) {
   const gesamt = z.schritte.length + 1;
   const text = `Schritt ${nummer} von ${gesamt}`;
 
-  // breit: am PC über die volle Breite (Seiten-Editor), sonst zentrierte Spalte.
+  // breit: am PC über die volle Breite (Seiten- und Schwärzen-Editor), sonst zentrierte Spalte.
   rahmen.wizard.classList.toggle("ist-breit", Boolean(schritt.breit));
   rahmen.titel.textContent = schritt.titel;
   rahmen.schrittText.textContent = text;

@@ -18,6 +18,13 @@
 //     die Größe (mit Strg in größeren Schritten), Entf löscht, Esc/Enter wählt ab.
 //     Überall: Strg+Z / Strg+Y, Bild↑ / Bild↓, + / −.
 //
+// Am PC (ab 1024 px, S12) nutzt der Editor die volle Breite: links die Spalte
+// "Seiten" (Miniaturen mit Stellen, Klick springt hin), in der Mitte die
+// Werkzeugleiste (Rückgängig · Wiederholen │ Herauszoomen · Hineinzoomen ·
+// Seite einpassen │ ⋯) über der Seite, rechts "Text suchen" (immer sichtbar)
+// und "Stellen auf dieser Seite" (Zeile überfahren/fokussieren hebt die Stelle
+// hervor, "Löschen" löscht sie). Fußleiste: "7 Stellen auf 3 Seiten" + "Weiter".
+//
 // Stellen stehen in Prozent der angezeigten Seite ({ x, y, w, h }, 0–100). So
 // bleiben sie bei Zoom, Drehung des Geräts und beim Rendern in voller
 // Auflösung richtig.
@@ -36,6 +43,8 @@ import { seitenBild } from "./thumbs.js";
 import { hatText, textBekannt, bereiteVor, woerterAuf, suche, sucheMoeglich } from "./textstellen.js";
 
 const maus = window.matchMedia("(hover: hover) and (pointer: fine)"); // "Maus" statt "Finger"
+const breit = window.matchMedia("(min-width: 1024px)");                 // PC-Layout (S12)
+const mac = /Mac|iPhone|iPad/.test(navigator.platform);                 // ⌘ statt Strg
 const ZIEH_SCHWELLE = 5;    // px – ab hier zieht der Finger eine Stelle auf bzw. verschiebt sie
 const MIN_B = 1;            // % – schmalere oder …
 const MIN_H = 0.6;          // % – … niedrigere Rahmen waren Fehltipps
@@ -87,10 +96,12 @@ function spieleAb(element, klasse) {
   element.addEventListener("animationend", () => element.classList.remove(klasse), { once: true });
 }
 
-function werkzeug(iconName, label, beiKlick, strich = 1.8) {
+// taste = Tastenkürzel für den Tooltip am PC, z. B. "Strg+Z".
+function werkzeug(iconName, label, beiKlick, strich = 1.8, taste) {
   const b = el("button", "icon-btn");
   b.type = "button";
   b.setAttribute("aria-label", label);
+  if (taste) b.title = `${label} (${taste})`;
   b.append(icon(iconName, 22, strich));
   b.addEventListener("click", beiKlick);
   return b;
@@ -139,6 +150,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
   let auswahlUi = null;       // { id, box, weg } – Rahmen mit Griffen und Papierkorb
   let mitText = bild ? false : textBekannt(d); // Textebene: true / false / undefined = wird noch geprüft
   let versetzt = null;        // Set neuer Stellen, die nacheinander erscheinen (nach "Treffer schwärzen")
+  let pcSuche = null;         // Suchbereich in der rechten Spalte am PC (erst, wenn es Text gibt)
 
   const liste = (seite = o.seite) => o.stellen[seite] || [];
   const anzahl = () => anzahlIn(o.stellen);
@@ -190,12 +202,14 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
   vp.append(blatt, hinweisKarte, einpassen, zoomHinweis);
   buehne.append(vp);
 
-  // Werkzeugleiste: Rückgängig · Wiederholen │ ‹ · "2/12" · › │ Text suchen · ⋯
+  // Werkzeugleiste – Handy: Rückgängig · Wiederholen │ ‹ · "2/12" · › │ Text suchen · ⋯
+  // PC: Rückgängig · Wiederholen │ Herauszoomen · Hineinzoomen · Seite einpassen │ ⋯
+  // (zusammengestellt in setzeLayout).
   const leiste = el("div", "tbar");
   leiste.setAttribute("role", "toolbar");
   leiste.setAttribute("aria-label", "Werkzeuge");
-  const rueckK = werkzeug("rueckgaengig", "Rückgängig", rueckgaengig);
-  const vorK = werkzeug("wiederholen", "Wiederholen", wiederholen);
+  const rueckK = werkzeug("rueckgaengig", "Rückgängig", rueckgaengig, 1.8, mac ? "⌘Z" : "Strg+Z");
+  const vorK = werkzeug("wiederholen", "Wiederholen", wiederholen, 1.8, mac ? "⇧⌘Z" : "Strg+Y");
   const vorigeK = werkzeug("zurueck", "Vorherige Seite", () => blaettere(o.seite - 1), 2);
   const naechsteK = werkzeug("weiter", "Nächste Seite", () => blaettere(o.seite + 1), 2);
   const seitenK = el("button", "pgbtn");
@@ -209,13 +223,46 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
   suchenK.hidden = !mitText; // erst sichtbar, wenn feststeht, dass es Text gibt
   const mehrK = werkzeug("mehr", "Weitere Optionen", oeffneOptionen, 3);
   mehrK.setAttribute("aria-haspopup", "dialog");
-  leiste.append(rueckK, vorK);
-  if (mehrseitig) leiste.append(trenner("tsep"), vorigeK, seitenK, naechsteK);
-  leiste.append(trenner("tsep"));
-  if (!bild) leiste.append(suchenK);
-  leiste.append(mehrK);
+  const zoomAusK = werkzeug("herauszoomen", "Herauszoomen", () => zoomeUm(zoom.z / ZOOM_SCHRITT), 1.8, "−");
+  const zoomEinK = werkzeug("hineinzoomen", "Hineinzoomen", () => zoomeUm(zoom.z * ZOOM_SCHRITT), 1.8, "+");
+  const einpassenK = werkzeug("einpassen", "Seite einpassen", () => setzeZoom(1, 0, 0));
 
-  box.append(buehne, leiste);
+  // --- Nur am PC (S12): Seitenleiste, Mitte, rechte Spalte ---
+
+  // Links: "Seiten" mit Miniaturen. Nur die aktuelle Miniatur ist per Tab
+  // erreichbar, ↑/↓ wechseln zwischen ihnen (sonst wären es Dutzende Tab-Halte).
+  const seitenleiste = el("nav", "sw-seitenleiste");
+  const leistenTitel = el("p", "t-micro t-muted sw-seitenleiste-titel", "Seiten");
+  leistenTitel.id = "sw-seiten-titel";
+  seitenleiste.setAttribute("aria-labelledby", leistenTitel.id);
+  const leistenListe = el("ul", "sw-seitenliste");
+  seitenleiste.append(leistenTitel, leistenListe);
+  const miniaturen = [];      // [{ t, stand, aktuell }] je Seite – erst gebaut, wenn die Leiste gebraucht wird
+  let leistenIo = null;
+  let leistenSeite = 0;       // Seite, zu der die Leiste zuletzt gerollt ist
+
+  const mitte = el("section", "sw-mitte");
+  mitte.setAttribute("aria-label", bild ? "Bild bearbeiten" : "Seite bearbeiten");
+
+  // Rechts: "Text suchen" (nur PDF mit Text) und "Stellen auf dieser Seite".
+  const seitenteil = el("aside", "sw-seitenteil");
+  const suchPanel = el("section", "sw-panel");
+  const suchTitel = el("h2", "t-l", "Text suchen");
+  suchTitel.id = "sw-suchen-titel";
+  suchTitel.tabIndex = -1; // bekommt nach "Treffer schwärzen" den Fokus
+  suchPanel.setAttribute("aria-labelledby", suchTitel.id);
+  suchPanel.append(suchTitel);
+  suchPanel.hidden = true;
+  const stellenPanel = el("section", "sw-panel");
+  const stellenTitel = el("h2", "t-l", bild ? "Stellen auf dem Bild" : "Stellen auf dieser Seite");
+  stellenTitel.id = "sw-stellen-titel";
+  stellenTitel.tabIndex = -1; // bekommt den Fokus, wenn die letzte Stelle der Liste gelöscht wurde
+  stellenPanel.setAttribute("aria-labelledby", stellenTitel.id);
+  const stellenListe = el("ul", "sw-stellen");
+  const stellenLeer = el("p", "t-s t-muted", bild ? "Noch keine Stelle auf dem Bild." : "Noch keine Stelle auf dieser Seite.");
+  stellenPanel.append(stellenTitel, stellenListe, stellenLeer);
+  seitenteil.append(suchPanel, stellenPanel);
+  const zeilen = new Map();   // id → { li, text, knopf } der Liste "Stellen auf dieser Seite"
 
   // Dock: "Weiter" – deaktiviert, solange es keine Stelle gibt, sonst "Weiter · 7 Stellen".
   // Während beiWeiter läuft, ist die Seite gesperrt (auch Tasten und der Toast mit
@@ -235,6 +282,30 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
   });
   const weiterZahl = el("span", "sw-weiter-zahl");
   weiterKnopf.append(weiterZahl);
+  // Am PC links in der Fußleiste "7 Stellen auf 3 Seiten" (dafür ohne Zahl im Knopf).
+  const fussText = el("p", "t-body t-muted t-num sw-fuss");
+
+  // Handy: Seite, darunter die Werkzeugleiste. PC: drei Spalten (siehe oben).
+  // Dieselben Elemente wandern nur um – Stand, Zoom und Seitenbild bleiben.
+  function setzeLayout() {
+    const pc = breit.matches;
+    brichZugAb();
+    box.classList.toggle("ist-pc", pc);
+    box.classList.toggle("ohne-seiten", !mehrseitig);
+    if (pc) {
+      leiste.replaceChildren(rueckK, vorK, trenner("tsep"), zoomAusK, zoomEinK, einpassenK, trenner("tsep"), mehrK);
+      mitte.append(leiste, buehne);
+      if (mehrseitig) baueSeitenleiste();
+      box.replaceChildren(...(mehrseitig ? [seitenleiste] : []), mitte, seitenteil);
+    } else {
+      leiste.replaceChildren(rueckK, vorK);
+      if (mehrseitig) leiste.append(trenner("tsep"), vorigeK, seitenK, naechsteK);
+      leiste.append(trenner("tsep"));
+      if (!bild) leiste.append(suchenK);
+      leiste.append(mehrK);
+      box.replaceChildren(buehne, leiste);
+    }
+  }
 
   // --- Seite zeigen ---
 
@@ -351,6 +422,58 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     }
     versetzt = null;
     zeigeAuswahl();
+    zeichneStellenListe(sortiert);
+    pcSuche?.pruefeSchon();
+  }
+
+  // PC: Liste "Stellen auf dieser Seite" in derselben Reihenfolge und Zählung
+  // wie die Stellen auf der Seite. Zeilen bleiben stehen (Fokus bleibt erhalten).
+  function zeichneStellenListe(sortiert) {
+    const bleibt = new Set(sortiert.map((s) => s.id));
+    for (const [id, z] of zeilen) {
+      if (bleibt.has(id)) continue;
+      z.li.remove();
+      zeilen.delete(id);
+    }
+    const fokus = document.activeElement;
+    let davor = null;
+    sortiert.forEach((s, i) => {
+      let z = zeilen.get(s.id);
+      if (!z) {
+        z = baueZeile(s.id);
+        zeilen.set(s.id, z);
+      }
+      const mitteY = s.y + s.h / 2;
+      const lage = s.w >= 99 && s.h >= 99 ? (bild ? "ganzes Bild" : "ganze Seite")
+        : mitteY < 33 ? "oben" : mitteY < 66 ? "Mitte" : "unten";
+      z.text.replaceChildren(`Stelle ${i + 1} `, el("span", "t-muted", `· ${lage}`));
+      z.knopf.setAttribute("aria-label", `Stelle ${i + 1} löschen`);
+      const soll = davor ? davor.nextSibling : stellenListe.firstChild;
+      if (soll !== z.li) stellenListe.insertBefore(z.li, soll);
+      davor = z.li;
+    });
+    if (fokus && fokus.isConnected && fokus !== document.activeElement && stellenListe.contains(fokus)) {
+      fokus.focus({ preventScroll: true });
+    }
+    stellenListe.hidden = !sortiert.length;
+    stellenLeer.hidden = sortiert.length > 0;
+  }
+
+  // Zeile überfahren oder fokussieren hebt die Stelle auf der Seite hervor.
+  function baueZeile(id) {
+    const li = el("li", "sw-zeile");
+    const text = el("span", "t-s sw-zeile-text");
+    const knopf = el("button", "btn btn-ghost btn-sm sw-zeile-weg", "Löschen");
+    knopf.type = "button";
+    knopf.addEventListener("click", () => loesche(id, { ausListe: true }));
+    let drueber = false;
+    const hervor = () => knoepfe.get(id)?.classList.toggle("ist-hervor", drueber || li.contains(document.activeElement));
+    li.addEventListener("mouseenter", () => { drueber = true; hervor(); });
+    li.addEventListener("mouseleave", () => { drueber = false; hervor(); });
+    li.addEventListener("focusin", hervor);
+    li.addEventListener("focusout", hervor); // der Fokus ist dann schon weg (eine Zeile hat nur einen Knopf)
+    li.append(text, knopf);
+    return { li, text, knopf };
   }
 
   function waehle(id, { fokus = false } = {}) {
@@ -408,6 +531,8 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     seitenK.setAttribute("aria-label", `Seite ${o.seite} von ${n} – Seitenübersicht`);
     weiterKnopf.disabled = gesamt === 0;
     weiterZahl.textContent = gesamt ? `· ${stellenText(gesamt)}` : "";
+    fussText.textContent = stellenSumme(o.stellen, bild);
+    aktualisiereSeitenleiste();
     // Der Hinweis gilt, bis die Datei eine Stelle hat; beim Aufziehen tritt er zurück.
     hinweisKarte.hidden = gesamt > 0 || Boolean(zug && zug.art === "neu" && zug.bewegt);
   }
@@ -464,8 +589,9 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
   }
 
   // Löschen ohne Rückfrage, mit Toast "Rückgängig". fokusWeiter = per Tastatur
-  // gelöscht → die nächste Stelle bekommt den Fokus.
-  function loesche(id, { fokusWeiter = false } = {}) {
+  // gelöscht → die nächste Stelle bekommt den Fokus. ausListe = "Löschen" in der
+  // Liste am PC → der Fokus bleibt in der Liste (nächste Zeile bzw. Überschrift).
+  function loesche(id, { fokusWeiter = false, ausListe = false } = {}) {
     const k = knoepfe.get(id);
     if (!k || k.classList.contains("is-out")) return;
     const seite = o.seite;
@@ -480,7 +606,8 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
       setzeListe(liste(seite).filter((s) => s.id !== id), seite);
       nachAenderung();
       const ziel = fokusWeiter && naechste && knoepfe.get(naechste.id);
-      if (ziel) ziel.focus({ preventScroll: true });
+      if (ausListe) ((naechste && zeilen.get(naechste.id)?.knopf) || stellenTitel).focus({ preventScroll: true });
+      else if (ziel) ziel.focus({ preventScroll: true });
       else if (!blatt.contains(document.activeElement) || document.activeElement === document.body) blatt.focus({ preventScroll: true });
       toast = zeigeToast("Stelle gelöscht", { iconName: "loeschen", aktion: "Rückgängig", beiAktion: rueckgaengig });
       ansage("Stelle gelöscht.");
@@ -569,6 +696,8 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     blatt.style.transform = `translate(${zoom.fx * b}px, ${zoom.fy * h}px) scale(${zoom.z})`;
     blatt.style.setProperty("--z", zoom.z); // Griffe und Papierkorb behalten ihre Größe
     const an = zoom.z > 1;
+    zoomAusK.disabled = einpassenK.disabled = !an;
+    zoomEinK.disabled = zoom.z >= MAX_ZOOM;
     if (einpassen.hidden === an) {
       einpassen.hidden = !an;
       if (an) spieleAb(einpassen, "in-fade");
@@ -641,14 +770,23 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     const stelle = e.target.closest(".stelle");
     if (griff && gewaehlt != null) {
       zug = { ...basis, art: "groesse", ecke: griff.dataset.ecke, s: liste().find((x) => x.id === gewaehlt) };
+      setzeZeiger(["tl", "br"].includes(zug.ecke) ? "nwse" : "nesw");
     } else if (stelle) {
       const id = Number(stelle.dataset.id);
       zug = { ...basis, art: "schiebe", s: liste().find((x) => x.id === id) };
       waehle(id, { fokus: true });
     } else {
       zug = { ...basis, art: "neu" };
+      setzeZeiger("kreuz");
     }
   });
+
+  // Mauszeiger während einer Geste (9.2) – die Bühne hält den Zeiger fest, ohne
+  // das bliebe er sonst nicht über Seite, Stelle bzw. Griff stehen.
+  function setzeZeiger(art) {
+    if (art) buehne.dataset.zeiger = art;
+    else delete buehne.dataset.zeiger;
+  }
 
   buehne.addEventListener("pointermove", (e) => {
     if (!finger.has(e.pointerId)) return;
@@ -667,6 +805,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
         hinweisKarte.hidden = true;
       } else {
         blatt.classList.add("ist-ziehen");
+        if (zug.art === "schiebe") setzeZeiger("greift");
       }
     }
     const p = punkt(e);
@@ -716,6 +855,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     const z = zug;
     zug = null;
     blatt.classList.remove("ist-ziehen");
+    setzeZeiger(null);
     if (z.art === "neu") {
       rahmen.hidden = true;
       if (z.bewegt && z.r && z.r.w >= MIN_B && z.r.h >= MIN_H) fuegeHinzu([z.r], { waehlen: true });
@@ -769,6 +909,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     const z = zug;
     zug = null;
     blatt.classList.remove("ist-ziehen");
+    setzeZeiger(null);
     rahmen.hidden = true;
     if (z.art !== "neu" && z.bewegt) {
       o.stellen = z.vorher;
@@ -865,24 +1006,24 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     return false;
   });
 
-  // --- Text suchen und schwärzen (S5, S6) ---
+  // --- Text suchen und schwärzen (S5, S6; am PC S12) ---
 
-  // Bottom Sheet mit Feld "Suchbegriff", Treffern zum An- und Abhaken und dem
+  // Suchbereich mit Feld "Suchbegriff", Treffern zum An- und Abhaken und dem
   // Knopf "7 Treffer schwärzen". Sucht beim Tippen (nach 200 ms Pause) in allen
   // Seiten. Treffer, die schon ganz unter einer Stelle liegen, sind blass und
-  // nicht wählbar.
-  function oeffneSuche() {
-    if (!mitText) return;
-    for (let nr = 1; nr <= n; nr++) bereiteVor(d, nr); // alle Seiten lesen, während getippt wird
-
+  // nicht wählbar. Am Handy steht er im Bottom Sheet (oeffneSuche), am PC immer
+  // sichtbar in der rechten Spalte: Dort bleibt er nach dem Schwärzen stehen,
+  // und pruefeSchon() hält die Treffer aktuell, wenn sich die Stellen ändern.
+  // beiSchwaerzen(auswahl) bekommt die gewählten neuen Treffer.
+  function baueSuche({ imSheet, beiSchwaerzen }) {
     const feld = el("div", "field sw-suche-feld");
     const label = el("label", null, "Suchbegriff");
-    label.htmlFor = "sw-suchbegriff";
+    label.htmlFor = imSheet ? "sw-suchbegriff" : "sw-suchbegriff-pc";
     const feldBox = el("div", "field-box");
     const lupe = el("span", "sw-suche-lupe");
     lupe.append(icon("suchen", 18, 2));
     const eingabe = el("input");
-    eingabe.id = "sw-suchbegriff";
+    eingabe.id = label.htmlFor;
     eingabe.type = "search";
     eingabe.placeholder = "z. B. einen Namen oder eine Nummer";
     eingabe.autocomplete = "off";
@@ -909,7 +1050,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     const bereich = el("div", "fk-stack sw-suche-bereich");
     bereich.append(kopfZeile, erklaerung, schonHinweis, trefferListe);
 
-    const losK = el("button", "btn btn-primary btn-block");
+    const losK = el("button", imSheet ? "btn btn-primary btn-block" : "btn btn-primary btn-sm btn-block");
     losK.type = "button";
     const fuss = el("div", "sw-suche-fuss");
     fuss.append(losK);
@@ -919,9 +1060,10 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     let treffer = [];  // [{ seite, rechtecke, vorher, gesucht, nachher, schon, an, knopf }]
     let lauf = 0;      // Ergebnisse einer überholten Suche verwerfen
     let pause = 0;
-    let offen = true;
+    let aktiv = true;  // false, sobald das Sheet zu bzw. der Schritt vorbei ist
     const leerText = `${n > 1 ? `Durchsucht alle ${n} Seiten.` : "Durchsucht die ganze Seite."} Geschwärzt werden nur die gesuchten Zeichen.`;
     const neue = () => treffer.filter((t) => !t.schon && t.an);
+    const istSchon = (t) => t.rechtecke.every((r) => liste(t.seite).some((s) => deckt(s, r)));
 
     function setzeHaken(t) {
       const an = t.schon || t.an;
@@ -935,8 +1077,21 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
       losK.textContent = zahl ? `${zahl} Treffer schwärzen` : "Treffer schwärzen";
     }
 
+    function zeigeSchon() {
+      const schon = treffer.filter((t) => t.schon).length;
+      schonText.textContent = schon === 1 ? "1 Treffer ist schon geschwärzt" : `${schon} Treffer sind schon geschwärzt`;
+      schonHinweis.hidden = !schon;
+    }
+
+    function setzeSchon(t) {
+      t.knopf.classList.toggle("is-done", t.schon);
+      if (t.schon) t.knopf.setAttribute("aria-disabled", "true");
+      else t.knopf.removeAttribute("aria-disabled");
+      setzeHaken(t);
+    }
+
     function trefferKnopf(t) {
-      const k = el("button", t.schon ? "hit is-done" : "hit");
+      const k = el("button", "hit");
       k.type = "button";
       k.setAttribute("role", "checkbox");
       const kasten = el("span", "cbox");
@@ -946,16 +1101,13 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
       ausschnitt.append(t.vorher, el("mark", null, t.gesucht), t.nachher); // <mark> zeigt, was schwarz wird
       k.append(kasten, el("span", "hit-pg", `Seite ${t.seite}`), ausschnitt);
       t.knopf = k;
-      if (t.schon) {
-        k.setAttribute("aria-disabled", "true");
-      } else {
-        k.addEventListener("click", () => {
-          t.an = !t.an;
-          setzeHaken(t);
-          aktualisiereKnopf();
-        });
-      }
-      setzeHaken(t);
+      k.addEventListener("click", () => {
+        if (t.schon) return;
+        t.an = !t.an;
+        setzeHaken(t);
+        aktualisiereKnopf();
+      });
+      setzeSchon(t);
       return k;
     }
 
@@ -970,12 +1122,26 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
         : zustand === "sucht" ? text
         : mitTreffern ? "" : "Prüfe die Schreibweise oder suche nach einem Teil des Wortes.";
       erklaerung.hidden = !erklaerung.textContent;
-      const schon = mitTreffern ? treffer.filter((t) => t.schon).length : 0;
-      schonText.textContent = schon === 1 ? "1 Treffer ist schon geschwärzt" : `${schon} Treffer sind schon geschwärzt`;
-      schonHinweis.hidden = !schon;
+      zeigeSchon();
       trefferListe.replaceChildren(...(mitTreffern ? treffer.map(trefferKnopf) : []));
       trefferListe.hidden = !mitTreffern;
       trefferListe.scrollTop = 0;
+      aktualisiereKnopf();
+    }
+
+    // Stellen haben sich geändert (PC): Treffer unter einer Stelle gelten als
+    // geschwärzt; wird einer wieder frei (z. B. Rückgängig), ist er wie ein neuer
+    // Treffer ausgewählt. Die Knöpfe bleiben stehen, damit der Fokus nicht verloren geht.
+    function pruefeSchon() {
+      if (!treffer.length) return;
+      for (const t of treffer) {
+        const schon = istSchon(t);
+        if (schon === t.schon) continue;
+        t.schon = schon;
+        if (!schon) t.an = true;
+        setzeSchon(t);
+      }
+      zeigeSchon();
       aktualisiereKnopf();
     }
 
@@ -989,7 +1155,7 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
         return;
       }
       const ergebnis = await suche(d, begriff, {
-        abgebrochen: () => meine !== lauf || !offen,
+        abgebrochen: () => meine !== lauf || !aktiv,
         beiSeite: (nr, anzahl) => {
           if (meine === lauf && nr < anzahl) {
             treffer = [];
@@ -997,10 +1163,8 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
           }
         },
       });
-      if (!ergebnis || meine !== lauf || !offen) return;
-      treffer = ergebnis.map((t) => ({
-        ...t, an: true, schon: t.rechtecke.every((r) => liste(t.seite).some((s) => deckt(s, r))),
-      }));
+      if (!ergebnis || meine !== lauf || !aktiv) return;
+      treffer = ergebnis.map((t) => ({ ...t, an: true, schon: istSchon(t) }));
       zeige("fertig");
     }
 
@@ -1012,8 +1176,10 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
       if (e.key !== "Enter") return;
       e.preventDefault();
       sucheJetzt();
-      eingabe.blur(); // Tastatur am Handy schließen, damit Treffer und Knopf zu sehen sind
+      if (imSheet) eingabe.blur(); // Tastatur am Handy schließen, damit Treffer und Knopf zu sehen sind
     });
+    // Am PC alle Seiten erst lesen, wenn jemand suchen will (am Handy beim Öffnen des Sheets).
+    if (!imSheet) eingabe.addEventListener("focus", () => liesAlleSeiten(), { once: true });
     const alleSetzen = (an) => {
       for (const t of treffer) {
         if (t.schon) continue;
@@ -1026,9 +1192,36 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     keineK.addEventListener("click", () => alleSetzen(false));
     losK.addEventListener("click", () => {
       const auswahl = neue();
-      if (!auswahl.length) return;
-      sheet.schliessen();
-      schwaerzeTreffer(auswahl);
+      if (auswahl.length) beiSchwaerzen(auswahl);
+    });
+
+    zeige("leer");
+    return {
+      inhalt: suchInhalt,
+      eingabe,
+      pruefeSchon,
+      beende() {
+        aktiv = false;
+        clearTimeout(pause);
+      },
+    };
+  }
+
+  // Alle Seiten lesen, während getippt wird.
+  function liesAlleSeiten() {
+    for (let nr = 1; nr <= n; nr++) bereiteVor(d, nr);
+  }
+
+  // Handy: Bottom Sheet "Text suchen und schwärzen" (S5).
+  function oeffneSuche() {
+    if (!mitText) return;
+    liesAlleSeiten();
+    const suchBereich = baueSuche({
+      imSheet: true,
+      beiSchwaerzen: (auswahl) => {
+        sheet.schliessen();
+        schwaerzeTreffer(auswahl);
+      },
     });
 
     // Bildschirmtastatur: Das Sheet rückt über sie, damit Treffer und Knopf sichtbar bleiben.
@@ -1041,10 +1234,9 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     };
 
     const sheet = oeffneSheet({
-      titel: "Text suchen und schwärzen", inhalt: suchInhalt, ausloeser: suchenK, klasse: "sw-suche",
+      titel: "Text suchen und schwärzen", inhalt: suchBereich.inhalt, ausloeser: suchenK, klasse: "sw-suche",
       beiSchliessen: () => {
-        offen = false;
-        clearTimeout(pause);
+        suchBereich.beende();
         vv?.removeEventListener("resize", passeAn);
         vv?.removeEventListener("scroll", passeAn);
       },
@@ -1052,8 +1244,24 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     passeAn();
     vv?.addEventListener("resize", passeAn);
     vv?.addEventListener("scroll", passeAn);
-    zeige("leer");
-    eingabe.focus();
+    suchBereich.eingabe.focus();
+  }
+
+  // PC: Suchbereich in der rechten Spalte – sobald feststeht, dass es Text gibt.
+  // Nach dem Schwärzen bleibt er stehen. Der Knopf ist dann deaktiviert und kann
+  // den Fokus nicht behalten: Er geht auf die Überschrift (nicht ins Feld, sonst
+  // träfe Strg+Z den Suchbegriff statt des Schwärzens).
+  function zeigePcSuche() {
+    if (!mitText || pcSuche) return;
+    pcSuche = baueSuche({
+      imSheet: false,
+      beiSchwaerzen: (auswahl) => {
+        schwaerzeTreffer(auswahl);
+        suchTitel.focus({ preventScroll: true });
+      },
+    });
+    suchPanel.append(pcSuche.inhalt);
+    suchPanel.hidden = false;
   }
 
   // "N Treffer schwärzen" (S6): ein Rückgängig-Schritt für alle Treffer, auch über
@@ -1084,65 +1292,81 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
     ansage(`${text}.`);
   }
 
-  // --- Seitenübersicht (S7) ---
+  // --- Seiten: Übersicht (S7) und Seitenleiste am PC (S12) ---
+
+  // Miniatur einer Seite mit ihren Stellen als schwarze Balken und Zähler-Badge.
+  // Das Seitenbild kommt erst, wenn sie in die Nähe des sichtbaren Bereichs
+  // kommt (beobachter = IntersectionObserver mit ladeMiniatur).
+  function baueMiniatur(nr, beiKlick, beobachter) {
+    const t = el("button", "thumb");
+    t.type = "button";
+    t.dataset.nr = String(nr);
+    t.style.aspectRatio = String(d.verhaeltnis);
+    t.addEventListener("click", beiKlick);
+    setzeMiniatur(t, nr);
+    beobachter.observe(t);
+    return t;
+  }
+
+  // Balken, Zähler und Beschriftung an den Stand anpassen (das Seitenbild bleibt).
+  function setzeMiniatur(t, nr) {
+    const stellen = liste(nr);
+    const aktuell = nr === o.seite;
+    for (const alt of t.querySelectorAll(":scope > i, :scope > .thumb-badge")) alt.remove();
+    for (const s of stellen) {
+      const balken = el("i");
+      setzeLage(balken, s);
+      t.append(balken);
+    }
+    if (stellen.length) {
+      const badge = el("span", "thumb-badge");
+      const zeichen = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      zeichen.setAttribute("width", "10");
+      zeichen.setAttribute("height", "10");
+      zeichen.setAttribute("viewBox", "0 0 10 10");
+      zeichen.setAttribute("aria-hidden", "true");
+      zeichen.innerHTML = '<rect x="0" y="3" width="10" height="4" rx="1" fill="currentColor"/>';
+      badge.append(zeichen, el("span", null, String(stellen.length)));
+      t.append(badge);
+    }
+    t.classList.toggle("is-current", aktuell);
+    t.setAttribute("aria-label",
+      `Seite ${nr}, ${stellen.length ? stellenText(stellen.length) : "keine Stellen"}${aktuell ? ", aktuelle Seite" : ""}`);
+    if (aktuell) t.setAttribute("aria-current", "page");
+    else t.removeAttribute("aria-current");
+  }
+
+  function ladeMiniatur(eintraege, beobachter) {
+    for (const e of eintraege) {
+      if (!e.isIntersecting) continue;
+      beobachter.unobserve(e.target);
+      seitenBild(d, Number(e.target.dataset.nr), "klein").then((b) => {
+        if (!b || !e.target.isConnected) return;
+        const img = el("img");
+        img.src = b.url;
+        img.alt = "";
+        img.draggable = false;
+        e.target.style.aspectRatio = String(b.verhaeltnis);
+        e.target.prepend(img);
+      });
+    }
+  }
 
   function oeffneSeiten() {
     const raster = el("div", "sw-seiten");
     raster.setAttribute("role", "list");
     let sheet = null;
-
-    // Miniaturen erst rendern, wenn sie in die Nähe des sichtbaren Bereichs kommen.
-    const io = new IntersectionObserver((eintraege) => {
-      for (const e of eintraege) {
-        if (!e.isIntersecting) continue;
-        io.unobserve(e.target);
-        seitenBild(d, Number(e.target.dataset.nr), "klein").then((b) => {
-          if (!b || !e.target.isConnected) return;
-          const img = el("img");
-          img.src = b.url;
-          img.alt = "";
-          img.draggable = false;
-          e.target.style.aspectRatio = String(b.verhaeltnis);
-          e.target.prepend(img);
-        });
-      }
-    }, { rootMargin: "200px 0px" });
+    const io = new IntersectionObserver((e) => ladeMiniatur(e, io), { rootMargin: "200px 0px" });
 
     for (let nr = 1; nr <= n; nr++) {
-      const stellen = liste(nr);
-      const aktuell = nr === o.seite;
       const eintrag = el("div", "sw-titem");
       eintrag.setAttribute("role", "listitem");
-      const t = el("button", `thumb${aktuell ? " is-current" : ""}`);
-      t.type = "button";
-      t.dataset.nr = String(nr);
-      t.style.aspectRatio = String(d.verhaeltnis);
-      for (const s of stellen) {
-        const balken = el("i");
-        setzeLage(balken, s);
-        t.append(balken);
-      }
-      if (stellen.length) {
-        const badge = el("span", "thumb-badge");
-        const zeichen = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        zeichen.setAttribute("width", "10");
-        zeichen.setAttribute("height", "10");
-        zeichen.setAttribute("viewBox", "0 0 10 10");
-        zeichen.setAttribute("aria-hidden", "true");
-        zeichen.innerHTML = '<rect x="0" y="3" width="10" height="4" rx="1" fill="currentColor"/>';
-        badge.append(zeichen, el("span", null, String(stellen.length)));
-        t.append(badge);
-      }
-      t.setAttribute("aria-label",
-        `Seite ${nr}, ${stellen.length ? stellenText(stellen.length) : "keine Stellen"}${aktuell ? ", aktuelle Seite" : ""}`);
-      if (aktuell) t.setAttribute("aria-current", "page");
-      t.addEventListener("click", () => {
+      const t = baueMiniatur(nr, () => {
         sheet.schliessen();
         blaettere(nr);
-      });
+      }, io);
       eintrag.append(t, el("span", null, `Seite ${nr}`));
       raster.append(eintrag);
-      io.observe(t);
     }
 
     sheet = oeffneSheet({
@@ -1150,6 +1374,61 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
       beiSchliessen: () => io.disconnect(),
     });
     raster.querySelector(".is-current")?.scrollIntoView({ block: "nearest" });
+  }
+
+  // PC: Spalte "Seiten" – einmal gebaut, danach nur noch abgeglichen.
+  function baueSeitenleiste() {
+    if (miniaturen.length) return;
+    leistenIo = new IntersectionObserver((e) => ladeMiniatur(e, leistenIo), { root: seitenleiste, rootMargin: "300px 0px" });
+    for (let nr = 1; nr <= n; nr++) {
+      const li = el("li", "sw-titem");
+      const t = baueMiniatur(nr, () => blaettere(nr), leistenIo);
+      t.tabIndex = nr === o.seite ? 0 : -1;
+      t.addEventListener("focus", () => setzeTabHalt(t));
+      t.addEventListener("keydown", (e) => wechsleMiniatur(e, nr));
+      li.append(t, el("span", null, `Seite ${nr}`));
+      leistenListe.append(li);
+      miniaturen.push({ t, stand: liste(nr), aktuell: nr === o.seite });
+    }
+  }
+
+  // ↑ / ↓ / Pos1 / Ende springen zur Miniatur daneben bzw. zur ersten/letzten.
+  function wechsleMiniatur(e, nr) {
+    const ziel = { ArrowUp: nr - 1, ArrowDown: nr + 1, Home: 1, End: n }[e.key];
+    if (!ziel || ziel < 1 || ziel > n) return;
+    e.preventDefault();
+    miniaturen[ziel - 1].t.focus();
+  }
+
+  // Genau eine Miniatur ist per Tab erreichbar: die fokussierte bzw. die aktuelle.
+  function setzeTabHalt(t) {
+    for (const m of miniaturen) m.t.tabIndex = m.t === t ? 0 : -1;
+  }
+
+  // Nur Miniaturen neu zeichnen, deren Stellen oder "aktuell" sich geändert
+  // haben (o.stellen[seite] wird bei jeder Änderung ersetzt). Beim Blättern
+  // rollt die Leiste so, dass die aktuelle Seite zu sehen ist.
+  function aktualisiereSeitenleiste() {
+    if (!miniaturen.length) return;
+    miniaturen.forEach((m, i) => {
+      const nr = i + 1;
+      const aktuell = nr === o.seite;
+      if (m.stand === liste(nr) && m.aktuell === aktuell) return;
+      m.stand = liste(nr);
+      m.aktuell = aktuell;
+      setzeMiniatur(m.t, nr);
+      if (aktuell && !seitenleiste.contains(document.activeElement)) setzeTabHalt(m.t);
+    });
+    if (leistenSeite === o.seite || !seitenleiste.clientHeight) return; // schon dort bzw. (noch) nicht zu sehen
+    const sanft = leistenSeite > 0 && !wenigBewegung();
+    leistenSeite = o.seite;
+    const li = miniaturen[o.seite - 1].t.parentElement;
+    const oben = li.offsetTop - 8;
+    const unten = li.offsetTop + li.offsetHeight + 8;
+    const sicht = seitenleiste.clientHeight;
+    const top = oben < seitenleiste.scrollTop ? oben
+      : unten > seitenleiste.scrollTop + sicht ? unten - sicht : null;
+    if (top !== null) seitenleiste.scrollTo({ top, behavior: sanft ? "smooth" : "auto" });
   }
 
   // --- Optionen für diese Seite (S8) ---
@@ -1183,10 +1462,16 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
       zeile("ganze-seite", bild ? "Ganzes Bild schwärzen" : "Ganze Seite schwärzen",
         () => fuegeHinzu([{ x: 0, y: 0, w: 100, h: 100 }])),
       trenner("sep"),
-      // Zoomen ohne zwei Finger (Nachtrag Kap. 13, Punkt 2).
-      zeile("hineinzoomen", "Hineinzoomen", () => zoomeUm(zoom.z * ZOOM_SCHRITT), { aus: zoom.z >= MAX_ZOOM }),
-      zeile("herauszoomen", "Herauszoomen", () => zoomeUm(zoom.z / ZOOM_SCHRITT), { aus: zoom.z <= 1 }),
-      trenner("sep"),
+    );
+    // Zoomen ohne zwei Finger (Nachtrag Kap. 13, Punkt 2) – am PC steht das in der Werkzeugleiste.
+    if (!breit.matches) {
+      nav.append(
+        zeile("hineinzoomen", "Hineinzoomen", () => zoomeUm(zoom.z * ZOOM_SCHRITT), { aus: zoom.z >= MAX_ZOOM }),
+        zeile("herauszoomen", "Herauszoomen", () => zoomeUm(zoom.z / ZOOM_SCHRITT), { aus: zoom.z <= 1 }),
+        trenner("sep"),
+      );
+    }
+    nav.append(
       zeile("loeschen", bild ? "Alle Stellen löschen" : "Alle Stellen dieser Seite löschen", loescheSeite,
         { gefahr: true, aus: !hier }),
     );
@@ -1202,11 +1487,14 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
   // --- Start ---
 
   // Drehen des Geräts o. ä.: Zoom und Verschiebung bleiben (als Anteile gespeichert).
+  // Die Seitenleiste rollt zur aktuellen Seite, sobald sie zu sehen ist.
   const groesse = new ResizeObserver(() => {
     blatt.style.transition = "none";
     wendeZoomAn();
+    aktualisiereSeitenleiste();
   });
   groesse.observe(vp);
+  groesse.observe(seitenleiste);
 
   // Hat das PDF eine Textebene? Erst dann gibt es Lupe und Antippen (sonst S2b).
   if (mitText === undefined) {
@@ -1217,19 +1505,30 @@ export function stellenSchritt(ctx, { beiWeiter } = {}) {
       if (!ja) return;
       suchenK.hidden = false;
       spieleAb(suchenK, "in-fade");
+      zeigePcSuche();
+      spieleAb(suchPanel, "in-fade");
       bereiteVor(d, o.seite, true);
     });
+  } else {
+    zeigePcSuche();
   }
+
+  // Fenster wird schmaler oder breiter als 1024 px: Layout wechseln.
+  breit.addEventListener("change", setzeLayout);
 
   ctx.signal.addEventListener("abort", () => {
     document.removeEventListener("keydown", globaleTaste);
+    breit.removeEventListener("change", setzeLayout);
     groesse.disconnect();
+    leistenIo?.disconnect();
+    pcSuche?.beende();
     clearTimeout(zoomHinweisTimer);
     finger.clear();
     zug = pinch = null;
     toast?.schliessen();
   }, { once: true });
 
+  setzeLayout();
   zeigeSeite(false);
-  return { inhalt: box, dock: weiterKnopf };
+  return { inhalt: box, dock: [fussText, weiterKnopf] };
 }
