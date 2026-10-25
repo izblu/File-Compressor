@@ -147,9 +147,32 @@ export const AKTIONEN = [
   { id: "umwandeln",       titel: "Umwandeln",      icon: "umwandeln" },
 ];
 
+// --- Vorschlag nach dem Weiterbearbeiten (Nachtrag 6.3) ---
+
+const MB = 1024 * 1024; // wie humanSize: "2 MB" im Tipp heißt auch wirklich ≥ 2 MB
+const GROSS = 2 * MB;
+const GEWACHSEN_FAKTOR = 1.5;
+const GEWACHSEN_MIN = 1 * MB;
+
+// Soll nach einer Aktion Verkleinern vorgeschlagen werden?
+// groessen = Bytes der Ergebnisdateien, herkunft = { aktion, vorher } (vorher =
+// Bytes der Eingabe). Liefert null oder { art: "gewachsen" | "gross", vorher, nachher }.
+// Der Tipp auf "Gespeichert ✓" und der Vorschlag im Startscreen nutzen beide
+// diese Regel – wer den Tipp sieht, sieht auch den Vorschlag.
+export function verkleinernGrund(groessen, herkunft) {
+  if (!herkunft || herkunft.aktion === "verkleinern" || !groessen.length) return null;
+  const nachher = groessen.reduce((s, g) => s + g, 0);
+  const { vorher } = herkunft;
+  if (nachher > vorher * GEWACHSEN_FAKTOR && nachher >= GEWACHSEN_MIN) return { art: "gewachsen", vorher, nachher };
+  if (groessen.some((g) => g >= GROSS)) return { art: "gross", vorher, nachher };
+  return null;
+}
+
 // Liefert { vorschlag, liste }; jeder Listeneintrag hat text (ein Satz) oder
 // grund (warum die Aktion hier nicht passt → ausgegraut).
-export function aktionenFuer(dateien) {
+// herkunft (nur, solange ausschließlich Ergebnisse gewählt sind): Vorschlag
+// nur mit Grund (verkleinernGrund), sonst null = kein Vorschlag.
+export function aktionenFuer(dateien, herkunft = null) {
   const einzeln = dateien.length === 1;
   const pdfs = dateien.filter((d) => d.art === "pdf").length;
   const einPdf = einzeln && pdfs === 1;
@@ -178,8 +201,13 @@ export function aktionenFuer(dateien) {
         : { grund: "Nur für Bilder oder ein einzelnes PDF" },
   };
 
+  let vorschlag = einzeln ? "verkleinern" : "zusammenfuehren";
+  if (herkunft) {
+    vorschlag = verkleinernGrund(dateien.map((d) => d.file.size), herkunft) ? "verkleinern" : null;
+  }
+
   return {
-    vorschlag: einzeln ? "verkleinern" : "zusammenfuehren",
+    vorschlag,
     liste: AKTIONEN.map((a) => ({ ...a, ...texte[a.id] })),
   };
 }

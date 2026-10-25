@@ -216,7 +216,8 @@ function speichernSchritt(ctx) {
     zeigeGespeichert(ctx, {
       gespeichert,
       bilder: (mehrere ? seiten : seiten.slice(0, 1)).map((nr) => ({ eintrag: d, nr })),
-      info: mehrere ? "je 1 Seite" : seitenText(n),
+      info: mehrere ? "1 Seite" : seitenText(n),
+      herkunft: { aktion: "trennen", vorher: d.file.size },
     });
   }
 

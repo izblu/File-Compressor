@@ -34,10 +34,16 @@ Notizen für Claude, damit die Zusammenarbeit über Sessions hinweg gleich bleib
      (20c), dann verwerfen – die Stellen werden **nicht** im Hintergrund gehalten.
   2. Dateinamen verketten ohne Kürzen: dieselbe Nachsilbe darf doppelt vorkommen (`Vertrag_klein_klein.pdf`).
   3. Zoom am Handy ohne zwei Finger: „Hineinzoomen“ / „Herauszoomen“ zusätzlich im ⋯-Menü (S8).
+  4. „Gespeichert ✓“ listet **immer alle** gespeicherten Dateien (kein „und 6 weitere“). Wird es eng, scrollt die
+     Dateiliste in sich, damit Tipp und Knöpfe sichtbar bleiben. Abstand 22 px wie in A1a.
   - Außerdem nach den Konzepten: Wortrahmen nach dem exakten Verfahren aus dem Vorab-Test (nicht `getTextContent`),
     Bilder: PNG bleibt PNG, alles andere wird JPG.
 - Reihenfolge: 1) CSS + Icons → 2) Teil A „Weiterbearbeiten“ → 3) Schwärzen in Abschnitten (Menüeintrag erst mit
   dem Editor). Nach jedem Abschnitt dem Nutzer das Ergebnis zeigen.
+- **Stand:** 1) committet (665ae70). 2) Teil A „Weiterbearbeiten“ gebaut, im Browser geprüft und vom Nutzer
+  abgenommen (25.10.2026). **Nächster Schritt:** 3) Schwärzen, erster Abschnitt = Editor (Nachtrag Kap. 12, Schritt 4)
+  samt Menüeintrag „Schwärzen“. Schwärzen gibt dann `herkunft` und Miniaturen **aus dem Ergebnis** an
+  `zeigeGespeichert` (nie aus dem Original).
 
 ## Begriffe in der App (verbindlich)
 - **Wählen / Hinzufügen** = Datei in die App holen · **Verarbeiten** = App arbeitet ·

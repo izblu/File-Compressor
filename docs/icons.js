@@ -17,6 +17,8 @@ const PFADE = {
   "datei-unbekannt": '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5zM14 3v5h5M10 12.5a2 2 0 1 1 2.7 1.9c-.4.2-.7.5-.7 1v.3M12 18.5h.01"/>',
   "drehen": '<path d="M21 12a9 9 0 1 1-2.64-6.36L21 8M21 3v5h-5"/>',
   "einpassen": '<path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"/>',
+  // Haken im Kreis: "Dein Ergebnis · schon gespeichert" (Nachtrag A2).
+  "erledigt": '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M8 12.5l2.8 2.8L16 10"/>',
   "fehler": '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0M15 9l-6 6M9 9l6 6"/>',
   "geraet": '<path d="M8.5 2h7A2.5 2.5 0 0 1 18 4.5v15a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 6 19.5v-15A2.5 2.5 0 0 1 8.5 2zM10.5 18h3"/>',
   "geraet-pc": '<path d="M5 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM8 20h8M12 16v4"/>',
@@ -41,6 +43,8 @@ const PFADE = {
   "stift": '<path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/>',
   "suchen": '<path d="M4 11a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-3.5-3.5"/>',
   "tauschen": '<path d="M5 9l-3 3 3 3M19 9l3 3-3 3M2 12h20"/>',
+  // Glühbirne: Tipp-Zeile auf "Gespeichert ✓" (Nachtrag A1a).
+  "tipp": '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
   "trennen": '<path d="M3 6a3 3 0 1 0 6 0a3 3 0 1 0-6 0M3 18a3 3 0 1 0 6 0a3 3 0 1 0-6 0M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/>',
   "umwandeln": '<path d="M21 12a9 9 0 0 0-15.5-6.2L3 8M3 3v5h5M3 12a9 9 0 0 0 15.5 6.2L21 16M21 21v-5h-5"/>',
   "verkleinern": '<path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" stroke-dasharray="2.2 2.4" opacity=".6"/><path d="M7 12.5h3.5l2 2V19a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-4.5a2 2 0 0 1 2-2zM18.5 5.5 13.5 10.5M13.5 6.5v4h4"/>',

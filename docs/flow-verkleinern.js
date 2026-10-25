@@ -428,11 +428,13 @@ function speichernSchritt(ctx) {
     const gespeichert = await speichereErgebnis(speichern, ziel,
       zuSpeichern.map((r, i) => ({ blob: r.blob, name: dateiNamen[i] })));
     if (!gespeichert) return;
-    const vorher = zuSpeichern.reduce((s, r) => s + r.eintrag.file.size, 0);
     zeigeGespeichert(ctx, {
       gespeichert,
       bilder: zuSpeichern.map((r) => ({ eintrag: r.eintrag })),
-      badge: ersparnis(vorher, gespeichert.reduce((s, d) => s + d.groesse, 0)),
+      // Bilder können beim Verkleinern kleinere Maße bekommen → nur bei PDFs die Seitenzahl.
+      info: zuSpeichern.map((r) => (r.eintrag.art === "pdf" ? dateiInfo(r.eintrag) : null)),
+      badge: zuSpeichern.map((r, i) => ersparnis(r.eintrag.file.size, gespeichert[i].groesse)),
+      herkunft: { aktion: "verkleinern", vorher: zuSpeichern.reduce((s, r) => s + r.eintrag.file.size, 0) },
     });
   }, "speichern");
 

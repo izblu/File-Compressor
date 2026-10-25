@@ -124,8 +124,9 @@ function speichernSchritt(ctx) {
     zeigeGespeichert(ctx, {
       gespeichert,
       bilder: einPdf
-        ? Array.from({ length: Math.min(seiten, 3) }, (_, i) => ({ eintrag: d, nr: i + 1 }))
+        ? Array.from({ length: seiten }, (_, i) => ({ eintrag: d, nr: i + 1 }))
         : dateien.map((x) => ({ eintrag: x })),
+      herkunft: { aktion: "umwandeln", vorher: dateien.reduce((s, x) => s + x.file.size, 0) },
     });
   }
 

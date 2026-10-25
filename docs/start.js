@@ -3,6 +3,11 @@
 // (Streifen), Fehlerkarte. Nach der Wahl gleitet der geteilte Button ein:
 // Hauptteil = vorgeschlagene Aktion, ▾ = Aktionen-Menü (Bottom Sheet).
 // Beim ersten Mal erscheint einmalig der Hinweis "Weitere Aktionen".
+//
+// Nach "Diese Datei weiterbearbeiten" (Nachtrag A2–A4) ist das Ergebnis die
+// Auswahl: Hinweis "Dein Ergebnis · schon gespeichert", Vorschlag nur mit Grund
+// (sonst Knopf "Aktion wählen"). Kommt eine weitere Datei dazu, ist es eine
+// neue Auswahl mit den normalen Regeln.
 
 import { el, humanSize, seitenText, zusammensetzung, kurzerName } from "./shared.js";
 import { icon } from "./icons.js";
@@ -19,11 +24,12 @@ const dateiwahl = document.getElementById("dateiwahl");
 const zustand = {
   dateien: [],    // geöffnete Dateien (Einträge aus intake.js)
   oeffnet: false, // gerade werden Dateien geöffnet
+  herkunft: null, // nur Ergebnisse gewählt: { aktion, vorher } (für den Vorschlag)
 };
 
 let beiAktion = () => {};
 let wahlHinzufuegen = false; // öffnet die Dateiwahl zum Ersetzen oder Hinzufügen?
-let ansicht = null;          // Elemente der Dateiansicht: { vorschau, mehr, dock, splitMain, ... }
+let ansicht = null;          // Elemente der Dateiansicht: { vorschau, reihe, mehr, dock, split, waehlen, ... }
 let fehlerKarte = null;
 
 // --- Texte ---
@@ -78,6 +84,7 @@ async function waehle(files, hinzufuegen) {
   zeigeBeschaeftigt(false, hinzufuegen);
   const ersteWahl = zustand.dateien.length === 0;
   zustand.dateien.push(...neu);
+  if (neu.length) zustand.herkunft = null; // nicht mehr nur Ergebnisse → normale Regeln
 
   if (!zustand.dateien.length) {
     zeigeFehler(fehler);
@@ -135,7 +142,7 @@ function zeigeBeschaeftigt(an, hinzufuegen) {
 function zeigeLeer(neu = false) {
   if (ansicht) {
     ansicht.vorschau.remove();
-    ansicht.mehr.remove();
+    ansicht.reihe.remove();
     ansicht.dock.remove();
     ansicht = null;
   }
@@ -145,6 +152,7 @@ function zeigeLeer(neu = false) {
   }
   zustand.dateien.forEach(freigeben);
   zustand.dateien = [];
+  zustand.herkunft = null;
   app.classList.remove("has-files", "has-error", "ist-zurueck");
   dropzone.hidden = false;
   if (neu) {
@@ -178,9 +186,11 @@ function zeigeFehler(fehler) {
   knopf.focus({ preventScroll: true });
 }
 
-// Dateiansicht: Vorschau (1 Datei / mehrere), "Weitere Dateien hinzufügen",
-// geteilter Button. ersteWahl = Verwandlung der Dropzone mit voller Animation.
-function zeigeDateien(ersteWahl) {
+// Dateiansicht: Vorschau (1 Datei / mehrere), ggf. Ergebnis-Hinweis, "Weitere
+// Dateien hinzufügen", geteilter Button bzw. "Aktion wählen".
+// anim: true = Verwandlung der Dropzone mit voller Animation, "morph" = wie
+// true, nur kommt die Vorschau aus der Datei-Karte (A5, siehe zeigeErgebnis).
+function zeigeDateien(anim) {
   if (fehlerKarte) {
     fehlerKarte.remove();
     fehlerKarte = null;
@@ -191,26 +201,48 @@ function zeigeDateien(ersteWahl) {
   app.classList.add("has-files");
 
   const vorschau = zustand.dateien.length === 1
-    ? baueEinzel(zustand.dateien[0], ersteWahl)
-    : baueMehrere(zustand.dateien, ersteWahl);
+    ? baueEinzel(zustand.dateien[0], anim)
+    : baueMehrere(zustand.dateien, anim);
 
   if (!ansicht) {
     ansicht = baueAnsicht();
-    zone.append(vorschau, ansicht.mehr, ansicht.dock);
+    zone.append(vorschau, ansicht.reihe, ansicht.dock);
   } else {
     ansicht.vorschau.replaceWith(vorschau);
   }
   ansicht.vorschau = vorschau;
 
-  const { vorschlag } = aktionenFuer(zustand.dateien);
-  const aktion = AKTIONEN.find((a) => a.id === vorschlag);
+  const ergebnis = Boolean(zustand.herkunft);
+  ansicht.reihe.classList.toggle("ist-ergebnis", ergebnis);
+  ansicht.ergebnis.hidden = !ergebnis;
+  ansicht.ergebnisText.textContent = ergebnis ? ergebnisText() : "";
+
+  // Ohne Vorschlag (nur nach "Weiterbearbeiten" möglich): "Aktion wählen" statt geteiltem Button.
+  const { vorschlag } = aktionenFuer(zustand.dateien, zustand.herkunft);
   ansicht.vorschlag = vorschlag;
-  ansicht.splitMain.replaceChildren(icon(aktion.icon, 20, 2.1), el("span", null, aktion.titel));
-  if (ansicht.coachText) ansicht.coachText.textContent = hinweisText(vorschlag);
+  ansicht.split.hidden = !vorschlag;
+  ansicht.waehlen.hidden = Boolean(vorschlag);
+  if (vorschlag) {
+    const aktion = AKTIONEN.find((a) => a.id === vorschlag);
+    ansicht.splitMain.replaceChildren(icon(aktion.icon, 20, 2.1), el("span", null, aktion.titel));
+  }
+  if (ansicht.coach) {
+    // Der Hinweis zeigt auf ▾ – den gibt es nur am geteilten Button.
+    ansicht.coach.hidden = ansicht.puls.hidden = !vorschlag;
+    if (vorschlag) ansicht.coachText.textContent = hinweisText(vorschlag);
+  }
 
   // Fokus auf den Haupt-Button, wenn er sonst verloren ginge (z. B. × entfernt).
   const fokusWeg = !document.activeElement || document.activeElement === document.body;
-  if (ersteWahl || fokusWeg) ansicht.splitMain.focus({ preventScroll: true });
+  if (anim || fokusWeg) hauptAktion().focus({ preventScroll: true });
+}
+
+// Der sichtbare Haupt-Button: Vorschlag oder "Aktion wählen".
+const hauptAktion = () => (ansicht.vorschlag ? ansicht.splitMain : ansicht.waehlen);
+
+function ergebnisText() {
+  const n = zustand.dateien.length;
+  return n === 1 ? "Dein Ergebnis · schon gespeichert" : `${n} Ergebnisse · schon gespeichert`;
 }
 
 function vorschauBild(d) {
@@ -231,9 +263,12 @@ function entfernenKnopf(label, klasse, groesse, id) {
   return knopf;
 }
 
+// Einstieg der Vorschau-Karte; "morph" setzt zeigeErgebnis erst nach dem Messen.
+const karteEinstieg = (anim) => (anim === "morph" ? "" : anim ? " in-card" : " in-fade");
+
 // Eine Datei: große Vorschau der ersten Seite bzw. des Bildes.
 function baueEinzel(d, anim) {
-  const sek = el("section", `preview start-preview ${anim ? "in-card" : "in-fade"}`);
+  const sek = el("section", `preview start-preview${karteEinstieg(anim)}`);
   sek.setAttribute("aria-label", `Vorschau von ${d.file.name}`);
 
   const kopf = el("div", "preview-kopf");
@@ -260,7 +295,7 @@ function baueEinzel(d, anim) {
 
 // Mehrere Dateien: Kopf mit Anzahl/Größe, darunter ein Streifen mit allen Dateien.
 function baueMehrere(dateien, anim) {
-  const sek = el("section", `preview start-preview is-multi ${anim ? "in-card" : "in-fade"}`);
+  const sek = el("section", `preview start-preview is-multi${karteEinstieg(anim)}`);
   sek.setAttribute("aria-label", "Gewählte Dateien");
 
   const summe = dateien.reduce((s, d) => s + d.file.size, 0);
@@ -290,14 +325,22 @@ function baueMehrere(dateien, anim) {
   return sek;
 }
 
-// "Weitere Dateien hinzufügen" + Dock mit geteiltem Button (+ einmaliger Hinweis).
+// Ergebnis-Hinweis + "Weitere Dateien hinzufügen" + Dock mit geteiltem Button
+// bzw. "Aktion wählen" (+ einmaliger Hinweis).
 function baueAnsicht() {
-  const mehr = el("button", "btn-link start-mehr in-up d3");
+  const reihe = el("div", "start-weiter in-up d3");
+  const ergebnis = el("p", "result-hint start-ergebnis");
+  ergebnis.setAttribute("role", "status");
+  const ergebnisText = el("span");
+  ergebnis.append(icon("erledigt", 18, 2.2), ergebnisText);
+
+  const mehr = el("button", "btn-link start-mehr");
   mehr.type = "button";
   mehr.append(icon("hinzufuegen", 18, 2.2), el("span", null, "Weitere Dateien hinzufügen"));
   mehr.addEventListener("click", () => {
     if (mehr.getAttribute("aria-disabled") !== "true") waehleVomGeraet(true);
   });
+  reihe.append(ergebnis, mehr);
 
   const dock = el("div", "start-dock in-dock");
   const split = el("div", "split");
@@ -313,15 +356,21 @@ function baueAnsicht() {
   splitMore.setAttribute("aria-haspopup", "dialog");
   splitMore.append(icon("aufklappen", 20, 2.1));
   split.append(splitMain, trenner, splitMore);
-  dock.append(split);
 
-  const teile = { mehr, dock, splitMain, coachText: null };
+  const waehlen = el("button", "btn btn-primary btn-block start-waehlen");
+  waehlen.type = "button";
+  waehlen.setAttribute("aria-haspopup", "dialog");
+  waehlen.append(el("span", null, "Aktion wählen"), icon("aufklappen", 20, 2.1));
+  dock.append(split, waehlen);
+
+  const teile = { reihe, ergebnis, ergebnisText, mehr, dock, split, splitMain, waehlen, coachText: null };
 
   splitMain.addEventListener("click", () => beiAktion(teile.vorschlag, zustand.dateien));
   splitMore.addEventListener("click", () => {
     hinweisWeg();
     oeffneAktionen(splitMore);
   });
+  waehlen.addEventListener("click", () => oeffneAktionen(waehlen));
 
   if (!hinweisGesehen()) {
     const puls = el("span", "pulse start-puls");
@@ -369,7 +418,7 @@ function hinweisWeg() {
 // --- Aktionen-Menü (Bottom Sheet) ---
 
 function oeffneAktionen(ausloeser) {
-  const { vorschlag, liste } = aktionenFuer(zustand.dateien);
+  const { vorschlag, liste } = aktionenFuer(zustand.dateien, zustand.herkunft);
   const box = el("div", "sheet-liste");
   let sheet = null;
 
@@ -407,7 +456,7 @@ function oeffneAktionen(ausloeser) {
 
 function sheetUnterzeile() {
   const d = zustand.dateien;
-  if (d.length > 1) return `${d.length} Dateien · ${zusammensetzung(d)}`;
+  if (d.length > 1) return `${d.length} ${zustand.herkunft ? "Ergebnisse" : "Dateien"} · ${zusammensetzung(d)}`;
   const n = d[0];
   return `${n.file.name} · ${n.art === "pdf" ? seitenText(n.seiten) : humanSize(n.file.size)}`;
 }
@@ -492,14 +541,35 @@ function initZiehen() {
 
 // leeren = true (Abbrechen): alles zurücksetzen. Sonst (Zurück aus Schritt 2)
 // bleiben die Dateien gewählt und der Fokus liegt wieder auf dem Haupt-Button.
-export function zurueckZumStart({ leeren }) {
-  if (leeren || !ansicht) {
+// ergebnis (nach "Weiterbearbeiten"): das Ergebnis wird die neue Auswahl.
+export function zurueckZumStart({ leeren, ergebnis }) {
+  if (ergebnis) {
+    zeigeErgebnis(ergebnis);
+  } else if (leeren || !ansicht) {
     zeigeLeer(true);
     dropzone.focus({ preventScroll: true });
   } else {
     app.classList.add("ist-zurueck"); // Einstiegs-Animationen nicht erneut abspielen
-    ansicht.splitMain.focus({ preventScroll: true });
+    hauptAktion().focus({ preventScroll: true });
   }
+}
+
+// eintraege = die geöffneten Ergebnisse, herkunft = { aktion, vorher },
+// von = Lage der Datei-Karte auf "Gespeichert ✓" (für den Übergang).
+function zeigeErgebnis({ eintraege, herkunft, von }) {
+  zeigeLeer(); // bisherige Auswahl (die Originale) freigeben
+  zustand.dateien = eintraege;
+  zustand.herkunft = herkunft;
+  zeigeDateien("morph");
+
+  // A5: Die Datei-Karte wächst aus ihrer Lage zur großen Vorschau. Gemessen
+  // wird vor dem Start der Animation, sonst verfälscht sie die Lage.
+  const v = ansicht.vorschau;
+  if (von) v.style.setProperty("--fk-morph-y", `${Math.round(von.bottom - v.getBoundingClientRect().bottom)}px`);
+  v.classList.add("in-morph");
+
+  const aktion = AKTIONEN.find((a) => a.id === ansicht.vorschlag);
+  ansage(`${beschreibeAuswahl()} ${ergebnisText().replace(" · ", ", ")}.${aktion ? ` Vorschlag: ${aktion.titel}.` : ""}`);
 }
 
 // --- Start ---

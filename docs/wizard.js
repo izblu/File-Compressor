@@ -18,7 +18,10 @@
 //
 // Abschluss: "Gespeichert ✓" (ctx.zeigeFertig) ist ein Zwischen-Screen ohne
 // Kopfzeile – Zurück zeigt wieder den Speichern-Schritt, ctx.vonVorn
-// ("Noch eine Datei bearbeiten") führt zum leeren Startscreen.
+// ("Noch eine Datei bearbeiten") führt zum leeren Startscreen,
+// ctx.weiterbearbeiten ("Diese Datei weiterbearbeiten") zum Startscreen mit
+// dem Ergebnis als neuer Auswahl. Beides schließt die Aktion ab: Zurück führt
+// danach nie mehr in sie hinein.
 //
 // ctx.signal wird abgebrochen, sobald die Ansicht wechselt (anderer Schritt,
 // Zurück aus dem Zwischen-Screen, Abbrechen) – laufende Arbeit hört dann auf.
@@ -35,7 +38,8 @@ const start = document.getElementById("app");
 
 let rahmen = null;      // Elemente: { wizard, kopf, reihe, titel, schrittText, balken, fortschritt, body, dock, zurueck, abbrechen, sonderKopf }
 let z = null;           // Zustand des laufenden Wizards (null = Startscreen)
-let beiEnde = () => {}; // zurück zum Startscreen: beiEnde({ leeren })
+let beiEnde = () => {}; // zurück zum Startscreen: beiEnde({ leeren, ergebnis })
+let ausblenden = null;  // Ausblenden des Wizards vor dem Weiterbearbeiten (Animation)
 
 // --- Aufbau ---
 
@@ -167,6 +171,7 @@ function kontext() {
     schliesseZwischen,
     zeigeFertig,
     vonVorn: abbrechen,              // "Noch eine Datei bearbeiten": leerer Startscreen
+    weiterbearbeiten,                // "Diese Datei weiterbearbeiten": Startscreen mit dem Ergebnis
     // fn() bei Zurück; liefert true, wenn der Schritt es selbst erledigt hat
     // (z. B. Auswahlmodus beendet) – dann bleibt der Schritt stehen.
     beiZurueck(fn) { z.beiZurueck = fn; },
@@ -238,6 +243,29 @@ function abbrechenMitRueckfrage(ausloeser) {
   else abbrechen();
 }
 
+// "Diese Datei weiterbearbeiten": Der Screen blendet kurz aus (Nachtrag 8, A5),
+// dann endet der Wizard wie bei "Noch eine Datei bearbeiten" – nur bekommt der
+// Startscreen das Ergebnis mit. ergebnis = { eintraege, herkunft, von }.
+// Liefert false, wenn inzwischen woanders hin gegangen wurde (dann hat der
+// Startscreen das Ergebnis nicht übernommen).
+async function weiterbearbeiten(ergebnis) {
+  if (!z || ausblenden) return false;
+  const lauf = z.lauf;
+  const anim = rahmen.wizard.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, easing: "ease", fill: "forwards" });
+  ausblenden = anim;
+  rahmen.wizard.inert = true; // während des Ausblendens keine weiteren Tipps
+  await anim.finished.catch(() => {});
+  if (!z || lauf.signal.aborted) {
+    anim.cancel();
+    if (ausblenden === anim) ausblenden = null;
+    rahmen.wizard.inert = false;
+    return false;
+  }
+  z.ergebnis = ergebnis;
+  abbrechen();
+  return true;
+}
+
 function abbrechen() {
   z.leeren = true;
   z.dirty = false;
@@ -250,15 +278,21 @@ function beende({ leeren }) {
   schliesseOverlay();
   z.lauf.abort();
   for (const fn of z.aufraeumen) fn();
+  const ergebnis = z.ergebnis || null;
   z = null;
   setzeKopf(null);
   rahmen.wizard.hidden = true;
   rahmen.wizard.classList.remove("ist-breit");
+  if (ausblenden) {
+    ausblenden.cancel();
+    ausblenden = null;
+  }
+  rahmen.wizard.inert = false;
   rahmen.body.replaceChildren();
   rahmen.dock.replaceChildren();
   start.hidden = false;
   spieleAb(start, leeren ? "in-fade" : "in-step-back");
-  beiEnde({ leeren });
+  beiEnde({ leeren, ergebnis });
 }
 
 function beiPopstate(e) {
@@ -312,9 +346,10 @@ function beiPopstate(e) {
 
 // --- Öffentlich ---
 
-// beiEnde({ leeren }) wird aufgerufen, wenn der Wizard zum Startscreen
-// zurückkehrt: leeren = true nach Abbrechen (alles zurücksetzen), sonst
-// bleiben die gewählten Dateien erhalten.
+// beiEnde({ leeren, ergebnis }) wird aufgerufen, wenn der Wizard zum
+// Startscreen zurückkehrt: leeren = true nach Abbrechen (alles zurücksetzen),
+// sonst bleiben die gewählten Dateien erhalten. ergebnis (nach
+// "Weiterbearbeiten") = { eintraege, herkunft, von } wird die neue Auswahl.
 export function initWizard(optionen) {
   beiEnde = optionen.beiEnde;
   rahmen = baueRahmen();

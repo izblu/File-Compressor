@@ -152,6 +152,7 @@ function speichernSchritt(ctx) {
       gespeichert,
       bilder: [{ eintrag: erste.datei, nr: erste.nr, drehung: erste.drehung }],
       info: seitenText(n),
+      herkunft: { aktion: ctx.aktion, vorher: benutzt.reduce((s, d) => s + d.file.size, 0) },
     });
   }
 

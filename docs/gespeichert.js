@@ -1,10 +1,18 @@
-// gespeichert.js – Erfolgsmoment nach dem Speichern (HANDOFF Screen 18):
-// Kreis ploppt auf, Haken zeichnet sich, Ring + 8 Funken; "Gespeichert",
-// Datei-Karte (Name, Größe, ggf. Ersparnis) und "Noch eine Datei bearbeiten".
+// gespeichert.js – Erfolgsmoment nach dem Speichern (Nachtrag A1, ersetzt
+// Screen 18): Kreis ploppt auf, Haken zeichnet sich, Ring + 8 Funken;
+// "Gespeichert", Datei-Karte (Name, Größe, ggf. Ersparnis) und – nur mit gutem
+// Grund – ein Tipp zum Verkleinern. Dock: "Diese Datei weiterbearbeiten"
+// (sekundär) über "Noch eine Datei bearbeiten" (Haupt-Button).
 // Zurück führt wieder zum Speichern-Schritt (siehe wizard.js, zeigeFertig).
+//
+// Weiterbearbeiten: Die gespeicherten Blobs werden wie frisch gewählte Dateien
+// geöffnet (oeffneDatei) und als neue Auswahl an den Startscreen gegeben. Die
+// nächste Aktion kennt so nur die Bytes des Ergebnisses – nie das Original.
 
 import { el, humanSize } from "./shared.js";
-import { seitenMini } from "./flow-teile.js";
+import { seitenMini, arbeitet, hinweis } from "./flow-teile.js";
+import { oeffneDatei, freigeben, verkleinernGrund } from "./intake.js";
+import { zeigeToast, ansage } from "./ui.js";
 
 const SVG = "http://www.w3.org/2000/svg";
 
@@ -29,52 +37,130 @@ function erfolgsZeichen() {
   return box;
 }
 
-// Datei-Karte: eine Datei mit Name und Größe bzw. "3 Dateien gespeichert".
-function dateiKarte({ gespeichert, bilder, info, badge }) {
-  const karte = el("div", "card fk-row gs-karte in-up d6");
-  const mehrere = gespeichert.length > 1;
+// info/badge gelten für alle Dateien (Text) oder je Datei (Liste).
+const jeDatei = (wert, i) => (Array.isArray(wert) ? wert[i] : wert);
 
-  if (mehrere) {
-    const stapel = el("span", "gs-stapel");
-    stapel.setAttribute("aria-hidden", "true");
-    bilder.slice(0, 3).forEach((b) => stapel.append(seitenMini(b, "gs-mini")));
-    karte.append(stapel);
-  } else {
-    karte.append(seitenMini(bilder[0], "gs-mini"));
+// Inhalt einer Zeile: Name, darunter "5 Seiten · 6,8 MB", rechts ggf. "−77 %".
+function dateiText(datei, info, badge) {
+  const text = el("div", "fk-stack gs-karte-text");
+  const name = el("span", "t-l gs-name", datei.name);
+  name.title = datei.name;
+  const zeile = [info, humanSize(datei.groesse)].filter(Boolean).join(" · ");
+  text.append(name, el("span", "t-s t-muted t-num", zeile));
+  return badge ? [text, el("span", "badge badge-success t-num", badge)] : [text];
+}
+
+// Datei-Karte: eine Datei bzw. eine Zeile je Datei (A1c). Die Liste zeigt
+// immer alle Dateien; wird es zu viel, scrollt sie in sich (styles.css, .gs),
+// damit Tipp und Knöpfe sichtbar bleiben.
+function dateiKarte({ gespeichert, bilder, info, badge }) {
+  const bild = (i) => bilder[Math.min(i, bilder.length - 1)];
+
+  if (gespeichert.length === 1) {
+    const karte = el("div", "card fk-row gs-karte in-up d6");
+    karte.append(seitenMini(bild(0), "gs-mini"), ...dateiText(gespeichert[0], jeDatei(info, 0), jeDatei(badge, 0)));
+    return karte;
   }
 
-  const groesse = humanSize(gespeichert.reduce((s, d) => s + d.groesse, 0));
-  const text = el("div", "fk-stack gs-karte-text");
-  const name = el("span", "t-l gs-name", mehrere ? `${gespeichert.length} Dateien gespeichert` : gespeichert[0].name);
-  name.title = name.textContent;
-  const zeile = mehrere ? `zusammen ${groesse}` : groesse;
-  text.append(name, el("span", "t-s t-muted t-num", info ? `${zeile} · ${info}` : zeile));
-  karte.append(text);
-  if (badge) karte.append(el("span", "badge badge-success t-num", badge));
+  const karte = el("ul", `card gs-karte ist-liste in-up d6${gespeichert.length > 2 ? " ist-lang" : ""}`);
+  // Scrollbar → auch per Tastatur erreichbar.
+  karte.tabIndex = 0;
+  karte.setAttribute("aria-label", "Gespeicherte Dateien");
+  gespeichert.forEach((d, i) => {
+    const li = el("li", "fk-row gs-zeile");
+    li.append(seitenMini(bild(i), "gs-mini"), ...dateiText(d, jeDatei(info, i), jeDatei(badge, i)));
+    karte.append(li);
+  });
   return karte;
 }
 
-// gespeichert: [{ name, groesse }] (aus dem Speichern)
-// bilder:      Seiten für die Miniatur(en) [{ eintrag, nr, drehung }]
-// info:        Zusatz hinter der Größe, z. B. "5 Seiten" (optional)
-// badge:       Ersparnis "−77 %" (optional, Verkleinern)
-export function zeigeGespeichert(ctx, { gespeichert, bilder, info, badge }) {
+// Tipp unter der Karte (Nachtrag 6.3) – nur, wenn Verkleinern einen Grund hat.
+// Zahl und Einheit bleiben zusammen ("6 KB" bricht nicht um).
+function tippText(grund, mehrere) {
+  const g = (bytes) => humanSize(bytes).replace(" ", " ");
+  if (grund.art === "gewachsen") {
+    return `Tipp: ${mehrere ? "Die Dateien sind" : "Die Datei ist"} größer geworden (${g(grund.vorher)} → ${g(grund.nachher)}) – du kannst sie gleich verkleinern.`;
+  }
+  return mehrere
+    ? `Tipp: Die Dateien sind zusammen ${g(grund.nachher)} groß – du kannst sie gleich verkleinern.`
+    : `Tipp: Die Datei ist ${g(grund.nachher)} groß – du kannst sie gleich verkleinern, z. B. für Online-Formulare.`;
+}
+
+const OEFFNEN_FEHLER = (mehrere) =>
+  `Das Öffnen hat leider nicht geklappt. ${mehrere ? "Die Dateien sind" : "Die Datei ist"} trotzdem gespeichert.`;
+
+// gespeichert: [{ name, groesse, blob }] (aus dem Speichern)
+// bilder:      Seiten für die Miniaturen, je Datei [{ eintrag, nr, drehung }]
+// info:        Zusatz vor der Größe, z. B. "5 Seiten" – Text oder Liste je Datei (optional)
+// badge:       Ersparnis "−77 %" – Text oder Liste je Datei (optional, Verkleinern)
+// herkunft:    { aktion, vorher } – vorher = Bytes der Eingabe; Grundlage für Tipp und Vorschlag
+export function zeigeGespeichert(ctx, { gespeichert, bilder, info, badge, herkunft }) {
   if (ctx.signal.aborted) return; // inzwischen woanders hin gegangen
   const mehrere = gespeichert.length > 1;
+  herkunft ??= { aktion: ctx.aktion, vorher: Infinity };
 
   const text = el("div", "fk-stack gs-text in-up d5");
   text.setAttribute("role", "status");
   const titel = el("h1", "t-display", "Gespeichert");
   titel.tabIndex = -1;
-  text.append(titel, el("p", "t-body t-muted",
-    mehrere ? "Die Dateien liegen jetzt auf deinem Gerät." : "Die Datei liegt jetzt auf deinem Gerät."));
+  text.append(titel, el("p", "t-body t-muted", mehrere
+    ? `${gespeichert.length} Dateien gespeichert – sie liegen jetzt auf deinem Gerät.`
+    : "Die Datei liegt jetzt auf deinem Gerät."));
 
+  const karte = dateiKarte({ gespeichert, bilder, info, badge });
   const screen = el("div", "fk-stack gs");
-  screen.append(erfolgsZeichen(), text, dateiKarte({ gespeichert, bilder, info, badge }));
+  screen.append(erfolgsZeichen(), text, karte);
 
-  const knopf = el("button", "btn btn-primary btn-block in-dock gs-knopf", "Noch eine Datei bearbeiten");
-  knopf.type = "button";
-  knopf.addEventListener("click", () => ctx.vonVorn());
+  const grund = verkleinernGrund(gespeichert.map((d) => d.groesse), herkunft);
+  if (grund) {
+    const tipp = hinweis(tippText(grund, mehrere), { art: "tip", iconName: "tipp" });
+    tipp.classList.add("gs-tipp", "in-up", "d6");
+    screen.append(tipp);
+  }
 
-  ctx.zeigeFertig({ inhalt: screen, dock: knopf });
+  const weiter = el("button", "btn btn-secondary btn-block in-dock gs-knopf",
+    mehrere ? `Diese ${gespeichert.length} Dateien weiterbearbeiten` : "Diese Datei weiterbearbeiten");
+  weiter.type = "button";
+  const neu = el("button", "btn btn-primary btn-block in-dock gs-knopf", "Noch eine Datei bearbeiten");
+  neu.type = "button";
+  neu.addEventListener("click", () => ctx.vonVorn());
+
+  // Ergebnisse öffnen; "Wird geöffnet …" erst nach 400 ms (sonst direkt weiter).
+  let oeffnet = false;
+  weiter.addEventListener("click", async () => {
+    if (oeffnet) return;
+    oeffnet = true;
+    let zuruecksetzen = null;
+    const timer = setTimeout(() => {
+      zuruecksetzen = arbeitet(weiter, "Wird geöffnet …");
+      ansage("Wird geöffnet …");
+    }, 400);
+
+    const eintraege = [];
+    let fehler = false;
+    try {
+      for (const d of gespeichert) {
+        if (ctx.signal.aborted) break;
+        eintraege.push(await oeffneDatei(new File([d.blob], d.name, { type: d.blob.type })));
+      }
+    } catch (e) {
+      console.error(e);
+      fehler = true;
+    }
+    clearTimeout(timer);
+
+    const uebernommen = !fehler && !ctx.signal.aborted &&
+      (await ctx.weiterbearbeiten({ eintraege, herkunft, von: karte.getBoundingClientRect() }));
+    if (uebernommen) return; // ab jetzt gehören die Einträge dem Startscreen
+
+    eintraege.forEach(freigeben);
+    oeffnet = false;
+    if (zuruecksetzen && weiter.isConnected) zuruecksetzen();
+    if (fehler && !ctx.signal.aborted) {
+      zeigeToast(OEFFNEN_FEHLER(mehrere));
+      ansage(OEFFNEN_FEHLER(mehrere));
+    }
+  });
+
+  ctx.zeigeFertig({ inhalt: screen, dock: [weiter, neu] });
 }

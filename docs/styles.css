@@ -132,13 +132,18 @@ p, h1, h2, h3 { margin: 0; }
 .strip-pill { left: 8px; bottom: 8px; height: 24px; background: color-mix(in srgb, var(--fk-bg) 78%, transparent); color: var(--fk-text); }
 .strip-weg { position: absolute; top: -10px; right: -10px; z-index: 2; background: color-mix(in srgb, var(--fk-surface-1) 92%, transparent); }
 
-.start-mehr { align-self: flex-start; margin-top: 28px; }
+/* Unter der Vorschau: ggf. "Dein Ergebnis · schon gespeichert" (A2), dann "Weitere Dateien hinzufügen" */
+.start-weiter { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 28px; }
+.start-weiter.ist-ergebnis { margin-top: 16px; }
+.start-mehr { align-self: flex-start; }
 .start-mehr[aria-disabled="true"] { cursor: progress; color: var(--fk-text-2); }
 .start-mehr .spinner { width: 16px; height: 16px; border-color: var(--fk-line-strong); border-top-color: var(--fk-accent-text); }
 
 /* Dock mit geteiltem Button (Daumen-Zone) */
 .start-dock { position: relative; margin-top: auto; padding-top: 16px; }
 .start-puls { position: absolute; right: 0; bottom: 0; width: 58px; height: 58px; border-radius: var(--fk-r-l); pointer-events: none; }
+/* Kein Vorschlag (A3): ein Knopf "Aktion wählen ▾" in der Höhe des geteilten Buttons */
+.start-waehlen { height: 58px; }
 
 /* Einmaliger Hinweis „Weitere Aktionen“ (heller Coach-Mark über dem ▾) */
 .start-coach { right: -10px; bottom: calc(100% + 16px); }
@@ -221,7 +226,9 @@ p, h1, h2, h3 { margin: 0; }
 
   .start-preview, .start-preview.is-multi { margin: 0; height: 420px; }
   .start-preview.is-multi { border-radius: var(--fk-r-2xl); border: 1px solid var(--fk-line); }
-  .start-mehr { margin-top: 16px; }
+  /* A4: Hinweis und "Weitere Dateien hinzufügen" in einer Reihe */
+  .start-weiter, .start-weiter.ist-ergebnis { margin-top: 16px; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+  .start-ergebnis { flex: 1; }
   .start-dock { margin-top: 8px; }
 }
 
@@ -392,7 +399,13 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 
 /* Gespeichert ✓ (Referenz 18): Kreis ploppt auf, Haken zeichnet sich, Ring + 8 Funken.
    Ohne Kopfzeile – der Inhalt hält selbst Abstand zur Safe Area. */
-.gs { min-height: 100%; align-items: center; justify-content: center; gap: 28px; padding-top: var(--fk-safe-top); }
+/* Feste Höhe = Platz über dem Dock. Wird es zu eng, schrumpft nur die Dateiliste
+   und scrollt in sich – Tipp und Knöpfe bleiben sichtbar. Zentriert wird über
+   automatische Ränder: Reicht der Platz gar nicht, fehlt so oben nichts. */
+.gs { height: 100%; align-items: center; gap: 22px; padding-top: var(--fk-safe-top); }
+.gs > * { flex-shrink: 0; }
+.fk-stack.gs > :first-child { margin-top: auto; }
+.fk-stack.gs > :last-child { margin-bottom: auto; }
 .gs h1:focus { outline: none; } /* bekommt nur programmatisch den Fokus */
 .gs-text { align-items: center; gap: 8px; text-align: center; }
 .gs-zeichen { position: relative; width: 132px; height: 132px; flex: none; display: flex; align-items: center; justify-content: center; }
@@ -411,12 +424,22 @@ button.tile { width: 100%; text-align: left; cursor: pointer; }
 .gs-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gs-mini { width: 36px; height: 50px; flex: none; }
 .gs-mini .seite { border-radius: 4px; }
-.gs-stapel { position: relative; width: 52px; height: 54px; flex: none; }
-.gs-stapel .gs-mini { position: absolute; top: 2px; left: 0; }
-.gs-stapel .gs-mini:nth-child(1) { z-index: 3; }
-.gs-stapel .gs-mini:nth-child(2) { z-index: 2; left: 7px; transform: rotate(4deg); }
-.gs-stapel .gs-mini:nth-child(3) { z-index: 1; left: 14px; transform: rotate(8deg); }
 .fk-dock .gs-knopf { animation-delay: 520ms; }
+.fk-dock:has(.gs-knopf) { gap: 6px; }
+/* Mehrere Dateien (A1c): eine Zeile je Datei, immer alle. Bei Platzmangel
+   scrollt die Liste in sich; ab 3 Dateien bleiben mindestens 1½ Zeilen
+   sichtbar – die angeschnittene zeigt, dass es weitergeht. So passt der Tipp
+   auch auf kleinen Handys (375 × 667) über die Knöpfe. */
+.gs-karte.ist-liste {
+  display: flex; flex-direction: column; margin: 0; padding: 6px 0; list-style: none;
+  flex-shrink: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+}
+.gs-karte.ist-liste.ist-lang { min-height: 120px; }
+.gs-karte.ist-liste:focus-visible { outline: 3px solid var(--fk-focus); outline-offset: 2px; }
+.gs-zeile { flex: none; padding: 8px 16px 8px 12px; gap: 12px; }
+.gs-tipp { width: 100%; }
+/* "Wird geöffnet …" im sekundären Knopf (A1e) */
+.btn-secondary .spinner { border-color: var(--fk-line-strong); border-top-color: var(--fk-text); }
 
 .fk-top .icon-btn:active { background: var(--fk-surface-3); }
 .fk-top-row > .btn-link { justify-self: end; padding: 0 8px; margin: 0; } /* „Alle“ im Auswahlmodus */

@@ -10,6 +10,9 @@
 // Ablauf: speicherZiel() direkt im Tipp auf "Speichern" aufrufen – den Dialog
 // öffnet der Browser nur, solange der Tipp "frisch" ist (wenige Sekunden).
 // Danach verarbeiten und mit ziel.schreibe() speichern.
+//
+// ziel.schreibe() liefert die gespeicherten Dateien samt Blob zurück – damit
+// lässt sich das Ergebnis gleich weiterbearbeiten (gespeichert.js).
 
 const TYPEN = {
   pdf: { description: "PDF-Dokument", accept: { "application/pdf": [".pdf"] } },
@@ -58,7 +61,7 @@ function dialogZiel(handle) {
   }
 
   return {
-    // dateien: [{ blob, name }] (genau eine). Rückgabe: [{ name, groesse }] –
+    // dateien: [{ blob, name }] (genau eine). Rückgabe: [{ name, groesse, blob }] –
     // mit dem Namen, den der Nutzer im Dialog gewählt hat.
     async schreibe([datei]) {
       let stream = null;
@@ -71,7 +74,7 @@ function dialogZiel(handle) {
         await verwerfe();
         throw e;
       }
-      return [{ name: handle.name, groesse: datei.blob.size }];
+      return [{ name: handle.name, groesse: datei.blob.size, blob: datei.blob }];
     },
     verwerfe,
   };
@@ -99,7 +102,7 @@ function linkZiel() {
         if (i > 0) await new Promise((r) => setTimeout(r, 350));
         perLink(dateien[i]);
       }
-      return dateien.map((d) => ({ name: d.name, groesse: d.blob.size }));
+      return dateien.map((d) => ({ name: d.name, groesse: d.blob.size, blob: d.blob }));
     },
     verwerfe() {},
   };

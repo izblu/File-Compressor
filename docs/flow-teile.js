@@ -365,7 +365,7 @@ function meldeFehler(text) {
 // Mit ziel (aus save.js/speicherZiel) wird das Ergebnis gleich gespeichert;
 // dateien(ergebnis) liefert dafür [{ blob, name }].
 // Rückgabe: das Ergebnis des job – mit ziel die gespeicherten Dateien
-// [{ name, groesse }] – oder null bei Abbruch oder Fehler (dann mit Toast).
+// [{ name, groesse, blob }] – oder null bei Abbruch oder Fehler (dann mit Toast).
 // Ein noch sichtbarer Verarbeiten-Screen wird danach vom nächsten Schritt bzw.
 // vom "Gespeichert"-Screen abgelöst.
 export async function mitVerarbeitung(ctx, { knopf, titel, text, einheiten, fehlerText, job, ziel, dateien }) {
